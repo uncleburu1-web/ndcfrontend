@@ -1,0 +1,122 @@
+.ds-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-md);
+  padding: var(--space-2) var(--space-6);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-label);
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.ds-button:active:not(:disabled),
+.ds-button[data-force="pressed"] {
+  transform: translateY(1px);
+}
+
+/* data-force lets the /design-system page show hover/pressed/focus statically */
+.ds-button[data-force="focus"] {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.ds-button--sm {
+  min-height: var(--control-height-sm);
+  padding: var(--space-1) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.ds-button--full {
+  width: 100%;
+}
+
+/* primary — red fill */
+.ds-button--primary {
+  background: var(--action-primary-bg);
+  border-color: var(--action-primary-bg);
+  color: var(--action-primary-fg);
+}
+.ds-button--primary:hover:not(:disabled),
+.ds-button--primary[data-force="hover"],
+.ds-button--primary[data-force="pressed"] {
+  background: var(--action-primary-bg-hover);
+  border-color: var(--action-primary-bg-hover);
+}
+
+/* secondary — white with strong border */
+.ds-button--secondary {
+  background: var(--action-secondary-bg);
+  border-color: var(--action-secondary-border);
+  color: var(--action-secondary-fg);
+}
+.ds-button--secondary:hover:not(:disabled),
+.ds-button--secondary[data-force="hover"],
+.ds-button--secondary[data-force="pressed"] {
+  background: var(--action-secondary-bg-hover);
+  border-color: var(--text);
+}
+
+/* ghost — text only */
+.ds-button--ghost {
+  background: transparent;
+  color: var(--text-link);
+  padding-inline: var(--space-3);
+}
+.ds-button--ghost:hover:not(:disabled),
+.ds-button--ghost[data-force="hover"],
+.ds-button--ghost[data-force="pressed"] {
+  background: var(--surface-brand-tint);
+}
+
+/* danger — destructive admin actions */
+.ds-button--danger {
+  background: var(--action-danger-bg);
+  border-color: var(--action-danger-bg);
+  color: var(--action-danger-fg);
+}
+.ds-button--danger:hover:not(:disabled),
+.ds-button--danger[data-force="hover"],
+.ds-button--danger[data-force="pressed"] {
+  background: var(--action-primary-bg-hover);
+  border-color: var(--action-primary-bg-hover);
+}
+
+.ds-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.ds-button--loading:disabled {
+  cursor: progress;
+  opacity: 0.85;
+}
+
+.ds-button__icon {
+  display: inline-flex;
+}
+
+.ds-button__spinner {
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--radius-full);
+  animation: ds-spin 0.8s linear infinite;
+}
+
+@keyframes ds-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

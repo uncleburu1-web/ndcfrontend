@@ -1,0 +1,138 @@
+.ds-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.ds-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  max-width: var(--bp-lg);
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-4);
+}
+
+.ds-header__wordmark {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-heading);
+  font-stretch: var(--stretch-heading);
+  color: var(--text-link);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+.ds-header__wordmark span {
+  color: var(--text);
+  font-weight: var(--weight-label);
+}
+
+.ds-header__nav,
+.ds-header__actions {
+  display: none;
+}
+
+.ds-header__nav ul,
+.ds-header__drawer ul {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ds-header__nav ul {
+  gap: var(--space-1);
+}
+.ds-header__nav a,
+.ds-header__drawer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-weight: var(--weight-label);
+  text-decoration: none;
+}
+.ds-header__nav a:hover,
+.ds-header__drawer a:hover {
+  background: var(--surface-page);
+}
+.ds-header__nav a[aria-current="page"],
+.ds-header__drawer a[aria-current="page"] {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+.ds-header__menu {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-md);
+  margin-left: auto;
+  padding: 0 var(--space-3);
+  background: none;
+  border: 1.5px solid var(--border-control);
+  border-radius: var(--radius-md);
+  font-weight: var(--weight-label);
+  cursor: pointer;
+}
+
+.ds-header__drawer {
+  padding: 0 var(--space-4) var(--space-4);
+  border-top: 1px solid var(--border);
+}
+.ds-header__drawer ul {
+  flex-direction: column;
+  padding-top: var(--space-2);
+}
+.ds-header__drawer a {
+  width: 100%;
+}
+.ds-header__drawer-account {
+  margin-top: var(--space-3);
+}
+
+/* Mobile bottom bar: Donate always one tap away (§6.2) */
+.ds-bottombar {
+  position: fixed;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+/* Page content must clear the bottom bar on mobile */
+body {
+  padding-bottom: calc(var(--control-height-md) + var(--space-6));
+}
+
+@media (min-width: 1024px) {
+  .ds-header__inner {
+    padding: var(--space-3) var(--space-6);
+  }
+  .ds-header__nav {
+    display: block;
+  }
+  .ds-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-left: auto;
+  }
+  .ds-header__menu,
+  .ds-header__drawer,
+  .ds-bottombar {
+    display: none;
+  }
+  body {
+    padding-bottom: 0;
+  }
+}

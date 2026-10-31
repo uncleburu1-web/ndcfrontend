@@ -1,0 +1,62 @@
+/* Status badge (§6.5) and attribution badge (§6.6) */
+
+.ds-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-label);
+  line-height: 1.6;
+  white-space: nowrap;
+  color: var(--badge-fg);
+  background: var(--badge-bg);
+}
+.ds-badge--warning {
+  --badge-fg: var(--tone-warning-fg);
+  --badge-bg: var(--tone-warning-bg);
+}
+.ds-badge--success {
+  --badge-fg: var(--tone-success-fg);
+  --badge-bg: var(--tone-success-bg);
+}
+.ds-badge--error {
+  --badge-fg: var(--tone-error-fg);
+  --badge-bg: var(--tone-error-bg);
+}
+.ds-badge--neutral {
+  --badge-fg: var(--tone-neutral-fg);
+  --badge-bg: var(--tone-neutral-bg);
+}
+
+.ds-attribution {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  line-height: 1.4;
+}
+
+.ds-attribution--official {
+  background: var(--tone-info-bg);
+  color: var(--tone-info-fg);
+}
+
+.ds-attribution--candidate {
+  background: var(--surface-brand-tint);
+  color: var(--text);
+  padding-left: var(--space-1);
+}
+.ds-attribution__verified {
+  color: var(--text-link);
+}
+
+.ds-attribution--user {
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}

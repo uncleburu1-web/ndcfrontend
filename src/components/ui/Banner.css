@@ -1,0 +1,64 @@
+.ds-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--banner-fg);
+  background: var(--banner-bg);
+  color: var(--text);
+}
+.ds-banner--info {
+  --banner-fg: var(--tone-info-fg);
+  --banner-bg: var(--tone-info-bg);
+}
+.ds-banner--success {
+  --banner-fg: var(--tone-success-fg);
+  --banner-bg: var(--tone-success-bg);
+}
+.ds-banner--warning {
+  --banner-fg: var(--tone-warning-fg);
+  --banner-bg: var(--tone-warning-bg);
+}
+.ds-banner--error {
+  --banner-fg: var(--tone-error-fg);
+  --banner-bg: var(--tone-error-bg);
+}
+
+.ds-banner__icon {
+  color: var(--banner-fg);
+  padding-top: 2px;
+}
+.ds-banner__body {
+  flex: 1;
+  min-width: 0;
+}
+.ds-banner__title {
+  margin: 0 0 var(--space-1);
+  font-weight: var(--weight-label);
+}
+.ds-banner__text {
+  font-size: var(--text-sm);
+}
+.ds-banner__text p {
+  margin: 0;
+}
+.ds-banner__action {
+  margin-top: var(--space-3);
+}
+.ds-banner__close {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  margin: calc(var(--space-3) * -1) calc(var(--space-3) * -1) 0 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.ds-banner__close:hover {
+  color: var(--text);
+}
