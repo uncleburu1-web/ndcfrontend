@@ -1,9 +1,11 @@
+/* Blue brand bar. Focus rings inside it switch to white (ink is invisible on blue). */
 .ds-header {
+  --focus-ring: var(--focus-ring-on-brand);
   position: sticky;
   top: 0;
   z-index: 40;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: var(--brand-bg);
+  color: var(--brand-fg);
 }
 
 .ds-header__inner {
@@ -15,17 +17,29 @@
   padding: var(--space-3) var(--space-4);
 }
 
+.ds-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: none;
+  color: var(--brand-fg);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+.ds-header__logo {
+  width: auto;
+  height: 44px;
+}
 .ds-header__wordmark {
   font-size: var(--text-lg);
   font-weight: var(--weight-heading);
   font-stretch: var(--stretch-heading);
-  color: var(--text-link);
-  text-decoration: none;
   letter-spacing: -0.01em;
+  line-height: 1;
 }
 .ds-header__wordmark span {
-  color: var(--text);
   font-weight: var(--weight-label);
+  color: var(--brand-fg-muted);
 }
 
 .ds-header__nav,
@@ -50,19 +64,24 @@
   min-height: var(--control-height-md);
   padding: 0 var(--space-3);
   border-radius: var(--radius-md);
-  color: var(--text);
+  color: var(--brand-fg);
   font-weight: var(--weight-label);
   text-decoration: none;
 }
 .ds-header__nav a:hover,
 .ds-header__drawer a:hover {
-  background: var(--surface-page);
+  background: var(--brand-bg-hover);
 }
 .ds-header__nav a[aria-current="page"],
 .ds-header__drawer a[aria-current="page"] {
-  color: var(--text-link);
   text-decoration: underline;
   text-decoration-thickness: 2px;
+  text-underline-offset: 0.35em;
+}
+
+/* Red buttons on blue get a white edge so their shape stays clear (red on blue is 2.03:1). */
+.ds-header .ds-button--primary {
+  border-color: var(--action-border-on-brand);
 }
 
 .ds-header__menu {
@@ -73,15 +92,19 @@
   margin-left: auto;
   padding: 0 var(--space-3);
   background: none;
-  border: 1.5px solid var(--border-control);
+  border: 1.5px solid var(--brand-fg-muted);
   border-radius: var(--radius-md);
+  color: var(--brand-fg);
   font-weight: var(--weight-label);
   cursor: pointer;
+}
+.ds-header__menu:hover {
+  background: var(--brand-bg-hover);
 }
 
 .ds-header__drawer {
   padding: 0 var(--space-4) var(--space-4);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--brand-bg-hover);
 }
 .ds-header__drawer ul {
   flex-direction: column;
@@ -112,6 +135,15 @@
 /* Page content must clear the bottom bar on mobile */
 body {
   padding-bottom: calc(var(--control-height-md) + var(--space-6));
+}
+
+@media (max-width: 479px) {
+  .ds-header__logo {
+    height: 34px;
+  }
+  .ds-header__wordmark {
+    font-size: var(--text-base);
+  }
 }
 
 @media (min-width: 1024px) {

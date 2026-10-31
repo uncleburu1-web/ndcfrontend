@@ -30,9 +30,9 @@
   cursor: not-allowed;
 }
 .ds-pagination__page[aria-current="page"] {
-  background: var(--action-primary-bg);
-  border-color: var(--action-primary-bg);
-  color: var(--action-primary-fg);
+  background: var(--brand-bg);
+  border-color: var(--brand-bg);
+  color: var(--brand-fg);
 }
 
 .ds-pagination__pages {

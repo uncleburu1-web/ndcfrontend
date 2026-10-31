@@ -24,10 +24,10 @@
   border-color: var(--text);
 }
 .ds-amount__chip[aria-pressed="true"] {
-  background: var(--surface-brand-tint);
+  background: var(--surface-accent-tint);
   border-color: var(--action-primary-bg);
   border-width: 2px;
-  color: var(--text-link);
+  color: var(--text-action);
 }
 
 .ds-amount__custom-label {

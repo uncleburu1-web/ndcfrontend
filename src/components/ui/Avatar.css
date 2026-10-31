@@ -4,8 +4,8 @@
   flex: none;
   overflow: hidden;
   border-radius: var(--radius-full);
-  background: var(--action-primary-bg);
-  color: var(--text-on-brand);
+  background: var(--brand-bg);
+  color: var(--brand-fg);
   font-weight: var(--weight-label);
   line-height: 1;
 }

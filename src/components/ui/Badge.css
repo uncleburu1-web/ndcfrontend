@@ -47,12 +47,12 @@
 }
 
 .ds-attribution--candidate {
-  background: var(--surface-brand-tint);
+  background: var(--surface-accent-tint);
   color: var(--text);
   padding-left: var(--space-1);
 }
 .ds-attribution__verified {
-  color: var(--text-link);
+  color: var(--text-brand);
 }
 
 .ds-attribution--user {

@@ -1,12 +1,19 @@
 /* ==========================================================================
    NDCConnect design tokens — feature-specs/01-design-system.md §4
-   STATUS: proposed values, pending owner approval (spec §11).
+   Brand blue + red come from the official NDC logo (spec §11.1 answered).
+   Roles: BLUE = brand & navigation · RED = actions · WHITE = surfaces.
+   Other values remain proposals pending owner approval (spec §11).
    This is the ONLY file allowed to contain colour literals (acceptance criterion 1).
    ========================================================================== */
 
 :root {
   /* ---- 4.1 Colour: raw scale ------------------------------------------- */
-  --color-red-600: #c8102e; /* brand red, primary actions, Donate — 5.88:1 on white */
+  --color-blue-900: #221f5e; /* brand hover / pressed — white on it 14.73:1 */
+  --color-blue-800: #2e2b7d; /* NDC brand blue, sampled from the logo — white on it 11.95:1 */
+  --color-blue-200: #c9c7e6; /* secondary text on blue — 7.28:1 on blue-800 */
+  --color-blue-50: #ecebf6; /* brand tint — blue-800 on it 10.11:1 */
+  /* Logo red is #E9282B; white text on it is only 4.37:1, so buttons use this deeper red. */
+  --color-red-600: #c8102e; /* action red: primary buttons, Donate — white on it 5.88:1 */
   --color-red-700: #a00d25; /* hover/pressed, red text links — 8.14:1 on white */
   --color-red-50: #fdecee; /* red tint backgrounds */
   --color-white: #ffffff;
@@ -42,14 +49,27 @@
   --action-danger-fg: var(--color-white);
   --surface: var(--color-white);
   --surface-page: var(--color-bg);
-  --surface-brand-tint: var(--color-red-50);
+  --surface-brand-tint: var(--color-blue-50); /* brand/navigation highlights */
+  --surface-accent-tint: var(--color-red-50); /* action highlights, candidate posts */
   --text: var(--color-ink);
   --text-muted: var(--color-ink-muted);
-  --text-on-brand: var(--color-white);
-  --text-link: var(--color-red-700);
+  --text-on-brand: var(--color-white); /* on blue AND on red fills */
+  --text-brand: var(--color-blue-800);
+  --text-link: var(--color-blue-800);
+  --text-action: var(--color-red-700); /* red text for action controls (Vote, selected amount) */
   --border: var(--color-border);
   --border-control: var(--color-border-strong);
   --focus-ring: var(--color-ink); /* ink, not red: red focus on red buttons would vanish */
+
+  /* Brand surfaces (header, heroes, welcome animation) */
+  --brand-bg: var(--color-blue-800);
+  --brand-bg-hover: var(--color-blue-900);
+  --brand-fg: var(--color-white);
+  --brand-fg-muted: var(--color-blue-200);
+  /* Ink focus ring is invisible on blue (1.44:1), so blue areas switch to white (11.95:1). */
+  --focus-ring-on-brand: var(--color-white);
+  /* Red on blue is only 2.03:1: red buttons on blue get a white edge so their shape stays clear. */
+  --action-border-on-brand: var(--color-white);
   --overlay: var(--color-overlay);
 
   --tone-success-fg: var(--color-success);

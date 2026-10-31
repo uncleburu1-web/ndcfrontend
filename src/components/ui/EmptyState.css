@@ -16,7 +16,7 @@
   margin-bottom: var(--space-4);
   border-radius: var(--radius-full);
   background: var(--surface-brand-tint);
-  color: var(--text-link);
+  color: var(--text-brand);
 }
 .ds-empty__title {
   font-size: var(--text-lg);

@@ -265,7 +265,7 @@
 }
 .dsp-spacing span {
   height: 12px;
-  background: var(--action-primary-bg);
+  background: var(--brand-bg);
   border-radius: 2px;
 }
 .dsp-radii {
@@ -279,7 +279,7 @@
   width: 64px;
   height: 64px;
   background: var(--surface-brand-tint);
-  border: 1.5px solid var(--action-primary-bg);
+  border: 1.5px solid var(--brand-bg);
   font-size: var(--text-xs);
 }
 .dsp-elev {
@@ -316,7 +316,7 @@
   width: 16px;
   height: 16px;
   border-radius: var(--radius-full);
-  background: var(--action-primary-bg);
+  background: var(--brand-bg);
   transition: left var(--duration-slow) var(--ease-standard);
 }
 .dsp-motion-dot.is-on {

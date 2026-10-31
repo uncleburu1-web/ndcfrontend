@@ -43,6 +43,10 @@ import "./DesignSystemPage.css";
 /* ------------------------------------------------------------------ data */
 
 const RAW_COLOURS = [
+  "--color-blue-900",
+  "--color-blue-800",
+  "--color-blue-200",
+  "--color-blue-50",
   "--color-red-600",
   "--color-red-700",
   "--color-red-50",
@@ -68,9 +72,19 @@ const PAIRS: { fg: string; bg: string; min: number; where: string }[] = [
   { fg: "--text", bg: "--surface-page", min: 4.5, where: "Body text on page" },
   { fg: "--text-muted", bg: "--surface", min: 4.5, where: "Hints, metadata on cards" },
   { fg: "--text-muted", bg: "--surface-page", min: 4.5, where: "Hints on page, input prefix" },
-  { fg: "--text-link", bg: "--surface", min: 4.5, where: "Links, ghost button, Vote (idle)" },
-  { fg: "--text-link", bg: "--surface-brand-tint", min: 4.5, where: "Ghost hover, selected amount chip" },
-  { fg: "--text", bg: "--surface-brand-tint", min: 4.5, where: "Candidate attribution badge" },
+  { fg: "--text-link", bg: "--surface", min: 4.5, where: "Links, ghost button (blue)" },
+  { fg: "--text-link", bg: "--surface-page", min: 4.5, where: "Links on page (blue)" },
+  { fg: "--text-link", bg: "--surface-brand-tint", min: 4.5, where: "Ghost hover" },
+  { fg: "--text-brand", bg: "--surface-brand-tint", min: 4.5, where: "Empty-state icon, brand highlights" },
+  { fg: "--text-action", bg: "--surface", min: 4.5, where: "Vote (idle) text" },
+  { fg: "--text-action", bg: "--surface-accent-tint", min: 4.5, where: "Vote hover, selected amount chip" },
+  { fg: "--text", bg: "--surface-accent-tint", min: 4.5, where: "Candidate attribution badge" },
+  { fg: "--brand-fg", bg: "--brand-bg", min: 4.5, where: "Header text, nav links, avatars, current page" },
+  { fg: "--brand-fg", bg: "--brand-bg-hover", min: 4.5, where: "Header link hover" },
+  { fg: "--brand-fg-muted", bg: "--brand-bg", min: 4.5, where: "“Connect” in the header wordmark" },
+  { fg: "--focus-ring-on-brand", bg: "--brand-bg", min: 3, where: "Focus ring inside the blue header (UI 3:1)" },
+  { fg: "--action-border-on-brand", bg: "--brand-bg", min: 3, where: "Edge of red buttons on blue (UI 3:1)" },
+  { fg: "--brand-bg", bg: "--surface", min: 3, where: "Switch on, checkbox/radio, tabs underline (UI 3:1)" },
   { fg: "--action-primary-fg", bg: "--action-primary-bg", min: 4.5, where: "Primary / Donate button" },
   { fg: "--action-primary-fg", bg: "--action-primary-bg-hover", min: 4.5, where: "Primary hover/pressed" },
   { fg: "--action-danger-fg", bg: "--action-danger-bg", min: 4.5, where: "Danger button" },
@@ -229,8 +243,9 @@ export default function DesignSystemPage() {
               Dev-only review page for <code>feature-specs/01-design-system.md</code>. Every token and documented component
               state is rendered below.
             </p>
-            <Banner tone="warning" title="Proposed tokens">
-              Colour, type and spacing values are the spec’s proposals and still need owner approval (spec §11).
+            <Banner tone="info" title="Brand colours from the official NDC logo">
+              Blue = brand and navigation · red = actions · white = surfaces. Type and spacing values are still proposals
+              pending owner approval (spec §11).
             </Banner>
           </header>
 

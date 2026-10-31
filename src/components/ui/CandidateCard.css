@@ -33,13 +33,13 @@
 }
 .ds-candidate__verified {
   flex: none;
-  color: var(--text-link);
+  color: var(--text-brand);
 }
 
 .ds-candidate__position {
   margin: var(--space-1) 0 var(--space-2);
   font-weight: var(--weight-label);
-  color: var(--text-link);
+  color: var(--text-brand);
 }
 
 .ds-candidate__meta {

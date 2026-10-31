@@ -15,7 +15,7 @@
   border: 1.5px solid var(--action-primary-bg);
   border-radius: var(--radius-md);
   background: var(--surface);
-  color: var(--text-link);
+  color: var(--text-action);
   font-size: var(--text-base);
   font-weight: var(--weight-label);
   cursor: pointer;
@@ -27,7 +27,7 @@
 
 /* idle → invite: outlined in brand red (Donate keeps the solid fill) */
 .ds-vote__button--idle:hover {
-  background: var(--surface-brand-tint);
+  background: var(--surface-accent-tint);
 }
 
 /* following → calm confirmation */

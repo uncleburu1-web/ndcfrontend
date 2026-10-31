@@ -127,7 +127,7 @@
   width: 22px;
   height: 22px;
   margin: 1px 0 0;
-  accent-color: var(--action-primary-bg);
+  accent-color: var(--brand-bg);
   cursor: pointer;
 }
 .ds-check__label {
@@ -184,8 +184,8 @@
     background-color var(--duration-base) var(--ease-standard);
 }
 .ds-switch__control[aria-checked="true"] .ds-switch__track {
-  background: var(--action-primary-bg);
-  border-color: var(--action-primary-bg);
+  background: var(--brand-bg);
+  border-color: var(--brand-bg);
 }
 .ds-switch__control[aria-checked="true"] .ds-switch__thumb {
   transform: translateX(18px);

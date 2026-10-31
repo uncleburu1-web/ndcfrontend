@@ -25,7 +25,7 @@
 }
 .ds-tabs__tab[aria-selected="true"] {
   color: var(--text);
-  border-bottom-color: var(--action-primary-bg);
+  border-bottom-color: var(--brand-bg);
 }
 .ds-tabs__panel {
   padding: var(--space-4) 0;
