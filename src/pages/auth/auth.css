@@ -1,0 +1,78 @@
+.auth-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-8) var(--space-4);
+}
+.auth-frame__notice {
+  max-width: 25rem;
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.auth-page {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-12);
+}
+.auth-page h1 {
+  margin-bottom: var(--space-1);
+}
+.auth-page__lead {
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.auth-pending {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-4);
+}
+
+.profile-form__fields {
+  margin-bottom: var(--space-2);
+}
+.auth-page form .ds-banner,
+.account-page form .ds-banner {
+  margin-bottom: var(--space-4);
+}
+
+.account-page {
+  max-width: var(--bp-lg);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-12);
+}
+.account-page h1 {
+  margin-bottom: var(--space-6);
+}
+.account-page h2 {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-2);
+}
+.account-page__grid {
+  display: grid;
+  gap: var(--space-8);
+  align-items: start;
+}
+.account-page__panel {
+  padding: var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.account-page__clerk {
+  min-width: 0;
+  overflow-x: auto;
+}
+@media (min-width: 1024px) {
+  .account-page__grid {
+    grid-template-columns: 22rem minmax(0, 1fr);
+  }
+}

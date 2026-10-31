@@ -1,44 +1,62 @@
 /**
- * App shell. Feature pages arrive with their own specs; this unit only ships the
- * design system. The /design-system review page is dev-only (spec §9.4): it is
- * imported behind `import.meta.env.DEV`, so production builds drop it entirely.
- * No router dependency is added yet — that decision belongs to the first page-level spec.
+ * Routes — spec §7.3. Public pages stay public; only the auth routes are guarded.
+ * The /design-system review page stays dev-only and doesn't need Clerk.
  */
 import { lazy, Suspense } from "react";
-import { EmptyState, SiteHeader } from "./components/ui";
+import { Route, Routes } from "react-router-dom";
+import { RequireSignedIn, SignedOutOnly } from "./auth/guards";
+import AppLayout from "./components/layout/AppLayout";
+import { EmptyState } from "./components/ui";
+import AccountDeactivatedPage from "./pages/auth/AccountDeactivatedPage";
+import AccountPage from "./pages/auth/AccountPage";
+import SetupProfilePage from "./pages/auth/SetupProfilePage";
+import SignInPage from "./pages/auth/SignInPage";
+import SignUpPage from "./pages/auth/SignUpPage";
 
-const DesignSystemPage = import.meta.env.DEV ? lazy(() => import("./pages/DesignSystemPage")) : null;
+function HomePage() {
+  return (
+    <div className="page-shell">
+      <EmptyState title="NDCConnect is being built">
+        Sign-in and accounts are ready. Candidate, news and donation pages arrive with their own specs.
+      </EmptyState>
+    </div>
+  );
+}
 
-const NAV = [
-  { label: "Candidates", href: "/candidates" },
-  { label: "News", href: "/news" },
-  { label: "Communities", href: "/communities" },
-  { label: "Finance", href: "/finance" },
-  { label: "PVC", href: "/pvc" },
-];
+function NotFound() {
+  return (
+    <div className="page-shell">
+      <EmptyState title="Page not found">That address doesn’t lead anywhere on NDCConnect yet.</EmptyState>
+    </div>
+  );
+}
 
 export default function App() {
-  const path = window.location.pathname;
-
-  if (DesignSystemPage && path === "/design-system") {
-    return (
-      <Suspense fallback={null}>
-        <DesignSystemPage />
-      </Suspense>
-    );
-  }
-
   return (
-    <>
-      <SiteHeader links={NAV} donateHref="/donate" joinHref="/join" />
-      <main style={{ maxWidth: "var(--bp-md)", margin: "0 auto", padding: "var(--space-12) var(--space-4)" }}>
-        <EmptyState
-          title="NDCConnect is being built"
-          action={import.meta.env.DEV ? <a href="/design-system">Open the design system</a> : undefined}
-        >
-          The design system is ready. Feature pages arrive with their own specs.
-        </EmptyState>
-      </main>
-    </>
+    <Routes>
+      <Route element={<AppLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="sign-in/*" element={<SignedOutOnly><SignInPage /></SignedOutOnly>} />
+        <Route path="sign-up/*" element={<SignedOutOnly><SignUpPage /></SignedOutOnly>} />
+        <Route element={<RequireSignedIn />}>
+          <Route path="setup-profile" element={<SetupProfilePage />} />
+          <Route path="account/*" element={<AccountPage />} />
+        </Route>
+        <Route path="account-deactivated" element={<AccountDeactivatedPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
+  );
+}
+
+/** Dev-only design-system page (01 §9.4), mounted outside Clerk and the router. */
+const DesignSystemPage = import.meta.env.DEV ? lazy(() => import("./pages/DesignSystemPage")) : null;
+
+export function DevDesignSystem() {
+  if (!DesignSystemPage) return null;
+  return (
+    <Suspense fallback={null}>
+      <DesignSystemPage />
+    </Suspense>
   );
 }

@@ -1,0 +1,13 @@
+/* App-level layout helpers (tokens only). */
+
+.page-shell {
+  max-width: var(--bp-md);
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-4);
+}
+
+.app-banner {
+  max-width: var(--bp-lg);
+  margin: var(--space-4) auto 0;
+  padding: 0 var(--space-4);
+}
