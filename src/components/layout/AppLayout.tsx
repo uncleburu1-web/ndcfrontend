@@ -5,7 +5,8 @@
 import { Show, UserButton } from "@clerk/react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useMe, useSessionIssue } from "../../auth/session";
-import { Banner, Button, SiteHeader } from "../ui";
+import { FollowProvider } from "../../follows/FollowProvider";
+import { Banner, Button, Icon, SiteHeader } from "../ui";
 
 const NAV = [
   { label: "Candidates", href: "/candidates" },
@@ -26,7 +27,11 @@ function AccountArea() {
         </Button>
       </Show>
       <Show when="signed-in">
-        <UserButton userProfileUrl="/account" />
+        <UserButton userProfileUrl="/account">
+          <UserButton.MenuItems>
+            <UserButton.Link label="Following" labelIcon={<Icon name="heart" size={16} />} href="/following" />
+          </UserButton.MenuItems>
+        </UserButton>
       </Show>
     </>
   );
@@ -71,7 +76,7 @@ export default function AppLayout() {
   // System admins also get a link to the admin area (the backend still enforces access).
   const links = me?.is_system_admin ? [...NAV, { label: "Admin", href: "/admin/candidates" }] : NAV;
   return (
-    <>
+    <FollowProvider>
       <SiteHeader
         links={links.map((l) => ({ ...l, current: path.startsWith(l.href) }))}
         donateHref="/donate"
@@ -82,6 +87,6 @@ export default function AppLayout() {
       <main id="main">
         <Outlet />
       </main>
-    </>
+    </FollowProvider>
   );
 }

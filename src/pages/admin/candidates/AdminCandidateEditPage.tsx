@@ -126,6 +126,21 @@ function ActionBar({ candidate, onDone }: { candidate: AdminCandidate; onDone: (
 }
 
 /* ----------------------------------------------------------------- photo */
+/** Counts only — there is no list of who follows a candidate, for anyone (spec 04 §7.4, §10). */
+function FollowersPanel({ followers }: { followers: { total: number; notify_on: number } }) {
+  const n = new Intl.NumberFormat("en-NG");
+  return (
+    <section className="adm-panel adm-followers" aria-labelledby="followers-title">
+      <h2 id="followers-title">Followers</h2>
+      <p className="adm-followers__line">
+        <strong>{n.format(followers.total)}</strong> {followers.total === 1 ? "follower" : "followers"} ·{" "}
+        {n.format(followers.notify_on)} with notifications on
+      </p>
+      <p className="ds-field__hint">Counts only. Who follows a candidate is private and isn’t shown to anyone.</p>
+    </section>
+  );
+}
+
 function PhotoPanel({ candidate, onDone }: { candidate: AdminCandidate; onDone: (c: AdminCandidate) => void }) {
   const api = useApi();
   const [file, setFile] = useState<File | null>(null);
@@ -388,6 +403,7 @@ export default function AdminCandidateEditPage() {
         </section>
         {candidate && (
           <div className="adm-side">
+            {candidate.followers && <FollowersPanel followers={candidate.followers} />}
             <PhotoPanel candidate={candidate} onDone={setCandidate} />
             <AccountsPanel candidate={candidate} />
           </div>

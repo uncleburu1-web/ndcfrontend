@@ -144,6 +144,19 @@ describe("workflow actions", () => {
   });
 });
 
+describe("followers (spec 04 §7.4)", () => {
+  it("shows follower counts only — never who", async () => {
+    h.api.mockImplementation(async (path: string) =>
+      path.endsWith("/accounts/") ? [] : { ...base, status: "published", is_verified: true, followers: { total: 1240, notify_on: 312 } }
+    );
+    renderAt(`/admin/candidates/${base.id}`);
+    const panel = (await screen.findByRole("heading", { name: "Followers" })).closest("section")!;
+    expect(panel.textContent).toContain("1,240 followers");
+    expect(panel.textContent).toContain("312 with notifications on");
+    expect(panel.querySelectorAll("li, a").length).toBe(0);
+  });
+});
+
 describe("identity change on a published candidate", () => {
   it("warns before saving and only PATCHes after confirmation", async () => {
     h.api.mockImplementation(async (path: string, opts?: { method?: string }) => {

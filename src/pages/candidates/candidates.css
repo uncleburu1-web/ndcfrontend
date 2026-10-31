@@ -12,6 +12,14 @@
   color: var(--text-muted);
   margin-top: var(--space-2);
 }
+.cand-page__vote-help {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-brand-tint);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  max-width: 46rem;
+}
 
 .cand-filters {
   display: grid;
@@ -129,11 +137,9 @@
 .cand-hero__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  align-items: flex-start;
+  gap: var(--space-3) var(--space-6);
   margin-top: var(--space-2);
-}
-.cand-hero__actions:empty {
-  display: none;
 }
 .cand-hero .ds-button--primary {
   border-color: var(--action-border-on-brand);

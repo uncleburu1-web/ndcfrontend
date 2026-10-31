@@ -1,0 +1,60 @@
+/* Vote + bell — spec 04 §8.3 */
+.cand-vote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-3) var(--space-6);
+}
+.cand-vote--card {
+  display: block;
+}
+.cand-vote--following {
+  align-items: center;
+}
+
+/* On the NDC-blue profile hero: keep text and the switch legible (spec 01 contrast rules). */
+.cand-hero .ds-vote__helper,
+.cand-hero .ds-switch__icon {
+  color: var(--brand-fg-muted);
+}
+.cand-hero .ds-switch__control {
+  color: var(--brand-fg);
+}
+.cand-hero .ds-switch__control[aria-checked="true"] .ds-switch__track {
+  background: var(--brand-fg);
+  border-color: var(--brand-fg);
+}
+.cand-hero .ds-switch__control[aria-checked="true"] .ds-switch__thumb {
+  background: var(--brand-bg);
+}
+.cand-hero .ds-vote__button {
+  border-color: var(--action-border-on-brand);
+}
+.cand-hero__private {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--brand-fg-muted);
+}
+
+/* Guest prompt */
+.vote-prompt__text {
+  margin: 0 0 var(--space-2);
+}
+.vote-prompt__text--muted {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+.vote-prompt__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+@media (max-width: 639px) {
+  .vote-prompt__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .vote-prompt__actions > * {
+    width: 100%;
+  }
+}

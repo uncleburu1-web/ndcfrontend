@@ -5,6 +5,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useApi } from "../../auth/session";
+import { CandidateVote } from "../../follows/CandidateVote";
+import { useFollows } from "../../follows/FollowProvider";
 import type { CandidateSummary, Paginated, PositionsResponse } from "../../candidates/types";
 import { useRequest } from "../../candidates/useRequest";
 import { Banner, Button, CandidateCard, CandidateCardSkeleton, EmptyState, Pagination, Select, TextField } from "../../components/ui";
@@ -61,6 +63,13 @@ export default function CandidatesPage() {
     api<PositionsResponse>(`/candidates/positions/${state ? `?state=${state}` : ""}`, { anonymous: true, signal })
   );
 
+  // Private follow state for the cards on screen, fetched separately so the public list stays cacheable (spec 04 §7.2).
+  const { loadStates } = useFollows();
+  const slugsKey = list.data?.results.map((c) => c.slug).join(",") ?? "";
+  useEffect(() => {
+    if (slugsKey) loadStates(slugsKey.split(","));
+  }, [loadStates, slugsKey]);
+
   const counts = new Map(positions.data?.positions.map((p) => [p.position, p.count]) ?? []);
   const filtered = Boolean(position || state || q);
   const year = list.data?.election_year ?? positions.data?.election_year;
@@ -77,6 +86,10 @@ export default function CandidatesPage() {
         <p className="cand-page__lead">
           NDC candidates by elective office{year ? ` for the ${year} elections` : ""}. Every profile here has been checked by
           NDCConnect before publishing.
+        </p>
+        <p className="cand-page__vote-help">
+          Tap <strong>Vote</strong> to follow a candidate. Voting here means following, not an official ballot. It’s free, and who
+          you follow is private.
         </p>
       </header>
 
@@ -141,7 +154,7 @@ export default function CandidatesPage() {
                     photoSrc={c.photo?.url_200}
                     verified={c.verified}
                     href={`/candidates/${c.slug}`}
-                    /* Vote (Follow) slot — spec 04 */
+                    actions={<CandidateVote slug={c.slug} name={c.full_name} variant="card" />}
                   />
                 ))}
               </div>

@@ -11,7 +11,10 @@ export const clerkMockModule = {
   useClerk: () => ({ signOut: async () => {} }),
   Show: ({ when, children }: { when: string; children: ReactNode }) =>
     (when === "signed-in") === clerkState.isSignedIn ? <>{children}</> : null,
-  UserButton: () => <button type="button">User menu</button>,
+  UserButton: Object.assign(({ children }: { children?: ReactNode }) => <div><button type="button">User menu</button>{children}</div>, {
+    MenuItems: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+    Link: ({ label, href }: { label: string; href: string }) => <a href={href}>{label}</a>,
+  }),
   SignIn: () => <div>Clerk sign-in</div>,
   SignUp: () => <div>Clerk sign-up</div>,
   UserProfile: () => <div>Clerk user profile</div>,

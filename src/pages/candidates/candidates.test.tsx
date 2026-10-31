@@ -6,6 +6,7 @@ import { ApiError } from "../../auth/api";
 import { ToastProvider } from "../../components/ui";
 
 const h = vi.hoisted(() => ({ api: vi.fn(), flags: { donations: false } }));
+vi.mock("@clerk/react", async () => (await import("../../test/clerkMock")).clerkMockModule);
 vi.mock("../../auth/session", () => ({ useApi: () => h.api }));
 vi.mock("../../config", () => ({
   get donationsEnabled() {
@@ -13,6 +14,8 @@ vi.mock("../../config", () => ({
   },
 }));
 
+import { FollowProvider } from "../../follows/FollowProvider";
+import { clerkState } from "../../test/clerkMock";
 import CandidateProfilePage from "./CandidateProfilePage";
 import CandidatesPage from "./CandidatesPage";
 
@@ -32,11 +35,13 @@ function renderAt(path: string) {
   return render(
     <ToastProvider>
       <MemoryRouter initialEntries={[path]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <Routes>
-          <Route path="/candidates" element={<CandidatesPage />} />
-          <Route path="/candidates/:slug" element={<CandidateProfilePage />} />
-        </Routes>
-        <Where />
+        <FollowProvider>
+          <Routes>
+            <Route path="/candidates" element={<CandidatesPage />} />
+            <Route path="/candidates/:slug" element={<CandidateProfilePage />} />
+          </Routes>
+          <Where />
+        </FollowProvider>
       </MemoryRouter>
     </ToastProvider>
   );
@@ -49,6 +54,8 @@ function listResponse(results: unknown[]) {
 beforeEach(() => {
   h.api.mockReset();
   h.flags.donations = false;
+  clerkState.isLoaded = true;
+  clerkState.isSignedIn = false;
 });
 afterEach(cleanup);
 

@@ -60,6 +60,16 @@
   margin: 0;
   font-size: var(--text-sm);
 }
+.ds-toast__action {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--text-link);
+  font: inherit;
+  font-weight: var(--weight-label);
+  text-decoration: underline;
+  cursor: pointer;
+}
 .ds-toast__close {
   display: inline-grid;
   place-items: center;

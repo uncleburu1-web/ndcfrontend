@@ -3,6 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clerkState } from "../test/clerkMock";
+import { ToastProvider } from "../components/ui";
 import type { Me } from "./session";
 
 vi.mock("@clerk/react", async () => (await import("../test/clerkMock")).clerkMockModule);
@@ -29,11 +30,14 @@ function Where() {
 }
 
 function renderAt(path: string, ui: React.ReactNode) {
+  // main.tsx wraps the whole app in ToastProvider; mirror that here.
   return render(
-    <MemoryRouter initialEntries={[path]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      {ui}
-      <Where />
-    </MemoryRouter>
+    <ToastProvider>
+      <MemoryRouter initialEntries={[path]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        {ui}
+        <Where />
+      </MemoryRouter>
+    </ToastProvider>
   );
 }
 
@@ -127,6 +131,28 @@ describe("header account area", () => {
     clerkState.isSignedIn = true;
     renderAt("/", <App />);
     expect(screen.getAllByRole("button", { name: "User menu" }).length).toBeGreaterThan(0);
+  });
+});
+
+describe("/following route (spec 04 §4.4)", () => {
+  it("requires sign-in", () => {
+    renderAt("/following", <App />);
+    expect(screen.getByTestId("where").textContent).toBe("/sign-in?redirect_url=%2Ffollowing");
+  });
+
+  it("needs sign-in only — not a completed profile", () => {
+    clerkState.isSignedIn = true;
+    session.me = incomplete;
+    session.status = "ready";
+    renderAt("/following", <App />);
+    expect(screen.getByTestId("where").textContent).toBe("/following");
+    expect(screen.getByRole("heading", { level: 1, name: "Following" })).toBeTruthy();
+  });
+
+  it("is linked from the signed-in user menu", () => {
+    clerkState.isSignedIn = true;
+    renderAt("/", <App />);
+    expect(screen.getAllByRole("link", { name: "Following" })[0].getAttribute("href")).toBe("/following");
   });
 });
 

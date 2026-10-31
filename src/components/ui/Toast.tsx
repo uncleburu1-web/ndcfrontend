@@ -8,14 +8,21 @@ import "./Toast.css";
 
 export type ToastTone = "info" | "success" | "warning" | "error";
 
+/** Optional follow-up action, e.g. "View profile". A button, so it works outside the router too. */
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 interface ToastItem {
   id: number;
   tone: ToastTone;
   message: string;
+  action?: ToastAction;
 }
 
 interface ToastApi {
-  show: (toast: { tone?: ToastTone; message: string; durationMs?: number }) => void;
+  show: (toast: { tone?: ToastTone; message: string; durationMs?: number; action?: ToastAction }) => void;
 }
 
 const ToastContext = createContext<ToastApi | null>(null);
@@ -34,9 +41,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const dismiss = useCallback((id: number) => setItems((all) => all.filter((t) => t.id !== id)), []);
 
   const show = useCallback<ToastApi["show"]>(
-    ({ tone = "info", message, durationMs = 5000 }) => {
+    ({ tone = "info", message, durationMs = 5000, action }) => {
       const id = nextId.current++;
-      setItems((all) => [...all, { id, tone, message }]);
+      setItems((all) => [...all, { id, tone, message, action }]);
       window.setTimeout(() => dismiss(id), durationMs);
     },
     [dismiss]
@@ -51,7 +58,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {/* polite: never steals focus or interrupts */}
         <div aria-live="polite" aria-atomic="false">
           {items.map((t) => (
-            <Toast key={t.id} tone={t.tone} message={t.message} onDismiss={() => dismiss(t.id)} />
+            <Toast
+              key={t.id}
+              tone={t.tone}
+              message={t.message}
+              action={t.action && { label: t.action.label, onClick: () => { dismiss(t.id); t.action!.onClick(); } }}
+              onDismiss={() => dismiss(t.id)}
+            />
           ))}
         </div>
       </div>
@@ -66,13 +79,23 @@ export function useToast(): ToastApi {
 }
 
 /** Presentational toast — also rendered statically on the design-system page. */
-export function Toast({ tone, message, onDismiss }: { tone: ToastTone; message: string; onDismiss?: () => void }) {
+export function Toast({ tone, message, action, onDismiss }: { tone: ToastTone; message: string; action?: ToastAction; onDismiss?: () => void }) {
   return (
     <div className={`ds-toast ds-toast--${tone}`} role={tone === "error" ? "alert" : "status"}>
       <span className="ds-toast__icon">
         <Icon name={TONE_ICON[tone]} />
       </span>
-      <p className="ds-toast__message">{message}</p>
+      <p className="ds-toast__message">
+        {message}
+        {action && (
+          <>
+            {" "}
+            <button type="button" className="ds-toast__action" onClick={action.onClick}>
+              {action.label}
+            </button>
+          </>
+        )}
+      </p>
       {onDismiss && (
         <button type="button" className="ds-toast__close" onClick={onDismiss} aria-label="Dismiss notification">
           <Icon name="close" size={18} />

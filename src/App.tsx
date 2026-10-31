@@ -10,6 +10,7 @@ import AdminCandidateEditPage from "./pages/admin/candidates/AdminCandidateEditP
 import AdminCandidatesPage from "./pages/admin/candidates/AdminCandidatesPage";
 import CandidateProfilePage from "./pages/candidates/CandidateProfilePage";
 import CandidatesPage from "./pages/candidates/CandidatesPage";
+import FollowingPage from "./pages/following/FollowingPage";
 import { EmptyState } from "./components/ui";
 import AccountDeactivatedPage from "./pages/auth/AccountDeactivatedPage";
 import AccountPage from "./pages/auth/AccountPage";
@@ -45,6 +46,8 @@ export default function App() {
         <Route element={<RequireSignedIn />}>
           <Route path="setup-profile" element={<SetupProfilePage />} />
           <Route path="account/*" element={<AccountPage />} />
+          {/* Sign-in only — never profile completion or PVC (spec 04 §4.4). */}
+          <Route path="following" element={<FollowingPage />} />
         </Route>
         {/* Public — no account, profile or PVC needed (spec 03 §3.4) */}
         <Route path="candidates" element={<CandidatesPage />} />

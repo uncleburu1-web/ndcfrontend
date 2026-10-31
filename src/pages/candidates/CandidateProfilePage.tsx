@@ -8,6 +8,8 @@ import { useApi } from "../../auth/session";
 import type { CandidateProfile } from "../../candidates/types";
 import { useRequest } from "../../candidates/useRequest";
 import { donationsEnabled } from "../../config";
+import { CandidateVote } from "../../follows/CandidateVote";
+import { useFollows } from "../../follows/FollowProvider";
 import { Avatar, Banner, Button, DonateButton, EmptyState, Icon, Skeleton } from "../../components/ui";
 import "./candidates.css";
 
@@ -31,6 +33,11 @@ export default function CandidateProfilePage() {
   const { data: c, error, loading, retry } = useRequest(`candidate:${slug}`, (signal) =>
     api<CandidateProfile>(`/candidates/${encodeURIComponent(slug)}/`, { anonymous: true, signal })
   );
+
+  const { loadStates } = useFollows();
+  useEffect(() => {
+    if (c?.slug) loadStates([c.slug]);
+  }, [c?.slug, loadStates]);
 
   useEffect(() => {
     document.title = c ? `${c.full_name} — ${c.position_label} | NDCConnect` : "Candidate | NDCConnect";
@@ -87,9 +94,11 @@ export default function CandidateProfilePage() {
               {c.area_display} · {c.party} · {c.election_year} elections
             </p>
             <div className="cand-hero__actions">
-              {/* Vote (Follow) slot — spec 04 */}
+              <CandidateVote slug={c.slug} name={c.full_name} variant="profile" onGone={retry} />
+              {/* Separate action, never a step toward voting (spec 01 §6.2, spec 04 §8.3). */}
               {donationsEnabled && <DonateButton href={`/donate?candidate=${encodeURIComponent(c.slug)}`} />}
             </div>
+            <p className="cand-hero__private">Who you follow is private.</p>
           </div>
         </div>
       </header>

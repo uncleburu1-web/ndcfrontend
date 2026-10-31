@@ -74,6 +74,8 @@ export interface AdminCandidate {
   created_at: string;
   updated_at: string;
   unpublished_by_edit?: boolean;
+  /** Single-record admin responses only: counts, never who (spec 04 §7.4). */
+  followers?: { total: number; notify_on: number };
 }
 
 export interface LinkedAccount {

@@ -210,3 +210,7 @@
 .adm-link-form {
   margin-top: var(--space-4);
 }
+
+.adm-followers__line {
+  margin: 0 0 var(--space-2);
+}
