@@ -39,6 +39,16 @@ const STATUS_SETS = {
     accepted: ["Accepted", "success"],
     declined: ["Declined", "error"],
   },
+  candidate: {
+    draft: ["Draft", "neutral"],
+    published: ["Published", "success"],
+    unpublished: ["Unpublished", "warning"],
+    archived: ["Archived", "neutral"],
+  },
+  verification: {
+    verified: ["Verified", "success"],
+    not_verified: ["Not verified", "neutral"],
+  },
 } as const satisfies Record<string, Record<string, readonly [string, Tone]>>;
 
 export type StatusSet = keyof typeof STATUS_SETS;

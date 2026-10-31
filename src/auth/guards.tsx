@@ -8,7 +8,7 @@
 import { useAuth } from "@clerk/react";
 import type { ReactNode } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { Banner, Button, Skeleton } from "../components/ui";
+import { Banner, Button, EmptyState, Skeleton } from "../components/ui";
 import { useMe } from "./session";
 
 function Pending({ label }: { label: string }) {
@@ -57,6 +57,32 @@ export function RequireProfileComplete({ children }: { children?: ReactNode }) {
   if (!me) return <Pending label="Loading your profile" />;
   if (!me.profile_complete) {
     return <Navigate to="/setup-profile" replace state={{ from: location.pathname + location.search }} />;
+  }
+  return children ? <>{children}</> : <Outlet />;
+}
+
+/**
+ * Admin pages (spec 03 §8.3). Uses /me's is_system_admin; the backend enforces
+ * IsSystemAdmin on every admin endpoint regardless of what the UI shows.
+ */
+export function RequireSystemAdmin({ children }: { children?: ReactNode }) {
+  const { me, status, error, refresh } = useMe();
+  if (status === "error") {
+    return (
+      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+        {error?.message}
+      </Banner>
+    );
+  }
+  if (!me) return <Pending label="Loading your account" />;
+  if (!me.is_system_admin) {
+    return (
+      <div className="page-shell">
+        <EmptyState icon="shield" title="You don’t have access to this page">
+          This area is for NDCConnect system administrators.
+        </EmptyState>
+      </div>
+    );
   }
   return children ? <>{children}</> : <Outlet />;
 }

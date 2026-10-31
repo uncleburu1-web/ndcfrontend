@@ -4,7 +4,7 @@
  */
 import { Show, UserButton } from "@clerk/react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useSessionIssue } from "../../auth/session";
+import { useMe, useSessionIssue } from "../../auth/session";
 import { Banner, Button, SiteHeader } from "../ui";
 
 const NAV = [
@@ -67,10 +67,13 @@ function SessionBanners() {
 
 export default function AppLayout() {
   const path = useLocation().pathname;
+  const { me } = useMe();
+  // System admins also get a link to the admin area (the backend still enforces access).
+  const links = me?.is_system_admin ? [...NAV, { label: "Admin", href: "/admin/candidates" }] : NAV;
   return (
     <>
       <SiteHeader
-        links={NAV.map((l) => ({ ...l, current: path.startsWith(l.href) }))}
+        links={links.map((l) => ({ ...l, current: path.startsWith(l.href) }))}
         donateHref="/donate"
         joinHref="/join"
         account={<AccountArea />}

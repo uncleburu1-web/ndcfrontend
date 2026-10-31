@@ -4,7 +4,7 @@
 import { useState } from "react";
 import "./Avatar.css";
 
-type AvatarSize = "xs" | "sm" | "md" | "lg";
+type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 interface AvatarProps {
   name: string;

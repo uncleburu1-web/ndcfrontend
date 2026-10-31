@@ -4,8 +4,12 @@
  */
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
-import { RequireSignedIn, SignedOutOnly } from "./auth/guards";
+import { RequireSignedIn, RequireSystemAdmin, SignedOutOnly } from "./auth/guards";
 import AppLayout from "./components/layout/AppLayout";
+import AdminCandidateEditPage from "./pages/admin/candidates/AdminCandidateEditPage";
+import AdminCandidatesPage from "./pages/admin/candidates/AdminCandidatesPage";
+import CandidateProfilePage from "./pages/candidates/CandidateProfilePage";
+import CandidatesPage from "./pages/candidates/CandidatesPage";
 import { EmptyState } from "./components/ui";
 import AccountDeactivatedPage from "./pages/auth/AccountDeactivatedPage";
 import AccountPage from "./pages/auth/AccountPage";
@@ -41,6 +45,17 @@ export default function App() {
         <Route element={<RequireSignedIn />}>
           <Route path="setup-profile" element={<SetupProfilePage />} />
           <Route path="account/*" element={<AccountPage />} />
+        </Route>
+        {/* Public — no account, profile or PVC needed (spec 03 §3.4) */}
+        <Route path="candidates" element={<CandidatesPage />} />
+        <Route path="candidates/:slug" element={<CandidateProfilePage />} />
+        {/* System admin only (spec 03 §8.3); the backend enforces IsSystemAdmin too */}
+        <Route element={<RequireSignedIn />}>
+          <Route element={<RequireSystemAdmin />}>
+            <Route path="admin/candidates" element={<AdminCandidatesPage />} />
+            <Route path="admin/candidates/new" element={<AdminCandidateEditPage />} />
+            <Route path="admin/candidates/:id" element={<AdminCandidateEditPage />} />
+          </Route>
         </Route>
         <Route path="account-deactivated" element={<AccountDeactivatedPage />} />
         <Route path="*" element={<NotFound />} />

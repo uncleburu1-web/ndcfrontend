@@ -44,6 +44,8 @@ export interface RequestOptions {
   body?: unknown;
   /** Public endpoints: send no token. */
   anonymous?: boolean;
+  /** Cancel when the caller no longer needs the response (e.g. filters changed). */
+  signal?: AbortSignal;
 }
 
 const NETWORK_ERROR = new ApiError({
@@ -62,17 +64,20 @@ export function createApiClient(opts: ApiClientOptions) {
   const doFetch = opts.fetchImpl ?? ((...args: Parameters<typeof fetch>) => fetch(...args));
   const base = opts.baseUrl.replace(/\/$/, "");
 
-  async function send(path: string, { method = "GET", body }: RequestOptions, token: string | null) {
+  async function send(path: string, { method = "GET", body, signal }: RequestOptions, token: string | null) {
     const headers: Record<string, string> = { Accept: "application/json" };
-    if (body !== undefined) headers["Content-Type"] = "application/json";
+    const isForm = typeof FormData !== "undefined" && body instanceof FormData;
+    if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
     if (token) headers.Authorization = `Bearer ${token}`;
     try {
       return await doFetch(`${base}${path}`, {
         method,
         headers,
-        body: body !== undefined ? JSON.stringify(body) : undefined,
+        signal,
+        body: body === undefined ? undefined : isForm ? (body as FormData) : JSON.stringify(body),
       });
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") throw err;
       throw NETWORK_ERROR;
     }
   }
