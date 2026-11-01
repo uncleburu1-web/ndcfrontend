@@ -1,0 +1,265 @@
+/* /join, /join/complete, /membership/card — spec 06 §4.2–4.3. Tokens only. */
+.join-hero {
+  --focus-ring: var(--focus-ring-on-brand);
+  background: var(--brand-bg);
+  color: var(--brand-fg);
+}
+.join-hero__inner {
+  max-width: var(--bp-lg);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+}
+.join-hero h1,
+.join-hero p {
+  margin: 0;
+  max-width: 46rem;
+}
+.join-fee {
+  font-size: var(--text-lg);
+}
+.join-fee strong {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-heading);
+}
+.join-hero__small {
+  color: var(--brand-fg-muted);
+  font-size: var(--text-sm);
+}
+.join-page {
+  max-width: var(--bp-lg);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-16);
+  display: grid;
+  gap: var(--space-4);
+}
+.join-status {
+  margin: 0;
+}
+.join-panel {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding: var(--space-6) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--brand-bg);
+  border-radius: var(--radius-md);
+}
+.join-panel--success {
+  border-left-color: var(--tone-success-fg);
+}
+.join-panel h2,
+.join-panel p {
+  margin: 0;
+}
+.join-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.join-steps {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.join-step {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.join-step__marker {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--border-control);
+  font-weight: var(--weight-heading);
+}
+.join-step--current .join-step__marker {
+  border-color: var(--brand-bg);
+  color: var(--text-brand);
+}
+.join-step--done .join-step__marker {
+  background: var(--tone-success-bg);
+  border-color: var(--tone-success-fg);
+  color: var(--tone-success-fg);
+}
+.join-step__body {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  justify-items: start;
+}
+.join-step__body h3 {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+.join-step__body p {
+  margin: 0;
+}
+.join-note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.join-form {
+  display: grid;
+  gap: var(--space-4);
+  width: 100%;
+}
+.join-form > button {
+  justify-self: start;
+}
+.join-date {
+  display: grid;
+  gap: var(--space-1);
+}
+.join-photo,
+.join-declarations {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.join-photo__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+.join-photo__img,
+.join-photo__empty {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  background: var(--surface-page);
+  border: 1px solid var(--border);
+}
+.join-photo__empty {
+  display: inline-grid;
+  place-items: center;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.join-photo__controls {
+  display: grid;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 14rem;
+  justify-items: start;
+}
+.join-photo__controls .is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.join-result {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-4) var(--space-16);
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}
+.join-result h1,
+.join-result__lead {
+  margin: 0;
+}
+.join-result__lead {
+  font-size: var(--text-lg);
+}
+
+.member-card-page {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+}
+.member-card {
+  width: min(100%, 26rem);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, var(--radius-md));
+  overflow: hidden;
+  box-shadow: var(--shadow-overlay);
+}
+.member-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--brand-bg);
+  color: var(--brand-fg);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+}
+.member-card__logo {
+  height: 28px;
+  width: auto;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+.member-card__body {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+.member-card__photo {
+  flex: none;
+  width: 112px;
+  height: 112px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  background: var(--surface-page);
+}
+.member-card__body dl {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  font-size: var(--text-sm);
+  min-width: 0;
+}
+.member-card__body dt {
+  color: var(--text-muted);
+}
+.member-card__body dd {
+  margin: 0 0 var(--space-1);
+  overflow-wrap: anywhere;
+}
+.member-card__number {
+  font-weight: var(--weight-heading);
+  letter-spacing: 0.03em;
+}
+.member-card__foot {
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--border);
+  font-size: var(--text-sm);
+  color: var(--tone-success-fg);
+  font-weight: var(--weight-label);
+}
+@media print {
+  .ds-header,
+  .ds-bottombar,
+  .member-card__actions,
+  .app-banner {
+    display: none !important;
+  }
+}
+.join-step__body .ds-button,
+.join-actions .ds-button {
+  white-space: normal;
+  text-align: center;
+  max-width: 100%;
+}

@@ -1,0 +1,88 @@
+/* /pvc — spec 06 §4.1. Tokens only. */
+.pvc-page {
+  max-width: var(--bp-lg);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  display: grid;
+  gap: var(--space-6);
+}
+.pvc-page h1 {
+  margin: 0;
+}
+.pvc-page__lead {
+  margin: var(--space-2) 0 0;
+  color: var(--text-muted);
+  max-width: 46rem;
+}
+.pvc-grid {
+  display: grid;
+  gap: var(--space-4);
+}
+@media (min-width: 900px) {
+  .pvc-grid {
+    grid-template-columns: 3fr 2fr;
+    align-items: start;
+  }
+}
+.pvc-card {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.pvc-card h2 {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+.pvc-card p {
+  margin: 0;
+}
+.pvc-form,
+.pvc-status {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}
+.pvc-form > * {
+  width: 100%;
+}
+.pvc-form > button {
+  width: auto;
+}
+.pvc-details {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+.pvc-details div {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: var(--space-3);
+}
+.pvc-details dt {
+  color: var(--text-muted);
+}
+.pvc-details dd {
+  margin: 0;
+}
+.pvc-private {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.pvc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.pvc-card,
+.pvc-status {
+  min-width: 0;
+}
+/* Long action labels wrap on narrow screens instead of pushing the page sideways. */
+.pvc-actions .ds-button {
+  white-space: normal;
+  text-align: center;
+  max-width: 100%;
+}

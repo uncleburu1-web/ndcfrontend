@@ -1,0 +1,161 @@
+/**
+ * /pvc — Verify your PVC + Get your PVC (spec 06 §4.1).
+ * A PVC is needed only for NDC membership — never to browse, follow or donate.
+ */
+import { useAuth } from "@clerk/react";
+import { useEffect, useState, type FormEvent } from "react";
+import { ApiError } from "../../auth/api";
+import { useApi } from "../../auth/session";
+import { useRequest } from "../../candidates/useRequest";
+import { Banner, Button, Checkbox, Select, Skeleton, StatusBadge, TextField } from "../../components/ui";
+import { STATES } from "../../lib/nigeria";
+import { formatDate } from "../../lib/format";
+import type { MembershipConfig } from "../../membership/types";
+import type { MyPvc } from "../../pvc/types";
+import "./pvc.css";
+
+type Errors = Record<string, string>;
+
+function flatten(fields: Record<string, unknown>): Errors {
+  const out: Errors = {};
+  for (const [k, v] of Object.entries(fields ?? {})) out[k] = Array.isArray(v) ? String(v[0]) : String(v);
+  return out;
+}
+
+function VerifyForm({ initial, onDone }: { initial?: MyPvc; onDone: (p: MyPvc) => void }) {
+  const api = useApi();
+  const [form, setForm] = useState({ vin: "", surname: initial?.surname ?? "", state: initial?.state ?? "", lga: initial?.lga ?? "",
+    polling_unit: initial?.polling_unit ?? "", consent: false });
+  const [errors, setErrors] = useState<Errors>({});
+  const [formError, setFormError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setErrors({});
+    setFormError("");
+    try {
+      onDone(await api<MyPvc>("/me/pvc/", { method: "PUT", body: form }));
+    } catch (err) {
+      const e2 = err instanceof ApiError ? err : new ApiError({});
+      const f = flatten(e2.fields);
+      if (Object.keys(f).length) setErrors(f);
+      else if (e2.status === 400) setErrors({ vin: e2.message });
+      else setFormError(e2.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form className="pvc-form" onSubmit={submit} noValidate>
+      {formError && <Banner tone="error">{formError}</Banner>}
+      <TextField label="VIN (Voter Identification Number)" required value={form.vin} onChange={(e) => setForm({ ...form, vin: e.target.value })}
+        hint="19 letters and numbers as printed on your card, or the last 10." error={errors.vin} autoComplete="off" />
+      <TextField label="Surname as printed on the card" required value={form.surname} onChange={(e) => setForm({ ...form, surname: e.target.value })}
+        error={errors.surname} />
+      <Select label="State of registration" required value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })}
+        error={errors.state} options={[{ value: "", label: "Choose a state" }, ...STATES]} />
+      <TextField label="LGA of registration" required value={form.lga} onChange={(e) => setForm({ ...form, lga: e.target.value })} error={errors.lga} />
+      <TextField label="Polling unit (optional)" value={form.polling_unit} onChange={(e) => setForm({ ...form, polling_unit: e.target.value })} />
+      <Checkbox required checked={form.consent} onChange={(e) => setForm({ ...form, consent: e.target.checked })} error={errors.consent}
+        label="NDCConnect may check these details on INEC’s voter register to confirm my registration." />
+      <Button type="submit" loading={busy} loadingLabel="Sending…">Send for checking</Button>
+    </form>
+  );
+}
+
+export default function PvcPage() {
+  const api = useApi();
+  const { isLoaded, isSignedIn } = useAuth();
+  const config = useRequest("membership-config", (signal) => api<MembershipConfig>("/membership/config/", { anonymous: true, signal }));
+  const [pvc, setPvc] = useState<MyPvc | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    document.title = "PVC | NDCConnect";
+  }, []);
+  useEffect(() => {
+    if (!isSignedIn) return;
+    setLoading(true);
+    api<MyPvc>("/me/pvc/").then(setPvc).catch(() => setPvc(null)).finally(() => setLoading(false));
+  }, [api, isSignedIn]);
+
+  const inec = config.data?.inec_pvc_url;
+  const withdraw = async () => {
+    setBusy(true);
+    try {
+      await api("/me/pvc/", { method: "DELETE" });
+      setPvc({ status: "unverified" });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="pvc-page">
+      <header>
+        <h1>Your PVC</h1>
+        <p className="pvc-page__lead">
+          A Permanent Voter’s Card is needed only to join the NDC. You never need one to browse, vote (follow) candidates or donate.
+        </p>
+      </header>
+
+      <div className="pvc-grid">
+        <section className="pvc-card" aria-labelledby="verify-title">
+          <h2 id="verify-title">Verify your PVC</h2>
+          {!isLoaded || loading ? (
+            <Skeleton width="80%" />
+          ) : !isSignedIn ? (
+            <>
+              <p>Sign in to verify your PVC.</p>
+              <Button href="/sign-in?redirect_url=%2Fpvc">Sign in</Button>
+            </>
+          ) : !pvc || pvc.status === "unverified" || editing ? (
+            <VerifyForm initial={editing ? pvc ?? undefined : undefined} onDone={(p) => { setPvc(p); setEditing(false); }} />
+          ) : (
+            <div className="pvc-status">
+              <StatusBadge set="pvc" status={pvc.status} />
+              {pvc.status === "pending" && (
+                <p>We’re checking your details on INEC’s voter register. This is done by a person and usually takes up to 3 working days.</p>
+              )}
+              {pvc.status === "successful" && <p>PVC verified{pvc.reviewed_at ? ` on ${formatDate(pvc.reviewed_at)}` : ""}.</p>}
+              {pvc.status === "rejected" && <Banner tone="error" title="We couldn’t verify your PVC">{pvc.reason}</Banner>}
+              <dl className="pvc-details">
+                <div><dt>VIN</dt><dd>{pvc.vin_masked}</dd></div>
+                <div><dt>Surname</dt><dd>{pvc.surname}</dd></div>
+                <div><dt>Registered in</dt><dd>{pvc.lga}, {pvc.state_label}</dd></div>
+              </dl>
+              <p className="pvc-private">These details are private and encrypted.</p>
+              <div className="pvc-actions">
+                {pvc.status === "pending" && <Button variant="secondary" loading={busy} onClick={() => void withdraw()}>Withdraw</Button>}
+                {pvc.status === "rejected" && <Button onClick={() => setEditing(true)}>Try again</Button>}
+                {pvc.status === "successful" && (
+                  <>
+                    <Button href="/join">Continue to Join NDC</Button>
+                    <Button variant="ghost" onClick={() => setEditing(true)}>Changed your registration? Submit new details</Button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </section>
+
+        <section className="pvc-card" aria-labelledby="get-title">
+          <h2 id="get-title">Get your PVC</h2>
+          <p>Register to vote, check your registration, or find where to collect your card on INEC’s official portal.</p>
+          {inec ? (
+            <Button variant="secondary" href={inec} target="_blank" rel="noopener noreferrer">
+              Go to INEC’s portal<span className="visually-hidden"> (opens in a new tab)</span>
+            </Button>
+          ) : (
+            <p className="pvc-private">The link to INEC’s portal will appear here once it’s confirmed.</p>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}

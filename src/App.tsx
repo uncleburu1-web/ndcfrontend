@@ -4,7 +4,7 @@
  */
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
-import { RequireFinanceViewer, RequireSignedIn, RequireSystemAdmin, SignedOutOnly } from "./auth/guards";
+import { RequireFinanceViewer, RequireMembershipOfficer, RequireSignedIn, RequireSystemAdmin, SignedOutOnly } from "./auth/guards";
 import AppLayout from "./components/layout/AppLayout";
 import AdminCandidateEditPage from "./pages/admin/candidates/AdminCandidateEditPage";
 import AdminCandidatesPage from "./pages/admin/candidates/AdminCandidatesPage";
@@ -18,6 +18,15 @@ import DonatePage from "./pages/donate/DonatePage";
 import MyDonationsPage from "./pages/donate/MyDonationsPage";
 import ReceiptPage from "./pages/donate/ReceiptPage";
 import FinancePage from "./pages/finance/FinancePage";
+import AdminMembershipDetailPage from "./pages/admin/membership/AdminMembershipDetailPage";
+import AdminMembershipPage from "./pages/admin/membership/AdminMembershipPage";
+import AdminMembershipPaymentsPage from "./pages/admin/membership/AdminMembershipPaymentsPage";
+import AdminMembershipSettingsPage from "./pages/admin/membership/AdminMembershipSettingsPage";
+import AdminPvcPage from "./pages/admin/pvc/AdminPvcPage";
+import JoinCompletePage from "./pages/join/JoinCompletePage";
+import JoinPage from "./pages/join/JoinPage";
+import MembershipCardPage from "./pages/join/MembershipCardPage";
+import PvcPage from "./pages/pvc/PvcPage";
 import { EmptyState } from "./components/ui";
 import AccountDeactivatedPage from "./pages/auth/AccountDeactivatedPage";
 import AccountPage from "./pages/auth/AccountPage";
@@ -29,7 +38,7 @@ function HomePage() {
   return (
     <div className="page-shell">
       <EmptyState title="NDCConnect is being built">
-        Sign-in and accounts are ready. Candidate, news and donation pages arrive with their own specs.
+        Sign-in and accounts are ready. News and community pages arrive with their own specs.
       </EmptyState>
     </div>
   );
@@ -56,6 +65,8 @@ export default function App() {
           {/* Sign-in only — never profile completion or PVC (spec 04 §4.4). */}
           <Route path="following" element={<FollowingPage />} />
           <Route path="my-donations" element={<MyDonationsPage />} />
+          {/* The member's own card — private, no public lookup (spec 06 §4.3) */}
+          <Route path="membership/card" element={<MembershipCardPage />} />
         </Route>
         {/* Public — no account, profile or PVC needed (spec 03 §3.4) */}
         <Route path="candidates" element={<CandidatesPage />} />
@@ -65,6 +76,10 @@ export default function App() {
         <Route path="donate/complete" element={<DonateCompletePage />} />
         <Route path="donate/receipt/:reference" element={<ReceiptPage />} />
         <Route path="finance" element={<FinancePage />} />
+        {/* Membership (spec 06): pages are public; applying needs sign-in + profile; paying needs a verified PVC */}
+        <Route path="pvc" element={<PvcPage />} />
+        <Route path="join" element={<JoinPage />} />
+        <Route path="join/complete" element={<JoinCompletePage />} />
         {/* System admin only (spec 03 §8.3); the backend enforces IsSystemAdmin too */}
         <Route element={<RequireSignedIn />}>
           <Route element={<RequireSystemAdmin />}>
@@ -76,6 +91,14 @@ export default function App() {
           <Route element={<RequireFinanceViewer />}>
             <Route path="admin/donations" element={<AdminDonationsPage />} />
             <Route path="admin/donations/:id" element={<AdminDonationDetailPage />} />
+          </Route>
+          {/* Membership officer or system admin (spec 06 §7.2) */}
+          <Route element={<RequireMembershipOfficer />}>
+            <Route path="admin/pvc" element={<AdminPvcPage />} />
+            <Route path="admin/membership" element={<AdminMembershipPage />} />
+            <Route path="admin/membership/settings" element={<AdminMembershipSettingsPage />} />
+            <Route path="admin/membership/payments" element={<AdminMembershipPaymentsPage />} />
+            <Route path="admin/membership/:id" element={<AdminMembershipDetailPage />} />
           </Route>
         </Route>
         <Route path="account-deactivated" element={<AccountDeactivatedPage />} />

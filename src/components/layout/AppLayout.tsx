@@ -4,7 +4,7 @@
  */
 import { Show, UserButton } from "@clerk/react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { isFinanceViewer } from "../../auth/guards";
+import { isFinanceViewer, isMembershipOfficer } from "../../auth/guards";
 import { useMe, useSessionIssue } from "../../auth/session";
 import { DonationConfigProvider, useDonationConfig } from "../../donations/DonationConfigProvider";
 import { FollowProvider } from "../../follows/FollowProvider";
@@ -33,6 +33,7 @@ function AccountArea() {
           <UserButton.MenuItems>
             <UserButton.Link label="Following" labelIcon={<Icon name="heart" size={16} />} href="/following" />
             <UserButton.Link label="My donations" labelIcon={<Icon name="inbox" size={16} />} href="/my-donations" />
+            <UserButton.Link label="My membership" labelIcon={<Icon name="user" size={16} />} href="/join" />
           </UserButton.MenuItems>
         </UserButton>
       </Show>
@@ -78,7 +79,8 @@ function Chrome() {
   const { me } = useMe();
   const { config } = useDonationConfig();
   // Admin link: system admins land on candidates; finance officers on donations (the backend still enforces access).
-  const adminHref = me?.is_system_admin ? "/admin/candidates" : isFinanceViewer(me) ? "/admin/donations" : null;
+  const adminHref = me?.is_system_admin ? "/admin/candidates" : isMembershipOfficer(me) ? "/admin/membership"
+    : isFinanceViewer(me) ? "/admin/donations" : null;
   const links = adminHref ? [...NAV, { label: "Admin", href: adminHref }] : NAV;
   return (
     <>

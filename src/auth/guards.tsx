@@ -113,3 +113,30 @@ export function RequireFinanceViewer({ children }: { children?: ReactNode }) {
   }
   return children ? <>{children}</> : <Outlet />;
 }
+
+/** Membership + PVC admin (spec 06 §5.3): system admins and membership officers. The backend enforces it too. */
+export function isMembershipOfficer(me: { is_system_admin: boolean; roles: { role: string }[] } | null) {
+  return Boolean(me && (me.is_system_admin || me.roles.some((r) => r.role === "membership_officer")));
+}
+
+export function RequireMembershipOfficer({ children }: { children?: ReactNode }) {
+  const { me, status, error, refresh } = useMe();
+  if (status === "error") {
+    return (
+      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+        {error?.message}
+      </Banner>
+    );
+  }
+  if (!me) return <Pending label="Loading your account" />;
+  if (!isMembershipOfficer(me)) {
+    return (
+      <div className="page-shell">
+        <EmptyState icon="shield" title="You don’t have access to this page">
+          Membership records are for NDCConnect administrators and membership officers.
+        </EmptyState>
+      </div>
+    );
+  }
+  return children ? <>{children}</> : <Outlet />;
+}

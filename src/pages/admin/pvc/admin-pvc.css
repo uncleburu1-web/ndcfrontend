@@ -1,0 +1,30 @@
+/* /admin/pvc — spec 06 §4.4. Tokens only. */
+.adm-pvc-list {
+  display: grid;
+  gap: var(--space-4);
+  margin: var(--space-4) 0;
+  padding: 0;
+  list-style: none;
+}
+.adm-pvc {
+  display: grid;
+  gap: var(--space-3);
+}
+.adm-pvc__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+.adm-pvc__head h2 {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+.adm-pvc__head p {
+  margin: 0;
+}
+.adm-pvc-filter {
+  max-width: 16rem;
+  margin-top: var(--space-4);
+}

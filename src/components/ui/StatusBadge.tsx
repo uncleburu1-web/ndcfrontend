@@ -21,6 +21,7 @@ const STATUS_SETS = {
   },
   membership: {
     not_joined: ["Not joined", "neutral"],
+    draft: ["Details in progress", "neutral"],
     payment_pending: ["Payment pending", "warning"],
     pending_approval: ["Pending approval", "warning"],
     active: ["Active member", "success"],

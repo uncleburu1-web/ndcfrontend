@@ -189,3 +189,40 @@ describe("setup-profile route", () => {
     expect(screen.getByTestId("where").textContent).toBe("/");
   });
 });
+
+describe("membership routes (spec 06)", () => {
+  for (const [path, heading] of [["/pvc", "Your PVC"], ["/join", "Join the NDC"]]) {
+    it(`${path} is a public page, not “Page not found”`, () => {
+      renderAt(path, <App />);
+      expect(screen.getByTestId("where").textContent).toBe(path);
+      expect(screen.getByRole("heading", { level: 1, name: heading })).toBeTruthy();
+      expect(screen.queryByText("Page not found")).toBeNull();
+    });
+  }
+
+  it("Join NDC in the header and the mobile bar goes to /join", () => {
+    renderAt("/", <App />);
+    const links = screen.getAllByRole("link", { name: "Join NDC" });
+    expect(links.length).toBe(2);
+    for (const l of links) expect(l.getAttribute("href")).toBe("/join");
+  });
+
+  it("/membership/card requires sign-in; admin membership pages need an officer", () => {
+    renderAt("/membership/card", <App />);
+    expect(screen.getByTestId("where").textContent).toBe("/sign-in?redirect_url=%2Fmembership%2Fcard");
+    cleanup();
+    clerkState.isSignedIn = true;
+    session.me = complete;
+    session.status = "ready";
+    renderAt("/admin/pvc", <App />);
+    expect(screen.getByText("You don’t have access to this page")).toBeTruthy();
+  });
+
+  it("officers with no other admin role get an Admin link to membership", () => {
+    clerkState.isSignedIn = true;
+    session.me = { ...complete, roles: [{ role: "membership_officer" }] } as Me;
+    session.status = "ready";
+    renderAt("/", <App />);
+    expect(screen.getAllByRole("link", { name: "Admin" })[0].getAttribute("href")).toBe("/admin/membership");
+  });
+});

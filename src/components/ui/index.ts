@@ -7,6 +7,7 @@ export { CandidateCard, CandidateCardSkeleton } from "./CandidateCard";
 export { DonateButton } from "./DonateButton";
 export { EmptyState } from "./EmptyState";
 export { Icon } from "./Icon";
+export { MaskedValue } from "./MaskedValue";
 export { BottomSheet, Modal } from "./Modal";
 export { NotificationToggle } from "./NotificationToggle";
 export { Pagination } from "./Pagination";
