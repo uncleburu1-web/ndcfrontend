@@ -267,3 +267,28 @@ describe("news routes (spec 07)", () => {
     expect(screen.getByText("You don’t have access to this page")).toBeTruthy();
   });
 });
+
+describe("PVC as its own unit (spec 08)", () => {
+  it("user menu says Verify your PVC, or Verified voter once the backend confirms it", () => {
+    clerkState.isSignedIn = true;
+    session.me = { ...complete, pvc_status: "pending" } as Me;
+    session.status = "ready";
+    renderAt("/", <App />);
+    expect(screen.getAllByRole("link", { name: "Verify your PVC" })[0].getAttribute("href")).toBe("/pvc");
+    cleanup();
+    session.me = { ...complete, pvc_status: "successful" } as Me;
+    renderAt("/", <App />);
+    expect(screen.getAllByRole("link", { name: "Verified voter" })[0].getAttribute("href")).toBe("/pvc");
+  });
+
+  it("PVC-only officers get an Admin link to the queue, and the queue opens", () => {
+    clerkState.isSignedIn = true;
+    session.me = { ...complete, roles: [{ role: "pvc_officer" }] } as Me;
+    session.status = "ready";
+    renderAt("/", <App />);
+    expect(screen.getAllByRole("link", { name: "Admin" })[0].getAttribute("href")).toBe("/admin/pvc");
+    cleanup();
+    renderAt("/admin/pvc", <App />);
+    expect(screen.getByRole("heading", { level: 1, name: "PVC checks" })).toBeTruthy();
+  });
+});

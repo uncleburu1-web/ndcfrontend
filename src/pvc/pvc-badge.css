@@ -1,0 +1,18 @@
+/* "Verified voter" badge — spec 08. Tokens only. */
+.pvc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--tone-success-bg);
+  color: var(--tone-success-fg);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.pvc-badge--sm {
+  padding: 0 var(--space-1);
+  font-size: var(--text-xs);
+}

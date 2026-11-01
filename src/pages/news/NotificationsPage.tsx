@@ -9,14 +9,20 @@ import "../../news/news.css";
 
 export interface NotificationItem {
   id: string;
-  kind: "announcement" | "news_decision";
+  kind: "announcement" | "news_decision" | "pvc_decision";
   created_at: string;
   read_at: string | null;
-  decision: "" | "approved" | "rejected";
-  article: { id: string; source: "official" | "community"; title: string; public: boolean };
+  decision: "" | "approved" | "rejected" | "verified";
+  article: { id: string; source: "official" | "community"; title: string; public: boolean } | null;
 }
 
 export function describe(n: NotificationItem) {
+  if (n.kind === "pvc_decision") {
+    return n.decision === "verified"
+      ? { text: "Your PVC is verified. You can now join the NDC.", href: "/pvc", icon: "verified" as const }
+      : { text: "We couldn’t verify your PVC. See why and try again.", href: "/pvc", icon: "shield" as const };
+  }
+  if (!n.article) return { text: "Notification", href: "/notifications", icon: "info" as const };
   if (n.kind === "announcement") return { text: `NDCConnect: ${n.article.title}`, href: `/news/official/${n.article.id}`, icon: "shield" as const };
   if (n.decision === "approved" && n.article.public) {
     return { text: `Your news “${n.article.title}” was published`, href: `/news/community/${n.article.id}`, icon: "checkCircle" as const };
@@ -69,7 +75,7 @@ export default function NotificationsPage() {
       </header>
       {error ? <Banner tone="error">{error}</Banner> : !items ? <Skeleton width="100%" height={160} /> : items.length === 0 ? (
         <EmptyState title="No notifications yet">
-          Official announcements and decisions about your news appear here. <Link to="/news">Read the news</Link>
+          Official announcements and decisions about your news and PVC appear here. <Link to="/news">Read the news</Link>
         </EmptyState>
       ) : (
         <ul className="notif-list">

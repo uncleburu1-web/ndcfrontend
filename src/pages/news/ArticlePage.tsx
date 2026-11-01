@@ -7,6 +7,7 @@ import { Button, EmptyState, Skeleton } from "../../components/ui";
 import { formatDate } from "../../lib/format";
 import { ArticleBody } from "../../news/ArticleBody";
 import { ArticleImage } from "../../news/ArticleImage";
+import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
 import { ReportDialog } from "../../news/ReportDialog";
 import { SourceBadges } from "../../news/SourceBadges";
 import type { ArticleDetail, ArticleSource } from "../../news/types";
@@ -40,7 +41,7 @@ export default function ArticlePage({ source }: { source: ArticleSource }) {
       <SourceBadges a={{ ...a, pinned: false }} />
       <h1>{a.title}</h1>
       <p className="news-meta">
-        {a.source === "community" && <>by {a.byline ?? "a member"} · </>}
+        {a.source === "community" && <>by {a.byline ?? "a member"}{a.byline_verified && <> <VerifiedVoterBadge size="sm" /></>} · </>}
         {a.published_at ? formatDate(a.published_at) : ""}
         {a.edited_at ? ` · Updated ${formatDate(a.edited_at)}` : ""}
         {a.state_label ? ` · ${a.state_label}` : ""}

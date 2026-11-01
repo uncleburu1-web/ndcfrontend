@@ -1,6 +1,6 @@
 /** Tabs between admin areas. Each link is shown only to roles that can use it; the backend enforces access anyway. */
 import { Link } from "react-router-dom";
-import { isFinanceViewer, isMembershipOfficer, isNewsReviewer } from "../../auth/guards";
+import { isFinanceViewer, isMembershipOfficer, isNewsReviewer, isPvcOfficer } from "../../auth/guards";
 import { useMe } from "../../auth/session";
 import "./admin-nav.css";
 
@@ -9,7 +9,7 @@ export function AdminNav({ current }: { current: "candidates" | "donations" | "p
   const links = [
     me?.is_system_admin ? { id: "candidates", label: "Candidates", href: "/admin/candidates" } : null,
     isFinanceViewer(me) ? { id: "donations", label: "Donations", href: "/admin/donations" } : null,
-    isMembershipOfficer(me) ? { id: "pvc", label: "PVC checks", href: "/admin/pvc" } : null,
+    isPvcOfficer(me) ? { id: "pvc", label: "PVC checks", href: "/admin/pvc" } : null,
     isMembershipOfficer(me) ? { id: "membership", label: "Membership", href: "/admin/membership" } : null,
     isNewsReviewer(me) ? { id: "news", label: "News review", href: "/admin/news" } : null,
     me?.is_system_admin ? { id: "announcements", label: "Announcements", href: "/admin/announcements" } : null,

@@ -4,7 +4,7 @@
  */
 import { Show, UserButton } from "@clerk/react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { isFinanceViewer, isMembershipOfficer, isNewsReviewer } from "../../auth/guards";
+import { isFinanceViewer, isMembershipOfficer, isNewsReviewer, isPvcOfficer } from "../../auth/guards";
 import { useMe, useSessionIssue } from "../../auth/session";
 import { DonationConfigProvider, useDonationConfig } from "../../donations/DonationConfigProvider";
 import { FollowProvider } from "../../follows/FollowProvider";
@@ -22,6 +22,8 @@ const NAV = [
 function AccountArea() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { me } = useMe();
+  const verified = me?.pvc_status === "successful"; // spec 08: the badge comes from the backend, never inferred
   return (
     <>
       <Show when="signed-out">
@@ -37,6 +39,7 @@ function AccountArea() {
             <UserButton.Link label="My donations" labelIcon={<Icon name="inbox" size={16} />} href="/my-donations" />
             <UserButton.Link label="My membership" labelIcon={<Icon name="user" size={16} />} href="/join" />
             <UserButton.Link label="My news" labelIcon={<Icon name="inbox" size={16} />} href="/news/mine" />
+            <UserButton.Link label={verified ? "Verified voter" : "Verify your PVC"} labelIcon={<Icon name={verified ? "verified" : "shield"} size={16} />} href="/pvc" />
           </UserButton.MenuItems>
         </UserButton>
       </Show>
@@ -83,7 +86,7 @@ function Chrome() {
   const { config } = useDonationConfig();
   // Admin link: system admins land on candidates; other roles on their own area (the backend still enforces access).
   const adminHref = me?.is_system_admin ? "/admin/candidates" : isMembershipOfficer(me) ? "/admin/membership"
-    : isFinanceViewer(me) ? "/admin/donations" : isNewsReviewer(me) ? "/admin/news" : null;
+    : isFinanceViewer(me) ? "/admin/donations" : isNewsReviewer(me) ? "/admin/news" : isPvcOfficer(me) ? "/admin/pvc" : null;
   const links = adminHref ? [...NAV, { label: "Admin", href: adminHref }] : NAV;
   return (
     <>

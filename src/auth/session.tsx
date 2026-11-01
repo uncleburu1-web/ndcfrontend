@@ -17,6 +17,8 @@ export interface Me {
   profile_complete: boolean;
   roles: { id: string; role: string; scope_type: string; scope_id: string | null }[];
   is_system_admin: boolean;
+  /** Spec 08: the caller's own PVC status; the "Verified voter" badge shows only when this is "successful". */
+  pvc_status?: "unverified" | "pending" | "successful" | "rejected";
   just_completed?: boolean;
 }
 

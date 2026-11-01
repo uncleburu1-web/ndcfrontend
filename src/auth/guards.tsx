@@ -167,3 +167,30 @@ export function RequireNewsReviewer({ children }: { children?: ReactNode }) {
   }
   return children ? <>{children}</> : <Outlet />;
 }
+
+/** PVC queue (spec 08 §5.3): PVC officers and membership officers; system admins imply both. The backend enforces it too. */
+export function isPvcOfficer(me: { is_system_admin: boolean; roles: { role: string }[] } | null) {
+  return Boolean(me && (me.is_system_admin || me.roles.some((r) => r.role === "pvc_officer" || r.role === "membership_officer")));
+}
+
+export function RequirePvcOfficer({ children }: { children?: ReactNode }) {
+  const { me, status, error, refresh } = useMe();
+  if (status === "error") {
+    return (
+      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+        {error?.message}
+      </Banner>
+    );
+  }
+  if (!me) return <Pending label="Loading your account" />;
+  if (!isPvcOfficer(me)) {
+    return (
+      <div className="page-shell">
+        <EmptyState icon="shield" title="You don’t have access to this page">
+          PVC checks are for PVC officers, membership officers and NDCConnect administrators.
+        </EmptyState>
+      </div>
+    );
+  }
+  return children ? <>{children}</> : <Outlet />;
+}

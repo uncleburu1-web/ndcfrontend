@@ -14,8 +14,8 @@ import { redirectTo } from "../../donations/navigation";
 import { formatDate } from "../../lib/format";
 import { STATES } from "../../lib/nigeria";
 import { useAuthedImage } from "../../membership/useAuthedImage";
+import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
 import { DISPLAY_LABELS, type MembershipConfig, type MyMembership } from "../../membership/types";
-import type { MyPvc } from "../../pvc/types";
 import "./join.css";
 
 type Errors = Record<string, string>;
@@ -172,7 +172,6 @@ export default function JoinPage() {
   const { me } = useMe();
   const config = useRequest("membership-config", (signal) => api<MembershipConfig>("/membership/config/", { anonymous: true, signal }));
   const [m, setM] = useState<MyMembership | null>(null);
-  const [pvc, setPvc] = useState<MyPvc | null>(null);
   const [loading, setLoading] = useState(false);
   const [payBusy, setPayBusy] = useState(false);
   const [payError, setPayError] = useState("");
@@ -184,8 +183,8 @@ export default function JoinPage() {
   }, []);
   const load = useCallback(() => {
     setLoading(true);
-    Promise.all([api<MyMembership>("/me/membership/"), api<MyPvc>("/me/pvc/")])
-      .then(([mm, pp]) => { setM(mm); setPvc(pp); })
+    api<MyMembership>("/me/membership/")
+      .then(setM)
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [api]);
@@ -195,7 +194,9 @@ export default function JoinPage() {
 
   const fee = config.data ? formatKobo(config.data.fee_kobo) : "₦20,000";
   const open = Boolean(config.data?.open);
-  const pvcOk = pvc?.status === "successful";
+  // Spec 08 §6.2: step 1 reads the caller's PVC status from /me (PVC is its own unit; no separate request).
+  const pvcStatus = me?.pvc_status ?? "unverified";
+  const pvcOk = pvcStatus === "successful";
   const complete = detailsComplete(m);
   const status = m?.status ?? null;
   const display = m?.display_status ?? "not_joined";
@@ -301,10 +302,10 @@ export default function JoinPage() {
         {(!settled || status === "rejected" || status === "cancelled" || status === "refunded") && (
           <ol className="join-steps">
             <Step n={1} title="Verify your PVC" state={pvcOk ? "done" : "current"}>
-              {pvcOk ? <p>PVC verified.</p> : (
+              {pvcOk ? <p><VerifiedVoterBadge /></p> : (
                 <p>
-                  {pvc?.status === "pending" ? "We’re checking your PVC. " : pvc?.status === "rejected" ? "We couldn’t verify your PVC. " : "Your PVC must be verified before you can pay. "}
-                  <Link to="/pvc">{pvc?.status === "pending" ? "See status" : "Verify your PVC"}</Link>
+                  {pvcStatus === "pending" ? "We’re checking your PVC. " : pvcStatus === "rejected" ? "We couldn’t verify your PVC. " : "Your PVC must be verified before you can pay. "}
+                  <Link to="/pvc">{pvcStatus === "pending" ? "See status" : "Verify your PVC"}</Link>
                 </p>
               )}
             </Step>

@@ -59,7 +59,10 @@ function renderAt(path: string) {
 }
 
 const CONFIG = { open: true, fee_kobo: 2_000_000, requires_approval: true, inec_pvc_url: "https://inec.example/pvc" };
-const ME = { full_name: "Ada Obi", email: "ada@example.com", phone_number: "+2348031234567", profile_complete: true, is_system_admin: false, roles: [] };
+const ME = { full_name: "Ada Obi", email: "ada@example.com", phone_number: "+2348031234567", profile_complete: true, is_system_admin: false, roles: [],
+  pvc_status: "successful" };
+const PVC_CONFIG = { inec_pvc_url: "https://inec.example/pvc", inec_voter_check_url: "https://cvr.inecnigeria.org/vvs", guidance_note: "",
+  collection_note: "Collection began on 9 October 2026 at INEC local government offices." };
 const COMPLETE = {
   status: "draft", display_status: "draft", full_name: "Ada Obi", sex: "female", date_of_birth: "1990-05-01", address: "12 Allen Avenue",
   state: "lagos", state_label: "Lagos", lga: "Ikeja", ward: "Ward 3", polling_unit: "PU 004", nin_masked: "•••• 8901", has_photo: true,
@@ -95,20 +98,22 @@ afterEach(() => {
 // ------------------------------------------------------------------- /pvc
 describe("/pvc", () => {
   it("is a real page for guests (no longer 404) with sign-in and the INEC link", async () => {
-    routes({ "/membership/config/": CONFIG });
+    routes({ "/pvc/config/": PVC_CONFIG });
     renderAt("/pvc");
     expect(screen.getByRole("heading", { name: "Your PVC" })).toBeTruthy();
-    expect(screen.getByText(/never need one to browse, vote \(follow\) candidates or donate/)).toBeTruthy();
+    expect(screen.getByText(/never need one to browse, vote \(follow\) candidates, donate or read news/)).toBeTruthy();
     expect(screen.getByRole("link", { name: "Sign in" }).getAttribute("href")).toBe("/sign-in?redirect_url=%2Fpvc");
     const inec = await screen.findByRole("link", { name: /Go to INEC’s portal/ });
     expect(inec.getAttribute("href")).toBe("https://inec.example/pvc");
     expect(inec.getAttribute("target")).toBe("_blank");
   });
 
-  it("hides the INEC button when no URL is configured", async () => {
-    routes({ "/membership/config/": { ...CONFIG, inec_pvc_url: null } });
+  it("hides the INEC portal button when no URL is configured, but keeps the voter checker and guidance", async () => {
+    routes({ "/pvc/config/": { ...PVC_CONFIG, inec_pvc_url: null, guidance_note: "Registration is closed until INEC announces the next phase." } });
     renderAt("/pvc");
-    expect(await screen.findByText(/link to INEC’s portal will appear here/)).toBeTruthy();
+    expect(await screen.findByText(/Collection began on 9 October 2026/)).toBeTruthy();
+    expect(screen.getByText("Registration is closed until INEC announces the next phase.")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Check on INEC’s voter checker/ }).getAttribute("href")).toBe("https://cvr.inecnigeria.org/vvs");
     expect(screen.queryByRole("link", { name: /INEC’s portal/ })).toBeNull();
   });
 
@@ -148,11 +153,11 @@ describe("/pvc", () => {
 
   it("successful → Continue to Join NDC; rejected → reason and Try again", async () => {
     clerkState.isSignedIn = true;
-    routes({ "/membership/config/": CONFIG, "GET /me/pvc/": { status: "successful", vin_masked: "•••• 2345", surname: "Obi", lga: "Ikeja", state_label: "Lagos" } });
+    routes({ "/pvc/config/": PVC_CONFIG, "GET /me/pvc/": { status: "successful", vin_masked: "•••• 2345", surname: "Obi", lga: "Ikeja", state_label: "Lagos" } });
     renderAt("/pvc");
     expect((await screen.findByRole("link", { name: "Continue to Join NDC" })).getAttribute("href")).toBe("/join");
     cleanup();
-    routes({ "/membership/config/": CONFIG, "GET /me/pvc/": { status: "rejected", reason: "The details don’t match INEC’s record.", vin_masked: "•••• 2345" } });
+    routes({ "/pvc/config/": PVC_CONFIG, "GET /me/pvc/": { status: "rejected", reason: "The details don’t match INEC’s record.", vin_masked: "•••• 2345" } });
     renderAt("/pvc");
     expect(await screen.findByText("The details don’t match INEC’s record.")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
@@ -173,8 +178,8 @@ describe("/join", () => {
 
   it("keeps Pay disabled until the PVC is verified, and links to /pvc", async () => {
     clerkState.isSignedIn = true;
-    h.me = ME;
-    routes({ "/membership/config/": CONFIG, "GET /me/membership/": COMPLETE, "GET /me/pvc/": { status: "pending" }, "/me/membership/photo/": new Blob() });
+    h.me = { ...ME, pvc_status: "pending" };
+    routes({ "/membership/config/": CONFIG, "GET /me/membership/": COMPLETE, "/me/membership/photo/": new Blob() });
     renderAt("/join");
     const pay = await screen.findByRole("button", { name: "Pay ₦20,000 membership fee" });
     expect((pay as HTMLButtonElement).disabled).toBe(true);
@@ -261,14 +266,14 @@ describe("/join", () => {
   it("active members see their number and the card link; rejected-and-paid see the refund line", async () => {
     clerkState.isSignedIn = true;
     h.me = ME;
-    routes({ "/membership/config/": CONFIG, "GET /me/pvc/": { status: "successful" },
+    routes({ "/pvc/config/": PVC_CONFIG, "GET /me/pvc/": { status: "successful" },
       "GET /me/membership/": { ...COMPLETE, status: "active", display_status: "active", membership_number: "NDC-LA-2026-000001", activated_at: "2026-11-01T10:00:00Z" } });
     renderAt("/join");
     expect(await screen.findByText("You’re an NDC member")).toBeTruthy();
     expect(screen.getByText("NDC-LA-2026-000001")).toBeTruthy();
     expect(screen.getByRole("link", { name: "My membership card" }).getAttribute("href")).toBe("/membership/card");
     cleanup();
-    routes({ "/membership/config/": CONFIG, "GET /me/pvc/": { status: "successful" }, "/me/membership/photo/": new Blob(),
+    routes({ "/pvc/config/": PVC_CONFIG, "GET /me/pvc/": { status: "successful" }, "/me/membership/photo/": new Blob(),
       "GET /me/membership/": { ...COMPLETE, status: "rejected", display_status: "rejected", decision_reason: "Duplicate application.",
         latest_payment: { reference: "MEM-X", status: "successful" } } });
     renderAt("/join");
@@ -279,7 +284,7 @@ describe("/join", () => {
   it("cancelling needs a reason and says the fee isn't refunded once active", async () => {
     clerkState.isSignedIn = true;
     h.me = ME;
-    routes({ "/membership/config/": CONFIG, "GET /me/pvc/": { status: "successful" },
+    routes({ "/pvc/config/": PVC_CONFIG, "GET /me/pvc/": { status: "successful" },
       "GET /me/membership/": { ...COMPLETE, status: "active", display_status: "active", membership_number: "NDC-LA-2026-000001" },
       "POST /me/membership/cancel/": { ...COMPLETE, status: "cancelled", display_status: "cancelled", cancel_reason: "Moving abroad." } });
     renderAt("/join");

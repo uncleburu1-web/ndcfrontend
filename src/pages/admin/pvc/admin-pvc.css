@@ -28,3 +28,34 @@
   max-width: 16rem;
   margin-top: var(--space-4);
 }
+.adm-pvc-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+}
+.adm-pvc-filters > * {
+  flex: 1 1 12rem;
+  max-width: 16rem;
+}
+.adm-pvc__history summary {
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--text-link);
+}
+.adm-history {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-4);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+.adm-pvc-settings {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 46rem;
+}
+.adm-pvc-settings > button {
+  justify-self: start;
+}

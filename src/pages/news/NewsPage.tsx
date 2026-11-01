@@ -8,6 +8,7 @@ import { Banner, Button, EmptyState, Pagination, Select, Skeleton } from "../../
 import { formatDate } from "../../lib/format";
 import { STATES } from "../../lib/nigeria";
 import { ArticleImage } from "../../news/ArticleImage";
+import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
 import { SourceBadges } from "../../news/SourceBadges";
 import { articlePath, type ArticleSummary, type NewsPage as Page } from "../../news/types";
 import "../../news/news.css";
@@ -24,6 +25,7 @@ function Item({ a }: { a: ArticleSummary }) {
           {a.published_at ? formatDate(a.published_at) : ""}
           {a.state_label ? ` · ${a.state_label}` : ""}
           {a.source === "community" ? ` · by ${a.byline ?? "a member"}` : ""}
+          {a.byline_verified && <> <VerifiedVoterBadge size="sm" /></>}
         </p>
         <p>{a.excerpt}</p>
       </div>

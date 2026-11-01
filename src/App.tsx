@@ -9,6 +9,7 @@ import {
   RequireMembershipOfficer,
   RequireNewsReviewer,
   RequireProfileComplete,
+  RequirePvcOfficer,
   RequireSignedIn,
   RequireSystemAdmin,
   SignedOutOnly,
@@ -31,6 +32,7 @@ import AdminMembershipPage from "./pages/admin/membership/AdminMembershipPage";
 import AdminMembershipPaymentsPage from "./pages/admin/membership/AdminMembershipPaymentsPage";
 import AdminMembershipSettingsPage from "./pages/admin/membership/AdminMembershipSettingsPage";
 import AdminPvcPage from "./pages/admin/pvc/AdminPvcPage";
+import AdminPvcSettingsPage from "./pages/admin/pvc/AdminPvcSettingsPage";
 import JoinCompletePage from "./pages/join/JoinCompletePage";
 import JoinPage from "./pages/join/JoinPage";
 import MembershipCardPage from "./pages/join/MembershipCardPage";
@@ -124,8 +126,12 @@ export default function App() {
             <Route path="admin/donations/:id" element={<AdminDonationDetailPage />} />
           </Route>
           {/* Membership officer or system admin (spec 06 §7.2) */}
-          <Route element={<RequireMembershipOfficer />}>
+          {/* PVC officer, membership officer or system admin (spec 08 §5.3) */}
+          <Route element={<RequirePvcOfficer />}>
             <Route path="admin/pvc" element={<AdminPvcPage />} />
+            <Route path="admin/pvc/settings" element={<AdminPvcSettingsPage />} />
+          </Route>
+          <Route element={<RequireMembershipOfficer />}>
             <Route path="admin/membership" element={<AdminMembershipPage />} />
             <Route path="admin/membership/settings" element={<AdminMembershipSettingsPage />} />
             <Route path="admin/membership/payments" element={<AdminMembershipPaymentsPage />} />
