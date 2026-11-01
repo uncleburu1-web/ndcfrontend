@@ -3,6 +3,9 @@
   gap: var(--space-2);
   margin-bottom: var(--space-6);
   border-bottom: 1px solid var(--border);
+  /* System admins see up to six tabs: on narrow screens the tab row scrolls, the page doesn't. */
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 .adm-nav a {
   padding: var(--space-2) var(--space-3);
@@ -11,6 +14,8 @@
   text-decoration: none;
   border-bottom: 3px solid transparent;
   margin-bottom: -1px;
+  white-space: nowrap;
+  flex: none;
 }
 .adm-nav a[aria-current="page"] {
   color: var(--text-brand);

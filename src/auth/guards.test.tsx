@@ -226,3 +226,44 @@ describe("membership routes (spec 06)", () => {
     expect(screen.getAllByRole("link", { name: "Admin" })[0].getAttribute("href")).toBe("/admin/membership");
   });
 });
+
+describe("news routes (spec 07)", () => {
+  it("/news is a public page, not “Page not found”", () => {
+    renderAt("/news", <App />);
+    expect(screen.getByRole("heading", { level: 1, name: "News" })).toBeTruthy();
+    expect(screen.queryByText("Page not found")).toBeNull();
+  });
+
+  it("/news/submit needs sign-in, then a completed profile", () => {
+    renderAt("/news/submit", <App />);
+    expect(screen.getByTestId("where").textContent).toBe("/sign-in?redirect_url=%2Fnews%2Fsubmit");
+    cleanup();
+    clerkState.isSignedIn = true;
+    session.me = incomplete;
+    session.status = "ready";
+    renderAt("/news/submit", <App />);
+    expect(screen.getByTestId("where").textContent).toBe("/setup-profile");
+    cleanup();
+    session.me = complete;
+    renderAt("/news/submit", <App />);
+    expect(screen.getByRole("heading", { level: 1, name: "Submit news" })).toBeTruthy();
+  });
+
+  it("signed-in users get the bell and a My news link; reviewers get an Admin link to the queue", () => {
+    clerkState.isSignedIn = true;
+    session.me = { ...complete, roles: [{ role: "news_reviewer" }] } as Me;
+    session.status = "ready";
+    renderAt("/", <App />);
+    expect(screen.getAllByRole("link", { name: "Notifications" })[0].getAttribute("href")).toBe("/notifications");
+    expect(screen.getAllByRole("link", { name: "My news" })[0].getAttribute("href")).toBe("/news/mine");
+    expect(screen.getAllByRole("link", { name: "Admin" })[0].getAttribute("href")).toBe("/admin/news");
+  });
+
+  it("/admin/news is closed to ordinary users", () => {
+    clerkState.isSignedIn = true;
+    session.me = complete;
+    session.status = "ready";
+    renderAt("/admin/news", <App />);
+    expect(screen.getByText("You don’t have access to this page")).toBeTruthy();
+  });
+});

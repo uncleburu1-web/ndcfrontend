@@ -12,6 +12,8 @@ const STATUS_SETS = {
     pending: ["Pending", "warning"],
     successful: ["Successful", "success"],
     rejected: ["Rejected", "error"],
+    withdrawn: ["Withdrawn", "neutral"],
+    removed: ["Removed", "warning"],
   },
   pvc: {
     unverified: ["Unverified", "neutral"],

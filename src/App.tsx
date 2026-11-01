@@ -4,7 +4,15 @@
  */
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
-import { RequireFinanceViewer, RequireMembershipOfficer, RequireSignedIn, RequireSystemAdmin, SignedOutOnly } from "./auth/guards";
+import {
+  RequireFinanceViewer,
+  RequireMembershipOfficer,
+  RequireNewsReviewer,
+  RequireProfileComplete,
+  RequireSignedIn,
+  RequireSystemAdmin,
+  SignedOutOnly,
+} from "./auth/guards";
 import AppLayout from "./components/layout/AppLayout";
 import AdminCandidateEditPage from "./pages/admin/candidates/AdminCandidateEditPage";
 import AdminCandidatesPage from "./pages/admin/candidates/AdminCandidatesPage";
@@ -27,6 +35,15 @@ import JoinCompletePage from "./pages/join/JoinCompletePage";
 import JoinPage from "./pages/join/JoinPage";
 import MembershipCardPage from "./pages/join/MembershipCardPage";
 import PvcPage from "./pages/pvc/PvcPage";
+import AdminAnnouncementsPage from "./pages/admin/announcements/AdminAnnouncementsPage";
+import AnnouncementFormPage from "./pages/admin/announcements/AnnouncementFormPage";
+import AdminNewsDetailPage from "./pages/admin/news/AdminNewsDetailPage";
+import AdminNewsPage from "./pages/admin/news/AdminNewsPage";
+import ArticlePage from "./pages/news/ArticlePage";
+import MyNewsPage from "./pages/news/MyNewsPage";
+import NewsPage from "./pages/news/NewsPage";
+import NotificationsPage from "./pages/news/NotificationsPage";
+import SubmitNewsPage from "./pages/news/SubmitNewsPage";
 import { EmptyState } from "./components/ui";
 import AccountDeactivatedPage from "./pages/auth/AccountDeactivatedPage";
 import AccountPage from "./pages/auth/AccountPage";
@@ -38,7 +55,7 @@ function HomePage() {
   return (
     <div className="page-shell">
       <EmptyState title="NDCConnect is being built">
-        Sign-in and accounts are ready. News and community pages arrive with their own specs.
+        Sign-in and accounts are ready. Communities and events arrive with their own specs.
       </EmptyState>
     </div>
   );
@@ -67,6 +84,13 @@ export default function App() {
           <Route path="my-donations" element={<MyDonationsPage />} />
           {/* The member's own card — private, no public lookup (spec 06 §4.3) */}
           <Route path="membership/card" element={<MembershipCardPage />} />
+          {/* News (spec 07): My submissions and notifications need sign-in; submitting also needs a completed profile */}
+          <Route path="news/mine" element={<MyNewsPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
+          <Route element={<RequireProfileComplete />}>
+            <Route path="news/submit" element={<SubmitNewsPage />} />
+            <Route path="news/mine/:id" element={<SubmitNewsPage />} />
+          </Route>
         </Route>
         {/* Public — no account, profile or PVC needed (spec 03 §3.4) */}
         <Route path="candidates" element={<CandidatesPage />} />
@@ -80,12 +104,19 @@ export default function App() {
         <Route path="pvc" element={<PvcPage />} />
         <Route path="join" element={<JoinPage />} />
         <Route path="join/complete" element={<JoinCompletePage />} />
+        {/* News (spec 07): public reading */}
+        <Route path="news" element={<NewsPage />} />
+        <Route path="news/official/:id" element={<ArticlePage source="official" />} />
+        <Route path="news/community/:id" element={<ArticlePage source="community" />} />
         {/* System admin only (spec 03 §8.3); the backend enforces IsSystemAdmin too */}
         <Route element={<RequireSignedIn />}>
           <Route element={<RequireSystemAdmin />}>
             <Route path="admin/candidates" element={<AdminCandidatesPage />} />
             <Route path="admin/candidates/new" element={<AdminCandidateEditPage />} />
             <Route path="admin/candidates/:id" element={<AdminCandidateEditPage />} />
+            <Route path="admin/announcements" element={<AdminAnnouncementsPage />} />
+            <Route path="admin/announcements/new" element={<AnnouncementFormPage />} />
+            <Route path="admin/announcements/:id" element={<AnnouncementFormPage />} />
           </Route>
           {/* System admin or finance officer (spec 05 §7.2) */}
           <Route element={<RequireFinanceViewer />}>
@@ -99,6 +130,11 @@ export default function App() {
             <Route path="admin/membership/settings" element={<AdminMembershipSettingsPage />} />
             <Route path="admin/membership/payments" element={<AdminMembershipPaymentsPage />} />
             <Route path="admin/membership/:id" element={<AdminMembershipDetailPage />} />
+          </Route>
+          {/* News reviewer or system admin (spec 07 §7.3) */}
+          <Route element={<RequireNewsReviewer />}>
+            <Route path="admin/news" element={<AdminNewsPage />} />
+            <Route path="admin/news/:id" element={<AdminNewsDetailPage />} />
           </Route>
         </Route>
         <Route path="account-deactivated" element={<AccountDeactivatedPage />} />

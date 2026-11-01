@@ -4,10 +4,11 @@
  */
 import { Show, UserButton } from "@clerk/react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { isFinanceViewer, isMembershipOfficer } from "../../auth/guards";
+import { isFinanceViewer, isMembershipOfficer, isNewsReviewer } from "../../auth/guards";
 import { useMe, useSessionIssue } from "../../auth/session";
 import { DonationConfigProvider, useDonationConfig } from "../../donations/DonationConfigProvider";
 import { FollowProvider } from "../../follows/FollowProvider";
+import { NotificationBell } from "../../notifications/NotificationBell";
 import { Banner, Button, Icon, SiteHeader } from "../ui";
 
 const NAV = [
@@ -29,11 +30,13 @@ function AccountArea() {
         </Button>
       </Show>
       <Show when="signed-in">
+        <NotificationBell />
         <UserButton userProfileUrl="/account">
           <UserButton.MenuItems>
             <UserButton.Link label="Following" labelIcon={<Icon name="heart" size={16} />} href="/following" />
             <UserButton.Link label="My donations" labelIcon={<Icon name="inbox" size={16} />} href="/my-donations" />
             <UserButton.Link label="My membership" labelIcon={<Icon name="user" size={16} />} href="/join" />
+            <UserButton.Link label="My news" labelIcon={<Icon name="inbox" size={16} />} href="/news/mine" />
           </UserButton.MenuItems>
         </UserButton>
       </Show>
@@ -78,9 +81,9 @@ function Chrome() {
   const path = useLocation().pathname;
   const { me } = useMe();
   const { config } = useDonationConfig();
-  // Admin link: system admins land on candidates; finance officers on donations (the backend still enforces access).
+  // Admin link: system admins land on candidates; other roles on their own area (the backend still enforces access).
   const adminHref = me?.is_system_admin ? "/admin/candidates" : isMembershipOfficer(me) ? "/admin/membership"
-    : isFinanceViewer(me) ? "/admin/donations" : null;
+    : isFinanceViewer(me) ? "/admin/donations" : isNewsReviewer(me) ? "/admin/news" : null;
   const links = adminHref ? [...NAV, { label: "Admin", href: adminHref }] : NAV;
   return (
     <>
