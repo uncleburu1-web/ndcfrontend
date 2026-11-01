@@ -7,7 +7,7 @@ import { Link, useParams } from "react-router-dom";
 import { useApi } from "../../auth/session";
 import type { CandidateProfile } from "../../candidates/types";
 import { useRequest } from "../../candidates/useRequest";
-import { donationsEnabled } from "../../config";
+import { useDonationConfig } from "../../donations/DonationConfigProvider";
 import { CandidateVote } from "../../follows/CandidateVote";
 import { useFollows } from "../../follows/FollowProvider";
 import { Avatar, Banner, Button, DonateButton, EmptyState, Icon, Skeleton } from "../../components/ui";
@@ -35,6 +35,7 @@ export default function CandidateProfilePage() {
   );
 
   const { loadStates } = useFollows();
+  const donationsOpen = useDonationConfig().config.open;
   useEffect(() => {
     if (c?.slug) loadStates([c.slug]);
   }, [c?.slug, loadStates]);
@@ -96,7 +97,7 @@ export default function CandidateProfilePage() {
             <div className="cand-hero__actions">
               <CandidateVote slug={c.slug} name={c.full_name} variant="profile" onGone={retry} />
               {/* Separate action, never a step toward voting (spec 01 §6.2, spec 04 §8.3). */}
-              {donationsEnabled && <DonateButton href={`/donate?candidate=${encodeURIComponent(c.slug)}`} />}
+              {donationsOpen && <DonateButton href={`/donate?candidate=${encodeURIComponent(c.slug)}`} />}
             </div>
             <p className="cand-hero__private">Who you follow is private.</p>
           </div>

@@ -8,7 +8,9 @@ import { ToastProvider } from "../components/ui";
 const h = vi.hoisted(() => ({ api: vi.fn() }));
 vi.mock("@clerk/react", async () => (await import("../test/clerkMock")).clerkMockModule);
 vi.mock("../auth/session", () => ({ useApi: () => h.api }));
-vi.mock("../config", () => ({ donationsEnabled: false }));
+vi.mock("../donations/DonationConfigProvider", () => ({
+  useDonationConfig: () => ({ config: { open: false, min_kobo: null, max_per_payment_kobo: null, presets_kobo: [] }, loading: false }),
+}));
 
 import CandidateProfilePage from "../pages/candidates/CandidateProfilePage";
 import CandidatesPage from "../pages/candidates/CandidatesPage";

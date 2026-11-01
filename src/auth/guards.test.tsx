@@ -156,6 +156,25 @@ describe("/following route (spec 04 §4.4)", () => {
   });
 });
 
+describe("donation routes (spec 05)", () => {
+  it("/my-donations requires sign-in only", () => {
+    renderAt("/my-donations", <App />);
+    expect(screen.getByTestId("where").textContent).toBe("/sign-in?redirect_url=%2Fmy-donations");
+  });
+
+  for (const path of ["/donate", "/finance", "/donate/receipt/NDC-X"]) {
+    it(`${path} is public`, () => {
+      renderAt(path, <App />);
+      expect(screen.getByTestId("where").textContent).toBe(path);
+    });
+  }
+
+  it("the header hides Donate while the compliance gate is closed or unknown", () => {
+    renderAt("/", <App />);
+    expect(screen.queryByRole("link", { name: /Donate/ })).toBeNull();
+  });
+});
+
 describe("setup-profile route", () => {
   it("requires sign-in", () => {
     renderAt("/setup-profile", <App />);

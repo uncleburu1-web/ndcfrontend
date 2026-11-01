@@ -46,6 +46,8 @@ export interface RequestOptions {
   anonymous?: boolean;
   /** Cancel when the caller no longer needs the response (e.g. filters changed). */
   signal?: AbortSignal;
+  /** "blob" for file downloads (e.g. the admin CSV export); default JSON. */
+  responseType?: "json" | "blob";
 }
 
 const NETWORK_ERROR = new ApiError({
@@ -102,7 +104,8 @@ export function createApiClient(opts: ApiClientOptions) {
       if (err.status === 503 && err.code === "auth_unavailable") opts.onAuthUnavailable?.();
       throw err;
     }
-    return (res.status === 204 ? undefined : await res.json()) as T;
+    if (res.status === 204) return undefined as T;
+    return (options.responseType === "blob" ? await res.blob() : await res.json()) as T;
   };
 }
 

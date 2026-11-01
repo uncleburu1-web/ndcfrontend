@@ -4,7 +4,9 @@
  */
 import { Show, UserButton } from "@clerk/react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { isFinanceViewer } from "../../auth/guards";
 import { useMe, useSessionIssue } from "../../auth/session";
+import { DonationConfigProvider, useDonationConfig } from "../../donations/DonationConfigProvider";
 import { FollowProvider } from "../../follows/FollowProvider";
 import { Banner, Button, Icon, SiteHeader } from "../ui";
 
@@ -30,6 +32,7 @@ function AccountArea() {
         <UserButton userProfileUrl="/account">
           <UserButton.MenuItems>
             <UserButton.Link label="Following" labelIcon={<Icon name="heart" size={16} />} href="/following" />
+            <UserButton.Link label="My donations" labelIcon={<Icon name="inbox" size={16} />} href="/my-donations" />
           </UserButton.MenuItems>
         </UserButton>
       </Show>
@@ -70,16 +73,18 @@ function SessionBanners() {
   return null;
 }
 
-export default function AppLayout() {
+function Chrome() {
   const path = useLocation().pathname;
   const { me } = useMe();
-  // System admins also get a link to the admin area (the backend still enforces access).
-  const links = me?.is_system_admin ? [...NAV, { label: "Admin", href: "/admin/candidates" }] : NAV;
+  const { config } = useDonationConfig();
+  // Admin link: system admins land on candidates; finance officers on donations (the backend still enforces access).
+  const adminHref = me?.is_system_admin ? "/admin/candidates" : isFinanceViewer(me) ? "/admin/donations" : null;
+  const links = adminHref ? [...NAV, { label: "Admin", href: adminHref }] : NAV;
   return (
-    <FollowProvider>
+    <>
       <SiteHeader
-        links={links.map((l) => ({ ...l, current: path.startsWith(l.href) }))}
-        donateHref="/donate"
+        links={links.map((l) => ({ ...l, current: l.label === "Admin" ? path.startsWith("/admin") : path.startsWith(l.href) }))}
+        donateHref={config.open ? "/donate" : undefined}
         joinHref="/join"
         account={<AccountArea />}
       />
@@ -87,6 +92,16 @@ export default function AppLayout() {
       <main id="main">
         <Outlet />
       </main>
-    </FollowProvider>
+    </>
+  );
+}
+
+export default function AppLayout() {
+  return (
+    <DonationConfigProvider>
+      <FollowProvider>
+        <Chrome />
+      </FollowProvider>
+    </DonationConfigProvider>
   );
 }

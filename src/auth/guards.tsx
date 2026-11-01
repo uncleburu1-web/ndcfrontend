@@ -86,3 +86,30 @@ export function RequireSystemAdmin({ children }: { children?: ReactNode }) {
   }
   return children ? <>{children}</> : <Outlet />;
 }
+
+/** Donation records (spec 05 §7.2): system admins and finance officers. The backend enforces it too. */
+export function isFinanceViewer(me: { is_system_admin: boolean; roles: { role: string }[] } | null) {
+  return Boolean(me && (me.is_system_admin || me.roles.some((r) => r.role === "finance_officer")));
+}
+
+export function RequireFinanceViewer({ children }: { children?: ReactNode }) {
+  const { me, status, error, refresh } = useMe();
+  if (status === "error") {
+    return (
+      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+        {error?.message}
+      </Banner>
+    );
+  }
+  if (!me) return <Pending label="Loading your account" />;
+  if (!isFinanceViewer(me)) {
+    return (
+      <div className="page-shell">
+        <EmptyState icon="shield" title="You don’t have access to this page">
+          Donation records are for NDCConnect administrators and party finance officers.
+        </EmptyState>
+      </div>
+    );
+  }
+  return children ? <>{children}</> : <Outlet />;
+}

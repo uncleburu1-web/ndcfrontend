@@ -1,0 +1,106 @@
+/* /finance — spec 05 §4.5. Tokens only. */
+.finance-page {
+  max-width: var(--bp-lg);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  display: grid;
+  gap: var(--space-6);
+}
+.finance-page__head h1 {
+  margin: 0;
+}
+.finance-page__lead {
+  margin: var(--space-2) 0 0;
+  color: var(--text-muted);
+  max-width: 46rem;
+}
+.finance-totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-4);
+}
+.finance-total {
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--brand-bg);
+  border-radius: var(--radius-md);
+}
+.finance-total p {
+  margin: 0;
+}
+.finance-total__label {
+  color: var(--text-muted);
+  font-weight: var(--weight-label);
+}
+.finance-total__value {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-heading);
+}
+.finance-total__sub {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.finance-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-end;
+}
+.finance-filters__chip {
+  margin: 0;
+}
+.finance-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.finance-table th,
+.finance-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.finance-table thead th {
+  background: var(--surface-page);
+  font-size: var(--text-sm);
+}
+.finance-table__amount {
+  font-weight: var(--weight-label);
+  white-space: nowrap;
+}
+/* Phones: each row becomes a small card; labels come from data-label. */
+@media (max-width: 639px) {
+  .finance-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .finance-table,
+  .finance-table tbody,
+  .finance-table tr,
+  .finance-table td {
+    display: block;
+    width: 100%;
+  }
+  .finance-table tr {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .finance-table td {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-4);
+    border: 0;
+  }
+  .finance-table td::before {
+    content: attr(data-label);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+}

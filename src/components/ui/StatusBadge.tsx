@@ -49,6 +49,15 @@ const STATUS_SETS = {
     verified: ["Verified", "success"],
     not_verified: ["Not verified", "neutral"],
   },
+  donation: {
+    initiated: ["Started", "neutral"],
+    pending: ["Pending", "warning"],
+    successful: ["Successful", "success"],
+    failed: ["Failed", "error"],
+    abandoned: ["Abandoned", "neutral"],
+    review: ["Under review", "warning"],
+    refunded: ["Refunded", "neutral"],
+  },
 } as const satisfies Record<string, Record<string, readonly [string, Tone]>>;
 
 export type StatusSet = keyof typeof STATUS_SETS;

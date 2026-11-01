@@ -5,7 +5,7 @@
  * - banners for "session ended" and "sign-in unavailable"
  */
 import { useAuth, useClerk } from "@clerk/react";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiError, createApiClient, type ApiRequest } from "./api";
 
@@ -47,20 +47,30 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [meError, setMeError] = useState<ApiError | null>(null);
   const [issue, setIssue] = useState<SessionIssue>(null);
 
+  // One API client for the whole session. Clerk's getToken and React Router's navigate can change
+  // identity between renders (navigate does on every route change); reading them through refs keeps
+  // `api` stable, so effects that depend on it don't re-run or restart in-flight requests.
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
+  const signOutRef = useRef(signOut);
+  signOutRef.current = signOut;
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
+
   const api = useMemo(
     () =>
       createApiClient({
         baseUrl: API_BASE_URL,
-        getToken: (o) => getToken(o),
+        getToken: (o) => getTokenRef.current(o),
         onSessionEnded: () => setIssue("session-ended"),
         onAuthUnavailable: () => setIssue("auth-unavailable"),
         onDeactivated: () => {
           setMe(null);
-          void signOut({ redirectUrl: "/account-deactivated" });
-          navigate("/account-deactivated", { replace: true });
+          void signOutRef.current({ redirectUrl: "/account-deactivated" });
+          navigateRef.current("/account-deactivated", { replace: true });
         },
       }),
-    [getToken, signOut, navigate]
+    []
   );
 
   const refreshMe = useCallback(async () => {

@@ -8,6 +8,7 @@ import { Banner, Button, EmptyState, Pagination, Select, Skeleton, StatusBadge, 
 import { formatDate } from "../../../lib/format";
 import { POSITIONS, STATES } from "../../../lib/nigeria";
 import "./admin.css";
+import { AdminNav } from "../AdminNav";
 
 export default function AdminCandidatesPage() {
   const api = useApi();
@@ -34,6 +35,7 @@ export default function AdminCandidatesPage() {
 
   return (
     <div className="adm-page">
+      <AdminNav current="candidates" />
       <header className="adm-page__head">
         <div>
           <h1>Candidates</h1>

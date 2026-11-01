@@ -22,7 +22,8 @@ interface NavLink {
 
 interface SiteHeaderProps {
   links: NavLink[];
-  donateHref: string;
+  /** Omit to hide Donate everywhere — e.g. while donations are closed (spec 05 §4.7). */
+  donateHref?: string;
   joinHref: string;
   /** Account area (sign-in button or user menu). */
   account?: ReactNode;
@@ -60,7 +61,7 @@ export function SiteHeader({ links, donateHref, joinHref, account }: SiteHeaderP
             <Button variant="secondary" href={joinHref}>
               Join NDC
             </Button>
-            <DonateButton href={donateHref} />
+            {donateHref && <DonateButton href={donateHref} />}
           </div>
 
           <button
@@ -93,7 +94,7 @@ export function SiteHeader({ links, donateHref, joinHref, account }: SiteHeaderP
         <Button variant="secondary" href={joinHref} fullWidth>
           Join NDC
         </Button>
-        <DonateButton href={donateHref} fullWidth />
+        {donateHref && <DonateButton href={donateHref} fullWidth />}
       </div>
     </>
   );
