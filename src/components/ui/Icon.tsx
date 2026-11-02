@@ -77,6 +77,18 @@ const PATHS = {
     </>
   ),
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+  search: (
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-4-4" />
+    </>
+  ),
+  mapPin: (
+    <>
+      <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
+      <circle cx="12" cy="9.5" r="2.5" />
+    </>
+  ),
 } as const;
 
 export type IconName = keyof typeof PATHS;

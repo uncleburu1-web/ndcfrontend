@@ -11,6 +11,8 @@ import type { CandidateSummary, Paginated, PositionsResponse } from "../../candi
 import { useRequest } from "../../candidates/useRequest";
 import { Banner, Button, CandidateCard, CandidateCardSkeleton, EmptyState, Pagination, Select, TextField } from "../../components/ui";
 import { POSITIONS, STATES } from "../../lib/nigeria";
+import { HomeStateChip } from "../../search/HomeStateChip";
+import { useHomeState } from "../../search/useHomeState";
 import "./candidates.css";
 
 const PAGE_SIZE = 20;
@@ -29,7 +31,8 @@ export default function CandidatesPage() {
   const api = useApi();
   const [params, setParams] = useSearchParams();
   const position = params.get("position") ?? "";
-  const state = params.get("state") ?? "";
+  const home = useHomeState(params.get("state") ?? "");
+  const state = home.state;
   const q = params.get("q") ?? "";
   const page = Math.max(1, Number(params.get("page") ?? 1) || 1);
   const [search, setSearch] = useState(q);
@@ -40,6 +43,7 @@ export default function CandidatesPage() {
   }, []);
 
   const update = (changes: Record<string, string>) => {
+    if ("state" in changes && !changes.state && home.fromHome) home.dismiss();
     const next = new URLSearchParams(params);
     for (const [k, v] of Object.entries(changes)) {
       if (v) next.set(k, v);
@@ -116,6 +120,7 @@ export default function CandidatesPage() {
           </Button>
         </div>
       </form>
+      {home.fromHome && <HomeStateChip state={home.home} onClear={home.dismiss} />}
 
       {list.error ? (
         <Banner tone="error" title="We couldn’t load candidates" action={<Button variant="secondary" size="sm" onClick={list.retry}>Try again</Button>}>
@@ -131,7 +136,7 @@ export default function CandidatesPage() {
       ) : list.data && list.data.results.length === 0 ? (
         <EmptyState
           title={filtered ? "No published candidates match these filters" : "No candidates have been published yet"}
-          action={filtered ? <Button variant="secondary" onClick={() => setParams(new URLSearchParams())}>Clear filters</Button> : undefined}
+          action={filtered ? <Button variant="secondary" onClick={() => { if (home.fromHome) home.dismiss(); setParams(new URLSearchParams()); }}>Clear filters</Button> : undefined}
         >
           {filtered ? "Try another office or state, or clear the search." : "Check back soon."}
         </EmptyState>

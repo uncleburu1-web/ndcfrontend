@@ -7,6 +7,8 @@ import { useRequest } from "../../candidates/useRequest";
 import { Banner, Button, EmptyState, Pagination, Select, Skeleton } from "../../components/ui";
 import { formatDate } from "../../lib/format";
 import { STATES } from "../../lib/nigeria";
+import { HomeStateChip } from "../../search/HomeStateChip";
+import { useHomeState } from "../../search/useHomeState";
 import { ArticleImage } from "../../news/ArticleImage";
 import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
 import { CandidatePostItem } from "../../posts/CandidatePostItem";
@@ -41,7 +43,9 @@ export default function NewsPage() {
   const { isSignedIn } = useAuth();
   const [params, setParams] = useSearchParams();
   const source = params.get("source") ?? "";
-  const state = params.get("state") ?? "";
+  const paramState = params.get("state") ?? "";
+  const home = useHomeState(paramState); // spec 12 §4.5: home state only pre-fills, with a chip
+  const state = home.state;
   const page = Math.max(1, Number(params.get("page") ?? 1) || 1);
   const qs = new URLSearchParams();
   if (source) qs.set("source", source);
@@ -53,6 +57,7 @@ export default function NewsPage() {
     document.title = "News | NDCConnect";
   }, []);
   const set = (changes: Record<string, string>) => {
+    if ("state" in changes && !changes.state && home.fromHome) home.dismiss();
     const next = new URLSearchParams(params);
     for (const [k, v] of Object.entries(changes)) (v ? next.set(k, v) : next.delete(k));
     if (!("page" in changes)) next.delete("page");
@@ -61,7 +66,7 @@ export default function NewsPage() {
   const tabHref = (s: string) => {
     const next = new URLSearchParams();
     if (s) next.set("source", s);
-    if (state) next.set("state", state);
+    if (paramState) next.set("state", paramState);
     return `/news${next.toString() ? `?${next}` : ""}`;
   };
   const submitHref = isSignedIn ? "/news/submit" : "/sign-in?redirect_url=%2Fnews%2Fsubmit";
@@ -88,6 +93,7 @@ export default function NewsPage() {
             options={[{ value: "", label: "All of Nigeria" }, ...STATES]} />
         </div>
       </div>
+      {home.fromHome && <HomeStateChip state={home.home} onClear={home.dismiss} />}
 
       {res.error ? (
         <Banner tone="error" title="We couldn’t load the news" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>

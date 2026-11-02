@@ -22,6 +22,8 @@ export interface Me {
   just_completed?: boolean;
   /** Spec 11: admin areas the backend says this account can open ("overview", "news", "team"…). Empty = not an admin. */
   admin_areas?: string[];
+  /** Spec 12: optional, private; only pre-fills state filters. "" = not set. */
+  home_state?: string;
 }
 
 type MeStatus = "idle" | "loading" | "ready" | "error";

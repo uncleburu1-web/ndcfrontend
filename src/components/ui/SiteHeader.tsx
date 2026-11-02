@@ -27,9 +27,11 @@ interface SiteHeaderProps {
   joinHref: string;
   /** Account area (sign-in button or user menu). */
   account?: ReactNode;
+  /** Search box or button (spec 12 §4.1). Shown at every width. */
+  search?: ReactNode;
 }
 
-export function SiteHeader({ links, donateHref, joinHref, account }: SiteHeaderProps) {
+export function SiteHeader({ links, donateHref, joinHref, account, search }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
 
@@ -55,6 +57,8 @@ export function SiteHeader({ links, donateHref, joinHref, account }: SiteHeaderP
               ))}
             </ul>
           </nav>
+
+          {search && <div className="ds-header__search">{search}</div>}
 
           <div className="ds-header__actions">
             {account}

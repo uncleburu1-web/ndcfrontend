@@ -1,0 +1,281 @@
+/* Search and discovery (spec 12 §8). Tokens only. */
+.search-mark {
+  padding: 0 1px;
+  border-radius: var(--radius-sm);
+  background: var(--highlight-bg);
+  color: var(--highlight-fg);
+}
+
+/* Header search: a button; on wide screens it opens a panel with the field and suggestions. */
+.hs {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.hs__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  padding: 0;
+  border: 1.5px solid var(--brand-fg-muted);
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--brand-fg);
+  cursor: pointer;
+}
+.hs__button:hover,
+.hs__button[aria-expanded="true"] {
+  background: var(--brand-bg-hover);
+}
+.hs__button--wide {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .hs__button--wide {
+    display: inline-flex;
+  }
+  .hs__button--narrow {
+    display: none;
+  }
+}
+.hs__panel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 50;
+  width: 26rem;
+  max-width: calc(100vw - var(--space-8));
+  padding: var(--space-3);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px var(--color-shadow);
+  --focus-ring: var(--color-ink); /* the panel is white: use the normal ink ring, not the header's white one */
+}
+.hs__field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.hs__icon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.hs__input {
+  width: 100%;
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-3) 0 calc(var(--space-3) * 2 + 18px);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+.hs__input::placeholder {
+  color: var(--text-muted);
+}
+.hs__list {
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.hs__opt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--text-sm);
+}
+.hs__opt span {
+  display: grid;
+}
+.hs__opt--active,
+.hs__opt:hover {
+  background: var(--surface-brand-tint);
+}
+.hs__meta {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+.hs__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+}
+.hs__foot a {
+  color: var(--text-brand);
+}
+
+/* Home-state chip */
+.home-chip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-brand-tint);
+  font-size: var(--text-sm);
+}
+.home-chip__clear {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-brand);
+  font: inherit;
+  font-weight: var(--weight-label);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* /search */
+.search-page,
+.states-page {
+  max-width: var(--bp-md);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+}
+.search-page h1,
+.states-page h1 {
+  margin: 0 0 var(--space-4);
+}
+.search-form {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-end;
+  margin-bottom: var(--space-4);
+}
+.search-form > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+.search-form .ds-button {
+  margin-bottom: var(--space-6); /* line up with the input, as on /candidates */
+}
+.search-tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.search-tabs a {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  color: var(--text-muted);
+  font-weight: var(--weight-label);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.search-tabs a[aria-current="page"] {
+  color: var(--text-brand);
+  border-bottom-color: var(--brand-bg);
+}
+.search-filters {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+@media (min-width: 640px) {
+  .search-filters {
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  }
+}
+.search-section {
+  margin-bottom: var(--space-8);
+}
+.search-section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.search-section__head h2 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-xl);
+}
+.search-item h3 {
+  margin: var(--space-1) 0;
+  font-size: var(--text-lg);
+}
+.search-snippet {
+  margin: 0;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.search-tips {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-6);
+}
+.search-dym {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-lg);
+}
+
+/* /states */
+.states-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 640px) {
+  .states-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .states-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.states-list a {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+}
+.states-list a:hover {
+  border-color: var(--brand-bg);
+}
+.states-list strong {
+  color: var(--text-brand);
+}
+.states-list span {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+.state-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+.state-head h1 {
+  margin: 0;
+}
+.state-group {
+  margin-bottom: var(--space-6);
+}
+.state-group h3 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-lg);
+}

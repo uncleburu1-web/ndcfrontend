@@ -7,7 +7,7 @@ import { ToastProvider } from "../../components/ui";
 
 const h = vi.hoisted(() => ({ api: vi.fn(), flags: { donations: false } }));
 vi.mock("@clerk/react", async () => (await import("../../test/clerkMock")).clerkMockModule);
-vi.mock("../../auth/session", () => ({ useApi: () => h.api }));
+vi.mock("../../auth/session", () => ({ useApi: () => h.api, useMe: () => ({ me: null, status: "idle", error: null, setMe: () => {}, refresh: () => {} }) }));
 vi.mock("../../donations/DonationConfigProvider", () => ({
   useDonationConfig: () => ({ config: { open: h.flags.donations, min_kobo: 50000, max_per_payment_kobo: 500000000, presets_kobo: [] }, loading: false }),
 }));

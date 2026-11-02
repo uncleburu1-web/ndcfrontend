@@ -9,11 +9,13 @@ import { useMe, useSessionIssue } from "../../auth/session";
 import { DonationConfigProvider, useDonationConfig } from "../../donations/DonationConfigProvider";
 import { FollowProvider } from "../../follows/FollowProvider";
 import { NotificationBell } from "../../notifications/NotificationBell";
+import { HeaderSearch } from "../../search/HeaderSearch";
 import { Banner, Button, Icon, SiteHeader } from "../ui";
 
 const NAV = [
   { label: "Candidates", href: "/candidates" },
   { label: "News", href: "/news" },
+  { label: "States", href: "/states" },
   { label: "Communities", href: "/communities" },
   { label: "Finance", href: "/finance" },
   { label: "PVC", href: "/pvc" },
@@ -40,6 +42,7 @@ function AccountArea() {
             <UserButton.Link label="My membership" labelIcon={<Icon name="user" size={16} />} href="/join" />
             <UserButton.Link label="My news" labelIcon={<Icon name="inbox" size={16} />} href="/news/mine" />
             {isCampaignAccount(me) && <UserButton.Link label="My campaign" labelIcon={<Icon name="bell" size={16} />} href="/campaign" />}
+            {me?.home_state && <UserButton.Link label="Your state" labelIcon={<Icon name="mapPin" size={16} />} href={`/states/${me.home_state}`} />}
             <UserButton.Link label={verified ? "Verified voter" : "Verify your PVC"} labelIcon={<Icon name={verified ? "verified" : "shield"} size={16} />} href="/pvc" />
           </UserButton.MenuItems>
         </UserButton>
@@ -96,6 +99,7 @@ function Chrome() {
         donateHref={config.open ? "/donate" : undefined}
         joinHref="/join"
         account={<AccountArea />}
+        search={<HeaderSearch />}
       />
       <SessionBanners />
       <main id="main">

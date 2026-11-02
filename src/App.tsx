@@ -52,6 +52,9 @@ import AdminPostsPage from "./pages/admin/posts/AdminPostsPage";
 import CampaignCandidatePage from "./pages/campaign/CampaignCandidatePage";
 import CampaignHomePage from "./pages/campaign/CampaignHomePage";
 import CandidatePostPage from "./pages/candidates/CandidatePostPage";
+import SearchPage from "./pages/search/SearchPage";
+import StatePage from "./pages/states/StatePage";
+import StatesPage from "./pages/states/StatesPage";
 import ArticlePage from "./pages/news/ArticlePage";
 import MyNewsPage from "./pages/news/MyNewsPage";
 import NewsPage from "./pages/news/NewsPage";
@@ -112,6 +115,10 @@ export default function App() {
         <Route path="candidates" element={<CandidatesPage />} />
         <Route path="candidates/:slug" element={<CandidateProfilePage />} />
         <Route path="candidates/:slug/posts/:id" element={<CandidatePostPage />} />
+        {/* Search and discovery (spec 12): public, anonymous */}
+        <Route path="search" element={<SearchPage />} />
+        <Route path="states" element={<StatesPage />} />
+        <Route path="states/:state" element={<StatePage />} />
         {/* Donations (spec 05): guests welcome; the page itself says when donations aren't open */}
         <Route path="donate" element={<DonatePage />} />
         <Route path="donate/complete" element={<DonateCompletePage />} />

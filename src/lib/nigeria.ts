@@ -44,3 +44,5 @@ export const STATES: { value: string; label: string }[] = [
   ["ogun", "Ogun"], ["ondo", "Ondo"], ["osun", "Osun"], ["oyo", "Oyo"], ["plateau", "Plateau"], ["rivers", "Rivers"],
   ["sokoto", "Sokoto"], ["taraba", "Taraba"], ["yobe", "Yobe"], ["zamfara", "Zamfara"], ["fct", "Federal Capital Territory"],
 ].map(([value, label]) => ({ value, label }));
+
+export const stateLabel = (value: string) => STATES.find((s) => s.value === value)?.label ?? "";

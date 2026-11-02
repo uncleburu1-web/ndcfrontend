@@ -33,6 +33,7 @@
   --color-warning-50: #fbf0df; /* warning on tint 4.81:1 */
   --color-error-50: #fbeae8; /* error on tint 5.61:1 */
   --color-info-50: #e7eff9; /* info on tint 5.57:1 */
+  --color-highlight: #fff0a0; /* search matches; ink on it ≈ 15:1 (spec 12 §8.1) */
 
   --color-overlay: rgba(28, 27, 26, 0.55); /* modal/sheet scrim (ink @ 55%) */
   --color-shadow: rgba(28, 27, 26, 0.18);
@@ -52,6 +53,8 @@
   --surface-brand-tint: var(--color-blue-50); /* brand/navigation highlights */
   --surface-accent-tint: var(--color-red-50); /* action highlights, candidate posts */
   --text: var(--color-ink);
+  --highlight-bg: var(--color-highlight);
+  --highlight-fg: var(--color-ink);
   --text-muted: var(--color-ink-muted);
   --text-on-brand: var(--color-white); /* on blue AND on red fills */
   --text-brand: var(--color-blue-800);
