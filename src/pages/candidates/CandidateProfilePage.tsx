@@ -12,6 +12,7 @@ import { CandidateVote } from "../../follows/CandidateVote";
 import { useFollows } from "../../follows/FollowProvider";
 import { Avatar, Banner, Button, DonateButton, EmptyState, Icon, Pagination, Skeleton, Tabs } from "../../components/ui";
 import { CandidatePostItem } from "../../posts/CandidatePostItem";
+import { ReportDialog } from "../../news/ReportDialog";
 import type { PostSummary } from "../../posts/types";
 import "../../news/news.css";
 import "./candidates.css";
@@ -46,6 +47,7 @@ export default function CandidateProfilePage() {
   );
 
   const [tab, setTab] = useState("about");
+  const [reporting, setReporting] = useState(false);
   const [postPage, setPostPage] = useState(1);
   const posts = usePosts(slug, postPage);
   const postCount = posts.data?.count ?? 0;
@@ -136,6 +138,11 @@ export default function CandidateProfilePage() {
       ) : (
         <div className="cand-about"><About c={c} /></div>
       )}
+      <p className="cand-report">
+        <Button variant="ghost" size="sm" onClick={() => setReporting(true)}>Report a problem with this profile</Button>
+      </p>
+      <ReportDialog variant="profile" path={`/candidates/${encodeURIComponent(c.slug)}/report/`} title="Report a problem with this profile"
+        open={reporting} onClose={() => setReporting(false)} />
     </article>
   );
 }

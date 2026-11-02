@@ -105,6 +105,6 @@ export const ROLE_LABELS: Record<string, string> = {
   pvc_officer: "PVC officer",
   membership_officer: "Membership officer",
   finance_officer: "Finance officer",
-  moderator: "Community moderator",
+  moderator: "Moderator",
   candidate: "Candidate link",
 };

@@ -1,6 +1,6 @@
 /** /admin/posts — system admins oversee candidate posts after publication (spec 09 §4.4). */
 import { useEffect } from "react";
-import { Link, NavLink, useSearchParams } from "react-router-dom";
+import { Link, Navigate, NavLink, useSearchParams } from "react-router-dom";
 import { useApi } from "../../../auth/session";
 import { useRequest } from "../../../candidates/useRequest";
 import { Banner, Button, EmptyState, Pagination, Skeleton, StatusBadge } from "../../../components/ui";
@@ -13,7 +13,7 @@ import "../membership/admin-membership.css";
 interface Page { count: number; results: AdminPost[]; counts: { reported: number; oldest_open_report: string | null } }
 const TABS = [["published", "Published"], ["reported", "Reported"], ["removed", "Removed"], ["deleted", "Deleted"]] as const;
 
-export default function AdminPostsPage() {
+function AdminPostsList() {
   const api = useApi();
   const [params, setParams] = useSearchParams();
   const tab = params.get("tab") ?? "published";
@@ -78,4 +78,11 @@ export default function AdminPostsPage() {
       ) : null}
     </div>
   );
+}
+
+/** Spec 13 §8.2: reported items live in the moderation queue now. */
+export default function AdminPostsPage() {
+  const [params] = useSearchParams();
+  if (params.get("tab") === "reported") return <Navigate to="/admin/moderation?type=posts" replace />;
+  return <AdminPostsList />;
 }

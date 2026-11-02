@@ -10,6 +10,7 @@ import { ArticleBody } from "../../../news/ArticleBody";
 import { ArticleImage } from "../../../news/ArticleImage";
 import { SourceBadges } from "../../../news/SourceBadges";
 import { REJECT_REASONS, type AdminArticle } from "../../../news/types";
+import { CaseLink, RuleSelect } from "../../../moderation/CaseLink";
 import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "../donations/admin-donations.css";
@@ -36,8 +37,7 @@ export default function AdminNewsDetailPage() {
   const [preset, setPreset] = useState(REJECT_REASONS[0]);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState("");
-  const [dismissing, setDismissing] = useState<string | null>(null);
-  const [note, setNote] = useState("");
+  const [rule, setRule] = useState("");
 
   useEffect(() => setA(res.data), [res.data]);
   useEffect(() => {
@@ -58,24 +58,10 @@ export default function AdminNewsDetailPage() {
       setBusy("");
     }
   };
-  const dismiss = async () => {
-    if (!dismissing) return;
-    try {
-      setA(await api<AdminArticle>(`/admin/news/reports/${dismissing}/dismiss/`, { method: "POST", body: { note } }));
-      toast.show({ tone: "success", message: "Report dismissed." });
-    } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Couldn’t dismiss." });
-    } finally {
-      setDismissing(null);
-      setNote("");
-    }
-  };
-
   if (res.error) return <div className="adm-page"><AdminNav current="news" /><EmptyState title="Article not found" action={<Button href="/admin/news">Back to the queue</Button>} /></div>;
   if (!a) return <div className="adm-page"><AdminNav current="news" /><Skeleton width="100%" height={240} /></div>;
 
   const finalReason = modal === "reject" ? (preset === "Other" ? reason.trim() : [preset, reason.trim()].filter(Boolean).join(" ")) : reason.trim();
-  const openReports = (a.reports ?? []).filter((r) => r.status === "open");
   return (
     <div className="adm-page">
       <AdminNav current="news" />
@@ -101,7 +87,7 @@ export default function AdminNewsDetailPage() {
       </header>
       {a.is_own && <Banner tone="info">This is your own submission. Another reviewer has to decide it.</Banner>}
       {a.decision_reason && a.status === "rejected" && <Banner tone="error" title="Rejected">{a.decision_reason}</Banner>}
-      {a.removed_reason && a.status === "removed" && <Banner tone="warning" title="Removed">{a.removed_reason}</Banner>}
+      {a.removed_reason && a.status === "removed" && <Banner tone="warning" title={a.removed_rule ? `Removed under ${a.removed_rule}` : "Removed"}>{a.removed_reason}</Banner>}
 
       <div className="adm-donation-grid">
         <section className="adm-panel" aria-labelledby="preview-h">
@@ -125,20 +111,8 @@ export default function AdminNewsDetailPage() {
               <ul className="adm-declarations">{CHECKLIST.map((c) => <li key={c}>{c}</li>)}</ul>
             </>
           )}
-          <h2>Reports{openReports.length ? ` (${openReports.length} open)` : ""}</h2>
-          {!(a.reports ?? []).length ? <p className="ds-field__hint">No reports.</p> : (
-            <ul className="adm-history">
-              {(a.reports ?? []).map((r) => (
-                <li key={r.id}>
-                  <strong>{r.reason_label}</strong> · {formatDate(r.created_at, { withTime: true })} · {r.status}
-                  {r.details && <> — {r.details}</>}
-                  {(r.reporter_email || r.contact_email) && <> · {r.reporter_email ?? r.contact_email}</>}
-                  {r.resolution_note && <> · note: {r.resolution_note}</>}
-                  {r.status === "open" && !a.is_own && <> <Button size="sm" variant="ghost" onClick={() => setDismissing(r.id)}>Dismiss</Button></>}
-                </li>
-              ))}
-            </ul>
-          )}
+          <h2>Reports</h2>
+          <CaseLink c={a.case} />
           <h2>History</h2>
           <ol className="adm-history">
             {(a.events ?? []).map((e, i) => (
@@ -150,18 +124,15 @@ export default function AdminNewsDetailPage() {
 
       <Modal open={Boolean(modal)} onClose={() => setModal(null)} title={modal === "reject" ? "Reject this article?" : "Remove this article?"}
         footer={<><Button variant="secondary" onClick={() => setModal(null)}>Go back</Button>
-          <Button variant="danger" disabled={!finalReason} loading={busy === modal} onClick={() => modal && void act(modal, { reason: finalReason })}>
+          <Button variant="danger" disabled={!finalReason || (modal === "remove" && !rule)} loading={busy === modal}
+            onClick={() => modal && void act(modal, modal === "remove" ? { reason: finalReason, rule, note_to_author: finalReason } : { reason: finalReason })}>
             {modal === "reject" ? "Reject article" : "Remove article"}
           </Button></>}>
-        <p>{modal === "reject" ? "The author sees this reason and can edit and resubmit." : "It disappears from NDCConnect. Open reports are marked as actioned."}</p>
+        <p>{modal === "reject" ? "The author sees this reason and can edit and resubmit." : "It disappears from NDCConnect and its page shows the rule it broke. The author is told why and can appeal. Open reports are marked as actioned."}</p>
+        {modal === "remove" && <RuleSelect value={rule} onChange={setRule} />}
         {modal === "reject" && <Select label="Reason" value={preset} onChange={(e) => setPreset(e.target.value)} options={REJECT_REASONS.map((r) => ({ value: r, label: r }))} />}
         <TextArea label={modal === "reject" && preset !== "Other" ? "More detail (optional)" : "Reason"} required={modal !== "reject" || preset === "Other"}
           rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
-      </Modal>
-      <Modal open={Boolean(dismissing)} onClose={() => setDismissing(null)} title="Dismiss this report?"
-        footer={<><Button variant="secondary" onClick={() => setDismissing(null)}>Go back</Button><Button onClick={() => void dismiss()}>Dismiss report</Button></>}>
-        <p>The article stays up.</p>
-        <TextArea label="Note (optional)" rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
       </Modal>
     </div>
   );

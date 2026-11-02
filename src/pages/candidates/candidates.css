@@ -197,3 +197,10 @@
 .cand-about__empty {
   color: var(--text-muted);
 }
+
+/* Spec 13: profile reports */
+.cand-report {
+  max-width: 46rem;
+  margin: calc(-1 * var(--space-12)) auto var(--space-8);
+  padding: 0 var(--space-4);
+}

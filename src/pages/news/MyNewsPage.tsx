@@ -7,6 +7,7 @@ import { useRequest } from "../../candidates/useRequest";
 import { Banner, Button, EmptyState, Modal, Skeleton, StatusBadge, useToast } from "../../components/ui";
 import { formatDate } from "../../lib/format";
 import { articlePath, type MyArticle } from "../../news/types";
+import { RemovalNotice, StandingBanners, useAuthorView } from "../../moderation/AuthorStanding";
 import "../../news/news.css";
 
 export default function MyNewsPage() {
@@ -15,6 +16,8 @@ export default function MyNewsPage() {
   const res = useRequest("my-news", (signal) => api<{ count: number; results: MyArticle[] }>("/me/news/", { signal }));
   const [items, setItems] = useState<MyArticle[] | null>(null);
   const [withdrawing, setWithdrawing] = useState<MyArticle | null>(null);
+  const standing = useAuthorView();
+  const pausedUntil = standing.data?.paused_until ?? null;
 
   useEffect(() => setItems(res.data?.results ?? null), [res.data]);
   useEffect(() => {
@@ -46,14 +49,22 @@ export default function MyNewsPage() {
     <div className="news-form-page">
       <header className="news-page__head">
         <h1>My news</h1>
-        <Button href="/news/submit" variant="secondary">Submit news</Button>
+        {pausedUntil ? (
+          <span className="mod-meta">
+            <Button variant="secondary" disabled aria-describedby="paused-why">Submit news</Button>
+            <span id="paused-why" className="visually-hidden">Paused until {formatDate(pausedUntil)}</span>
+          </span>
+        ) : (
+          <Button href="/news/submit" variant="secondary">Submit news</Button>
+        )}
       </header>
+      {standing.data && <StandingBanners view={standing.data} />}
       {res.error ? (
         <Banner tone="error" title="We couldn’t load your submissions" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>{res.error.message}</Banner>
       ) : !items ? (
         <Skeleton width="100%" height={160} />
       ) : items.length === 0 ? (
-        <EmptyState title="You haven’t submitted any news yet" action={<Button href="/news/submit">Submit news</Button>} />
+        <EmptyState title="You haven’t submitted any news yet" action={pausedUntil ? undefined : <Button href="/news/submit">Submit news</Button>} />
       ) : (
         <ul className="mine-list">
           {items.map((a) => (
@@ -65,10 +76,13 @@ export default function MyNewsPage() {
               <h2>{a.status === "successful" ? <Link to={articlePath(a)}>{a.title}</Link> : a.title}</h2>
               <p className="news-meta">Submitted {formatDate(a.submitted_at ?? a.created_at)} · by {a.show_author_name ? "your name" : "a member"}</p>
               {a.status === "rejected" && <Banner tone="error" title="Why it wasn’t approved">{a.decision_reason}</Banner>}
-              {a.status === "removed" && <Banner tone="warning" title="Removed">{a.removed_reason}</Banner>}
+              {a.status === "removed" && (
+                <RemovalNotice removal={standing.data?.removals.find((r) => r.target_id === a.id)} fallbackReason={a.removed_reason}
+                  onChange={standing.retry} />
+              )}
               <div className="mine-item__actions">
-                {a.status === "pending" && <Button size="sm" variant="secondary" href={`/news/mine/${a.id}`}>Edit</Button>}
-                {a.status === "rejected" && <Button size="sm" href={`/news/mine/${a.id}`}>Edit and resubmit</Button>}
+                {a.status === "pending" && !pausedUntil && <Button size="sm" variant="secondary" href={`/news/mine/${a.id}`}>Edit</Button>}
+                {a.status === "rejected" && !pausedUntil && <Button size="sm" href={`/news/mine/${a.id}`}>Edit and resubmit</Button>}
                 {a.status === "successful" && <Button size="sm" variant="secondary" href={articlePath(a)}>View</Button>}
                 {["pending", "rejected", "successful"].includes(a.status) && (
                   <Button size="sm" variant="ghost" onClick={() => void byline(a, !a.show_author_name)}>

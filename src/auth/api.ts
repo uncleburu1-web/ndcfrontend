@@ -19,12 +19,17 @@ export class ApiError extends Error implements ApiErrorBody {
   status: number;
   code: string;
   fields: Record<string, string[]>;
+  /** Anything else the envelope carried, e.g. `until` (paused) or `rule` (410 removed, spec 13 §4.5). */
+  extra: Record<string, unknown>;
 
-  constructor(body: Partial<ApiErrorBody>) {
+  constructor(body: Partial<ApiErrorBody> & Record<string, unknown>) {
     super(body.message ?? "Something went wrong. Please try again.");
     this.status = body.status ?? 0;
     this.code = body.code ?? "error";
     this.fields = body.fields ?? {};
+    const { status: _s, code: _c, message: _m, fields: _f, ...rest } = body;
+    void _s; void _c; void _m; void _f;
+    this.extra = rest;
   }
 }
 
@@ -58,7 +63,7 @@ const NETWORK_ERROR = new ApiError({
 
 async function readError(res: Response): Promise<ApiError> {
   const data = await res.json().catch(() => null);
-  if (data && typeof data === "object" && "error" in data) return new ApiError(data.error as ApiErrorBody);
+  if (data && typeof data === "object" && "error" in data) return new ApiError(data.error as ApiErrorBody & Record<string, unknown>);
   return new ApiError({ status: res.status, code: "error", message: `Request failed (${res.status}).` });
 }
 

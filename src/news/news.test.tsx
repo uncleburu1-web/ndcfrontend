@@ -169,19 +169,21 @@ describe("article pages", () => {
   });
 
   it("reports privately, as a guest with optional email", async () => {
-    routes({ "/news/c1/": { ...community(), body: BODY, source_name: "", source_url: "" }, "POST /news/c1/report/": { ok: true } });
+    routes({ "/news/c1/": { ...community(), body: BODY, source_name: "", source_url: "" }, "POST /news/c1/report/": { reference: "RPT-7K2Q9M" } });
     renderAt("/news/community/c1");
     fireEvent.click(await screen.findByRole("button", { name: "Report" }));
     const dialog = screen.getByRole("dialog");
     expect(within(dialog).getByText(/Reports are private/)).toBeTruthy();
     const send = within(dialog).getByRole("button", { name: "Send report" }) as HTMLButtonElement;
     expect(send.disabled).toBe(true);
-    fireEvent.click(within(dialog).getByLabelText("False or misleading"));
+    fireEvent.click(within(dialog).getByLabelText("False or misleading (R4)"));
     fireEvent.change(within(dialog).getByLabelText(/Your email/), { target: { value: "me@example.com" } });
     fireEvent.click(send);
     await waitFor(() => expect(h.api).toHaveBeenCalledWith("/news/c1/report/",
       { method: "POST", body: { reason: "false", details: "", contact_email: "me@example.com" }, anonymous: true }));
-    expect(await screen.findByText("Thanks. Our reviewers will look at it.")).toBeTruthy();
+    expect(await screen.findByText("RPT-7K2Q9M")).toBeTruthy(); // spec 13: the reference, with Copy
+    expect(screen.getByRole("button", { name: "Copy" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Check a report" })).toBeTruthy();
   });
 
   it("ArticleBody never renders HTML", () => {
@@ -283,7 +285,7 @@ describe("review", () => {
   const adminItem = (over: Record<string, unknown> = {}) => ({ ...community(), body: BODY, source_name: "", source_url: "https://inec.example/x",
     status: "pending", status_label: "Pending", show_author_name: false, decision_reason: "", removed_reason: "", submitted_at: "2026-11-01T09:00:00Z",
     created_at: "2026-11-01T09:00:00Z", author_name: "Ada Obi", author_email: "ada@example.com", is_own: false, open_reports: 0, important: false,
-    removed_at: null, decided_at: null, events: [], reports: [], ...over });
+    removed_at: null, decided_at: null, events: [], case: null, ...over });
 
   it("is for news reviewers only", () => {
     clerkState.isSignedIn = true;
@@ -302,7 +304,7 @@ describe("review", () => {
     expect(h.api).toHaveBeenCalledWith("/admin/news/?status=pending", expect.anything());
   });
 
-  it("approve; reject with a preset reason; remove needs a reason", async () => {
+  it("approve; reject with a preset reason; remove needs a reason and a rule", async () => {
     clerkState.isSignedIn = true;
     h.me = REVIEWER;
     routes({ "/admin/news/c1/": adminItem(), "POST /admin/news/c1/approve/": adminItem({ status: "successful" }),
@@ -323,11 +325,14 @@ describe("review", () => {
     dialog = screen.getByRole("dialog");
     expect((within(dialog).getByRole("button", { name: "Remove article" }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.change(within(dialog).getByLabelText(/^Reason/), { target: { value: "Private" } });
+    expect((within(dialog).getByRole("button", { name: "Remove article" }) as HTMLButtonElement).disabled).toBe(true); // spec 13: rule required
+    fireEvent.change(within(dialog).getByLabelText(/Rule it broke/), { target: { value: "R5" } });
     fireEvent.click(within(dialog).getByRole("button", { name: "Remove article" }));
-    await waitFor(() => expect(h.api).toHaveBeenCalledWith("/admin/news/c1/remove/", { method: "POST", body: { reason: "Private" } }));
+    await waitFor(() => expect(h.api).toHaveBeenCalledWith("/admin/news/c1/remove/",
+      { method: "POST", body: { reason: "Private", rule: "R5", note_to_author: "Private" } }));
   });
 
-  it("own submission: no Approve/Reject; reports can be dismissed", async () => {
+  it("own submission: no Approve/Reject; reports open the moderation case", async () => {
     clerkState.isSignedIn = true;
     h.me = REVIEWER;
     routes({ "/admin/news/c1/": adminItem({ is_own: true }) });
@@ -335,14 +340,13 @@ describe("review", () => {
     expect(await screen.findByText(/This is your own submission/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Approve" })).toBeNull();
     cleanup();
-    const rep = { id: "r1", reason: "spam", reason_label: "Spam or advertising", details: "", status: "open", contact_email: "", reporter_email: null,
-      created_at: "2026-11-01T10:00:00Z", resolved_at: null, resolution_note: "" };
-    routes({ "/admin/news/c1/": adminItem({ status: "successful", reports: [rep] }),
-      "POST /admin/news/reports/r1/dismiss/": adminItem({ status: "successful", reports: [{ ...rep, status: "dismissed" }] }) });
+    routes({ "/admin/news/c1/": adminItem({ status: "successful",
+      case: { id: "k9", status: "open", priority: "high", decision: "", rule: "", open_reports: 2, reports: 2 } }) });
     renderAt("/admin/news/c1");
-    fireEvent.click(await screen.findByRole("button", { name: "Dismiss" }));
-    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Dismiss report" }));
-    expect(await screen.findByText("Report dismissed.")).toBeTruthy();
+    const link = await screen.findByRole("link", { name: "Reports: open the case" });
+    expect(link.getAttribute("href")).toBe("/admin/moderation/k9");
+    expect(screen.getByText(/2 open of 2 reports/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Dismiss" })).toBeNull();
   });
 });
 
@@ -381,7 +385,7 @@ describe("announcements", () => {
     h.me = ADMIN;
     const a = { ...official(), body: "x", source_name: "", source_url: "", status: "successful", status_label: "Successful", show_author_name: false,
       decision_reason: "", removed_reason: "", submitted_at: null, created_at: "2026-11-01T09:00:00Z", author_name: "Sam", author_email: "s@x",
-      is_own: true, open_reports: 0, important: false, removed_at: null, decided_at: null, events: [], reports: [] };
+      is_own: true, open_reports: 0, important: false, removed_at: null, decided_at: null, events: [], case: null };
     routes({ "/admin/announcements/o1/": a, "POST /admin/announcements/o1/pin/": new ApiError({ status: 409, code: "too_many_pinned", message: "x" }),
       "/admin/announcements/": { count: 3, results: [{ ...a, id: "p1", title: "Old pinned", pinned: true }], paused_until: null, pinned_count: 3 } });
     renderAt("/admin/announcements/o1");

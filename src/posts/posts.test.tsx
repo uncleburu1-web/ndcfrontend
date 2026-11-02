@@ -254,8 +254,7 @@ describe("notifications", () => {
 describe("/admin/posts", () => {
   const adminPost = (over: Record<string, unknown> = {}) => ({ ...campaignPost(), author_email: "camp@example.com", editor_email: "", open_reports: 2,
     events: [{ event: "published", note: "", created_at: "2026-11-01T10:00:00Z", actor_email: "camp@example.com" }],
-    reports: [{ id: "r1", reason: "false_results", reason_label: "False election results", details: "", status: "open", contact_email: "", reporter_email: null,
-      created_at: "2026-11-01T11:00:00Z", resolved_at: null, resolution_note: "" }], ...over });
+    case: { id: "k1", status: "open", priority: "urgent", decision: "", rule: "", open_reports: 1, reports: 1 }, ...over });
 
   it("is closed to non-admins", () => {
     clerkState.isSignedIn = true;
@@ -264,7 +263,7 @@ describe("/admin/posts", () => {
     expect(screen.getByText("You don’t have access to this page")).toBeTruthy();
   });
 
-  it("lists with the reported count and a reported filter", async () => {
+  it("lists with the reported count; Reported goes to the moderation queue (spec 13)", async () => {
     clerkState.isSignedIn = true;
     h.me = ADMIN;
     routes({ "/admin/posts/": { count: 1, results: [adminPost()], counts: { reported: 1, oldest_open_report: "2026-11-01T11:00:00Z" } } });
@@ -272,10 +271,10 @@ describe("/admin/posts", () => {
     expect(await screen.findByRole("link", { name: "Reported (1)" })).toBeTruthy();
     expect(screen.getByText(/Oldest open report/)).toBeTruthy();
     fireEvent.click(screen.getByRole("link", { name: "Reported (1)" }));
-    await waitFor(() => expect(h.api).toHaveBeenLastCalledWith("/admin/posts/?reported=1", expect.anything()));
+    await waitFor(() => expect(screen.getByTestId("where").textContent).toBe("/admin/moderation?type=posts"));
   });
 
-  it("remove with a reason, restore, dismiss, and the self-moderation message", async () => {
+  it("remove with a reason and a rule, restore, the case link and the self-moderation message", async () => {
     clerkState.isSignedIn = true;
     h.me = ADMIN;
     let removedWith: unknown = null;
@@ -283,19 +282,25 @@ describe("/admin/posts", () => {
       "/admin/posts/p1/": adminPost(),
       "POST /admin/posts/p1/remove/": (o: Record<string, unknown>) => { removedWith = o.body; return adminPost({ status: "removed", removed_reason: (o.body as { reason: string }).reason, open_reports: 0 }); },
       "POST /admin/posts/p1/restore/": adminPost(),
-      "POST /admin/posts/reports/r1/dismiss/": new ApiError({ status: 403, code: "self_moderation", message: "x" }),
     });
     renderAt("/admin/posts/p1");
-    fireEvent.click(await screen.findByRole("button", { name: "Dismiss" }));
-    fireEvent.click(within(await screen.findByRole("dialog", { name: "Dismiss this report?" })).getByRole("button", { name: "Dismiss report" }));
-    expect(await screen.findByText(/another admin has to act on this post/)).toBeTruthy();
+    expect((await screen.findByRole("link", { name: "Reports: open the case" })).getAttribute("href")).toBe("/admin/moderation/k1");
     fireEvent.click(screen.getByRole("button", { name: "Remove" }));
-    const dialog = await screen.findByRole("dialog", { name: "Remove this post?" });
+    let dialog = await screen.findByRole("dialog", { name: "Remove this post?" });
     fireEvent.change(within(dialog).getByLabelText("Reason"), { target: { value: "False or unsourced election results." } });
+    expect((within(dialog).getByRole("button", { name: "Remove post" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.change(within(dialog).getByLabelText(/Rule it broke/), { target: { value: "R3" } });
     fireEvent.click(within(dialog).getByRole("button", { name: "Remove post" }));
     expect(await screen.findByRole("button", { name: "Restore" })).toBeTruthy();
-    expect(removedWith).toEqual({ reason: "False or unsourced election results." });
+    expect(removedWith).toEqual({ reason: "False or unsourced election results.", rule: "R3", note_to_author: "False or unsourced election results." });
     fireEvent.click(screen.getByRole("button", { name: "Restore" }));
     expect(await screen.findByRole("button", { name: "Remove" })).toBeTruthy();
+    // linked admins: the server refuses, the page explains
+    routes({ "/admin/posts/p1/": adminPost(), "POST /admin/posts/p1/remove/": new ApiError({ status: 403, code: "self_moderation", message: "x" }) });
+    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+    dialog = await screen.findByRole("dialog", { name: "Remove this post?" });
+    fireEvent.change(within(dialog).getByLabelText(/Rule it broke/), { target: { value: "R3" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Remove post" }));
+    expect(await screen.findByText(/another admin has to act on this post/)).toBeTruthy();
   });
 });

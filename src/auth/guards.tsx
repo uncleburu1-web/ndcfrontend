@@ -214,6 +214,7 @@ export function adminAreas(me: AdminMe): string[] {
   if (has("finance_officer")) areas.push("donations");
   if (isPvcOfficer(me)) areas.push("pvc");
   if (has("membership_officer")) areas.push("membership");
+  if (has("moderator") || has("news_reviewer")) areas.push("moderation");
   if (has("news_reviewer")) areas.push("news");
   if (me.is_system_admin) areas.push("announcements", "posts", "team", "audit");
   return areas;
@@ -238,6 +239,33 @@ export function RequireAnyAdmin({ children }: { children?: ReactNode }) {
       <div className="page-shell">
         <EmptyState icon="shield" title="You don’t have access to this page">
           The admin is for NDCConnect administrators and officers.
+        </EmptyState>
+      </div>
+    );
+  }
+  return children ? <>{children}</> : <Outlet />;
+}
+
+/** Moderation queue (spec 13 §4.3): moderators, news reviewers and system admins. The backend applies the role table. */
+export function isModerationStaff(me: AdminMe) {
+  return adminAreas(me).includes("moderation");
+}
+
+export function RequireModerationStaff({ children }: { children?: ReactNode }) {
+  const { me, status, error, refresh } = useMe();
+  if (status === "error") {
+    return (
+      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+        {error?.message}
+      </Banner>
+    );
+  }
+  if (!me) return <Pending label="Loading your account" />;
+  if (!isModerationStaff(me)) {
+    return (
+      <div className="page-shell">
+        <EmptyState icon="shield" title="You don’t have access to this page">
+          Moderation is for moderators, news reviewers and NDCConnect administrators.
         </EmptyState>
       </div>
     );

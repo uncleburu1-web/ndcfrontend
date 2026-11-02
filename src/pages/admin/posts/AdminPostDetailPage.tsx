@@ -1,4 +1,4 @@
-/** /admin/posts/:id — one candidate post: remove, restore, dismiss reports (spec 09 §4.4). Admins never edit a candidate's words. */
+/** /admin/posts/:id — one candidate post: remove (citing a rule) or restore (spec 09 §4.4, spec 13). Admins never edit a candidate's words. */
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useApi } from "../../../auth/session";
@@ -10,6 +10,7 @@ import { ArticleImage } from "../../../news/ArticleImage";
 import { KindBadge } from "../../../posts/KindBadge";
 import { moderationError } from "../../../posts/moderation";
 import { REMOVE_REASONS, postPath, type AdminPost } from "../../../posts/types";
+import { CaseLink, RuleSelect } from "../../../moderation/CaseLink";
 import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "../donations/admin-donations.css";
@@ -26,8 +27,7 @@ export default function AdminPostDetailPage() {
   const [preset, setPreset] = useState(REMOVE_REASONS[0]);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState("");
-  const [dismissing, setDismissing] = useState<string | null>(null);
-  const [note, setNote] = useState("");
+  const [rule, setRule] = useState("");
 
   useEffect(() => setP(res.data), [res.data]);
   useEffect(() => {
@@ -47,24 +47,10 @@ export default function AdminPostDetailPage() {
       setBusy("");
     }
   };
-  const dismiss = async () => {
-    if (!dismissing) return;
-    try {
-      setP(await api<AdminPost>(`/admin/posts/reports/${dismissing}/dismiss/`, { method: "POST", body: { note } }));
-      toast.show({ tone: "success", message: "Report dismissed." });
-    } catch (err) {
-      toast.show({ tone: "error", message: moderationError(err) });
-    } finally {
-      setDismissing(null);
-      setNote("");
-    }
-  };
-
   if (res.error) return <div className="adm-page"><AdminNav current="posts" /><EmptyState title="Post not found" action={<Button href="/admin/posts">Back to posts</Button>} /></div>;
   if (!p) return <div className="adm-page"><AdminNav current="posts" /><Skeleton width="100%" height={240} /></div>;
 
   const finalReason = preset === "Other" ? reason.trim() : [preset, reason.trim()].filter(Boolean).join(" ");
-  const openReports = (p.reports ?? []).filter((r) => r.status === "open");
   return (
     <div className="adm-page">
       <AdminNav current="posts" />
@@ -87,8 +73,8 @@ export default function AdminPostDetailPage() {
           {p.status === "removed" && <Button variant="secondary" onClick={() => void act("restore")} loading={busy === "restore"}>Restore</Button>}
         </div>
       </header>
-      {p.status === "removed" && <Banner tone="warning" title="Removed">{p.removed_reason}</Banner>}
-      {p.status === "deleted" && <Banner tone="info">The campaign deleted this post. It’s kept for 30 days for complaints, then erased.</Banner>}
+      {p.status === "removed" && <Banner tone="warning" title={p.removed_rule ? `Removed under ${p.removed_rule}` : "Removed"}>{p.removed_reason}</Banner>}
+      {p.status === "deleted" && <Banner tone="info">The campaign deleted this post. It’s kept for 1 year for complaints and legal requests, then erased.</Banner>}
 
       <div className="adm-donation-grid">
         <section className="adm-panel" aria-labelledby="preview-h">
@@ -99,20 +85,8 @@ export default function AdminPostDetailPage() {
           <ArticleBody body={p.body} />
         </section>
         <section className="adm-panel">
-          <h2>Reports{openReports.length ? ` (${openReports.length} open)` : ""}</h2>
-          {!(p.reports ?? []).length ? <p className="ds-field__hint">No reports.</p> : (
-            <ul className="adm-history">
-              {(p.reports ?? []).map((r) => (
-                <li key={r.id}>
-                  <strong>{r.reason_label}</strong> · {formatDate(r.created_at, { withTime: true })} · {r.status}
-                  {r.details && <> — {r.details}</>}
-                  {(r.reporter_email || r.contact_email) && <> · {r.reporter_email ?? r.contact_email}</>}
-                  {r.resolution_note && <> · note: {r.resolution_note}</>}
-                  {r.status === "open" && <> <Button size="sm" variant="ghost" onClick={() => setDismissing(r.id)}>Dismiss</Button></>}
-                </li>
-              ))}
-            </ul>
-          )}
+          <h2>Reports</h2>
+          <CaseLink c={p.case} />
           <h2>History</h2>
           <ol className="adm-history">
             {(p.events ?? []).map((e, i) => (
@@ -124,15 +98,12 @@ export default function AdminPostDetailPage() {
 
       <Modal open={removing} onClose={() => setRemoving(false)} title="Remove this post?"
         footer={<><Button variant="secondary" onClick={() => setRemoving(false)}>Go back</Button>
-          <Button variant="danger" disabled={!finalReason} loading={busy === "remove"} onClick={() => void act("remove", { reason: finalReason })}>Remove post</Button></>}>
-        <p>It disappears from the profile, News and notifications. The campaign sees this reason. Open reports are marked as actioned.</p>
+          <Button variant="danger" disabled={!finalReason || !rule} loading={busy === "remove"}
+            onClick={() => void act("remove", { reason: finalReason, rule, note_to_author: finalReason })}>Remove post</Button></>}>
+        <p>It disappears from the profile, News and notifications, and its page shows the rule it broke. The campaign sees this reason and can appeal. Open reports are marked as actioned.</p>
+        <RuleSelect value={rule} onChange={setRule} />
         <Select label="Reason" value={preset} onChange={(e) => setPreset(e.target.value)} options={REMOVE_REASONS.map((r) => ({ value: r, label: r }))} />
         <TextArea label={preset !== "Other" ? "More detail (optional)" : "Reason"} required={preset === "Other"} rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
-      </Modal>
-      <Modal open={Boolean(dismissing)} onClose={() => setDismissing(null)} title="Dismiss this report?"
-        footer={<><Button variant="secondary" onClick={() => setDismissing(null)}>Go back</Button><Button onClick={() => void dismiss()}>Dismiss report</Button></>}>
-        <p>The post stays up.</p>
-        <TextArea label="Note (optional)" rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
       </Modal>
     </div>
   );

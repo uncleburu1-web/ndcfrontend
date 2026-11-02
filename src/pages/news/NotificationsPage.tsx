@@ -11,17 +11,50 @@ import "../../news/news.css";
 
 export interface NotificationItem {
   id: string;
-  kind: "announcement" | "news_decision" | "pvc_decision" | "candidate_post";
+  kind: "announcement" | "news_decision" | "pvc_decision" | "candidate_post"
+    | "report_outcome" | "content_removed" | "account_warning" | "submissions_paused" | "appeal_decision";
   created_at: string;
   read_at: string | null;
-  decision: "" | "approved" | "rejected" | "verified";
+  decision: "" | "approved" | "rejected" | "verified" | "kept" | "removed" | "warning" | "paused" | "upheld" | "denied";
+  /** Spec 13: moderation outcomes — what, which rule; never who decided or who reported. */
+  case?: { id: string; target_kind: "article" | "post" | "candidate"; title: string; rule: string; rule_title: string };
+  appeal?: { id: string; status: "pending" | "upheld" | "denied"; reason: string };
   article: { id: string; source: "official" | "community"; title: string; public: boolean } | null;
   /** Spec 09: candidate_post items. */
   post?: { id: string; kind: "announcement" | "news"; kind_label: string; title: string };
   candidate?: { slug: string; full_name: string; photo: { url_200: string | null } | null };
 }
 
-export function describe(n: NotificationItem): { text: string; href: string; icon: "shield" | "verified" | "info" | "checkCircle" | null } {
+type Described = { text: string; href: string; icon: "shield" | "verified" | "info" | "checkCircle" | "alert" | null };
+
+function describeModeration(n: NotificationItem): Described | null {
+  const c = n.case;
+  const what = c?.target_kind === "post" ? "post" : c?.target_kind === "candidate" ? "profile" : "news story";
+  const own = c?.target_kind === "post" ? "/campaign" : "/news/mine";
+  const rule = c?.rule && c.rule !== "LEGAL" ? ` for breaking ${c.rule}: ${c.rule_title}` : "";
+  switch (n.kind) {
+    case "report_outcome":
+      return n.decision === "removed"
+        ? { text: "We removed the content you reported. Thanks for telling us.", href: "/reports", icon: "checkCircle" }
+        : { text: `We reviewed your report${c?.title ? ` about “${c.title}”` : ""}; the content stays up.`, href: "/reports", icon: "info" };
+    case "content_removed":
+      return { text: `Your ${what} “${c?.title ?? ""}” was removed${rule}. You can appeal.`, href: c ? `/appeals/new?case=${c.id}` : own, icon: "alert" };
+    case "account_warning":
+      return { text: `You received a warning${c?.rule ? ` under ${c.rule}: ${c.rule_title}` : ""}.`, href: own, icon: "alert" };
+    case "submissions_paused":
+      return { text: "Your community news submissions are paused. See when you can submit again, or appeal.", href: "/news/mine", icon: "alert" };
+    case "appeal_decision":
+      return n.decision === "upheld"
+        ? { text: `Your appeal was upheld${c?.title ? `: “${c.title}”` : ""}.`, href: own, icon: "checkCircle" }
+        : { text: `Your appeal wasn’t upheld${n.appeal?.reason ? `: ${n.appeal.reason}` : "."}`, href: own, icon: "info" };
+    default:
+      return null;
+  }
+}
+
+export function describe(n: NotificationItem): Described {
+  const mod = describeModeration(n);
+  if (mod) return mod;
   if (n.kind === "candidate_post" && n.post && n.candidate) {
     const what = n.post.kind === "announcement" ? "posted an announcement" : "posted news";
     return { text: `${n.candidate.full_name} ${what}: ${n.post.title}`, href: postPath(n.candidate.slug, n.post.id), icon: null };

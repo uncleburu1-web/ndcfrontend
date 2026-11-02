@@ -1,6 +1,6 @@
 /** /admin/news — review queue for news reviewers and system admins (spec 07 §4.5). */
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, NavLink, useSearchParams } from "react-router-dom";
+import { Link, Navigate, NavLink, useSearchParams } from "react-router-dom";
 import { useApi } from "../../../auth/session";
 import { useRequest } from "../../../candidates/useRequest";
 import { Banner, Button, EmptyState, Pagination, Skeleton, StatusBadge, TextField } from "../../../components/ui";
@@ -12,7 +12,7 @@ import "../membership/admin-membership.css";
 
 const TABS = [["pending", "Pending"], ["reported", "Reported"], ["successful", "Published"], ["rejected", "Rejected"], ["removed", "Removed"]] as const;
 
-export default function AdminNewsPage() {
+function AdminNewsQueue() {
   const api = useApi();
   const [params, setParams] = useSearchParams();
   const tab = params.get("tab") ?? "pending";
@@ -97,4 +97,11 @@ export default function AdminNewsPage() {
       ) : null}
     </div>
   );
+}
+
+/** Spec 13 §8.2: reported items live in the moderation queue now. */
+export default function AdminNewsPage() {
+  const [params] = useSearchParams();
+  if (params.get("tab") === "reported") return <Navigate to="/admin/moderation?type=news" replace />;
+  return <AdminNewsQueue />;
 }

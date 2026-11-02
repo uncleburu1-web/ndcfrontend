@@ -3,13 +3,15 @@
  * (spec §7.5), and the routed page.
  */
 import { Show, UserButton } from "@clerk/react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { isAnyAdmin, isCampaignAccount } from "../../auth/guards";
 import { useMe, useSessionIssue } from "../../auth/session";
 import { DonationConfigProvider, useDonationConfig } from "../../donations/DonationConfigProvider";
 import { FollowProvider } from "../../follows/FollowProvider";
 import { NotificationBell } from "../../notifications/NotificationBell";
+import { RulesUpdatedBanner } from "../../moderation/RulesUpdatedBanner";
 import { HeaderSearch } from "../../search/HeaderSearch";
+import "../../moderation/moderation.css";
 import { Banner, Button, Icon, SiteHeader } from "../ui";
 
 const NAV = [
@@ -41,6 +43,7 @@ function AccountArea() {
             <UserButton.Link label="My donations" labelIcon={<Icon name="inbox" size={16} />} href="/my-donations" />
             <UserButton.Link label="My membership" labelIcon={<Icon name="user" size={16} />} href="/join" />
             <UserButton.Link label="My news" labelIcon={<Icon name="inbox" size={16} />} href="/news/mine" />
+            <UserButton.Link label="My reports" labelIcon={<Icon name="shield" size={16} />} href="/reports" />
             {isCampaignAccount(me) && <UserButton.Link label="My campaign" labelIcon={<Icon name="bell" size={16} />} href="/campaign" />}
             {me?.home_state && <UserButton.Link label="Your state" labelIcon={<Icon name="mapPin" size={16} />} href={`/states/${me.home_state}`} />}
             <UserButton.Link label={verified ? "Verified voter" : "Verify your PVC"} labelIcon={<Icon name={verified ? "verified" : "shield"} size={16} />} href="/pvc" />
@@ -102,9 +105,17 @@ function Chrome() {
         search={<HeaderSearch />}
       />
       <SessionBanners />
+      <RulesUpdatedBanner />
       <main id="main">
         <Outlet />
       </main>
+      <footer className="site-footer">
+        <ul>
+          <li><Link to="/rules">Community rules</Link></li>
+          <li><Link to="/reports/status">Check a report</Link></li>
+          <li><Link to="/report/copyright">Copyright notice</Link></li>
+        </ul>
+      </footer>
     </>
   );
 }

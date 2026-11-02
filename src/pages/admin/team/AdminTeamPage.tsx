@@ -13,7 +13,7 @@ import "../../../admin/admin-home.css";
 const ORDER = ["system_admin", "news_reviewer", "pvc_officer", "membership_officer", "finance_officer", "moderator", "candidate"];
 const GROUP_LABEL: Record<string, string> = {
   system_admin: "System administrators", news_reviewer: "News reviewers", pvc_officer: "PVC officers",
-  membership_officer: "Membership officers", finance_officer: "Finance officers", moderator: "Community moderators",
+  membership_officer: "Membership officers", finance_officer: "Finance officers", moderator: "Moderators",
   candidate: "Candidate links",
 };
 

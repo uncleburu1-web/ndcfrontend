@@ -11,6 +11,7 @@ import { ArticleBody } from "../../news/ArticleBody";
 import { ArticleImage } from "../../news/ArticleImage";
 import { ReportDialog } from "../../news/ReportDialog";
 import { KindBadge } from "../../posts/KindBadge";
+import { RemovedNotice, removalFromError } from "../../moderation/RemovedNotice";
 import type { PostDetail } from "../../posts/types";
 import "../../news/news.css";
 import "../../posts/posts.css";
@@ -31,6 +32,8 @@ export default function CandidatePostPage() {
     document.title = p ? `${p.title} — ${p.candidate.full_name} | NDCConnect` : "Post | NDCConnect";
   }, [p]);
 
+  const removed = removalFromError(res.error);
+  if (removed) return <RemovedNotice notice={removed} back={{ href: `/candidates/${encodeURIComponent(slug)}`, label: "Back to the profile" }} />;
   if (res.error) {
     return (
       <div className="page-shell">

@@ -10,6 +10,7 @@ import { Avatar, Banner, Button, Checkbox, EmptyState, Modal, RadioGroup, Skelet
 import { formatDate } from "../../lib/format";
 import { BODY_MAX, TITLE_MAX, postPath, type CampaignCandidate, type CampaignPost, type PostKind } from "../../posts/types";
 import { KindBadge } from "../../posts/KindBadge";
+import { RemovalNotice, useAuthorView } from "../../moderation/AuthorStanding";
 import "../../news/news.css";
 import "../../posts/posts.css";
 
@@ -120,6 +121,7 @@ export default function CampaignCandidatePage() {
   const [error, setError] = useState<ApiError | null>(null);
   const [mode, setMode] = useState<"list" | "new" | CampaignPost>("list");
   const [deleting, setDeleting] = useState<CampaignPost | null>(null);
+  const standing = useAuthorView();
 
   const load = useCallback(() => {
     api<{ results: CampaignPost[]; candidate: CampaignCandidate }>(`/campaign/candidates/${candidateId}/posts/`)
@@ -191,7 +193,10 @@ export default function CampaignCandidatePage() {
               <span className="article-badges"><StatusBadge set="post" status={p.status} /><KindBadge kind={p.kind} label={p.kind_label} /></span>
               <h2>{p.status === "published" ? <Link to={postPath(candidate.slug, p.id)}>{p.title}</Link> : p.title}</h2>
               <p className="news-meta">{formatDate(p.published_at, { withTime: true })}{p.edited_at ? ` · Edited ${formatDate(p.edited_at, { withTime: true })}` : ""}</p>
-              {p.status === "removed" && <Banner tone="warning" title="Removed by NDCConnect">{p.removed_reason}</Banner>}
+              {p.status === "removed" && (
+                <RemovalNotice removal={standing.data?.removals.find((r) => r.target_id === p.id)} fallbackReason={p.removed_reason}
+                  onChange={standing.retry} />
+              )}
               <div className="campaign-post__actions">
                 {p.status === "published" && canWrite && <Button size="sm" variant="secondary" onClick={() => setMode(p)}>Edit</Button>}
                 {p.status !== "deleted" && <Button size="sm" variant="ghost" onClick={() => setDeleting(p)}>Delete</Button>}

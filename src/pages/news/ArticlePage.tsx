@@ -10,6 +10,7 @@ import { ArticleImage } from "../../news/ArticleImage";
 import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
 import { ReportDialog } from "../../news/ReportDialog";
 import { SourceBadges } from "../../news/SourceBadges";
+import { RemovedNotice, removalFromError } from "../../moderation/RemovedNotice";
 import type { ArticleDetail, ArticleSource } from "../../news/types";
 import "../../news/news.css";
 
@@ -24,6 +25,8 @@ export default function ArticlePage({ source }: { source: ArticleSource }) {
     document.title = a ? `${a.title} | NDCConnect News` : "News | NDCConnect";
   }, [a]);
 
+  const removed = removalFromError(res.error);
+  if (removed) return <RemovedNotice notice={removed} back={{ href: "/news", label: "Back to News" }} />;
   if (res.error || (res.data && !a)) {
     return (
       <div className="page-shell">
@@ -63,7 +66,8 @@ export default function ArticlePage({ source }: { source: ArticleSource }) {
         <Button variant="ghost" size="sm" onClick={() => setReporting(true)}>Report</Button>
         <Link to="/news">Back to News</Link>
       </div>
-      <ReportDialog articleId={a.id} open={reporting} onClose={() => setReporting(false)} />
+      <ReportDialog articleId={a.id} title={a.source === "official" ? "Report this announcement" : "Report this article"} open={reporting}
+        onClose={() => setReporting(false)} />
     </article>
   );
 }

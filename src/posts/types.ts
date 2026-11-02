@@ -42,6 +42,7 @@ export interface CampaignPost extends PostDetail {
   status: PostStatus;
   status_label: string;
   removed_reason: string;
+  removed_rule?: string;
   removed_at: string | null;
   created_at: string;
 }
@@ -54,25 +55,13 @@ export interface CampaignCandidate extends PostCandidate {
   posting_paused_until: string | null;
 }
 
-export interface PostReportRow {
-  id: string;
-  reason: string;
-  reason_label: string;
-  details: string;
-  status: "open" | "dismissed" | "actioned";
-  contact_email: string;
-  reporter_email: string | null;
-  created_at: string;
-  resolved_at: string | null;
-  resolution_note: string;
-}
-
 export interface AdminPost extends CampaignPost {
   author_email: string;
   editor_email: string;
   open_reports: number;
   events?: { event: string; note: string; created_at: string; actor_email: string | null }[];
-  reports?: PostReportRow[];
+  /** Spec 13: reports live in the moderation case. */
+  case?: import("../moderation/types").CaseSummary | null;
 }
 
 export const postPath = (slug: string, id: string) => `/candidates/${encodeURIComponent(slug)}/posts/${id}`;

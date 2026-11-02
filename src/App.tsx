@@ -11,6 +11,7 @@ import {
   RequireProfileComplete,
   RequirePvcOfficer,
   RequireAnyAdmin,
+  RequireModerationStaff,
   RequireSignedIn,
   RequireSystemAdmin,
   SignedOutOnly,
@@ -53,6 +54,17 @@ import CampaignCandidatePage from "./pages/campaign/CampaignCandidatePage";
 import CampaignHomePage from "./pages/campaign/CampaignHomePage";
 import CandidatePostPage from "./pages/candidates/CandidatePostPage";
 import SearchPage from "./pages/search/SearchPage";
+import NewAppealPage from "./pages/appeals/NewAppealPage";
+import CopyrightNoticePage from "./pages/reports/CopyrightNoticePage";
+import MyReportsPage from "./pages/reports/MyReportsPage";
+import ReportStatusPage from "./pages/reports/ReportStatusPage";
+import RulesPage from "./pages/rules/RulesPage";
+import AdminModerationPage from "./pages/admin/moderation/AdminModerationPage";
+import AdminCasePage from "./pages/admin/moderation/AdminCasePage";
+import AdminAppealsPage from "./pages/admin/moderation/AdminAppealsPage";
+import AdminLegalPage from "./pages/admin/moderation/AdminLegalPage";
+import AdminLegalNoticePage from "./pages/admin/moderation/AdminLegalNoticePage";
+import AdminCompliancePage from "./pages/admin/moderation/AdminCompliancePage";
 import StatePage from "./pages/states/StatePage";
 import StatesPage from "./pages/states/StatesPage";
 import ArticlePage from "./pages/news/ArticlePage";
@@ -106,6 +118,9 @@ export default function App() {
           {/* Candidate posts (spec 09): linked campaign accounts; the backend checks the candidate link on every call */}
           <Route path="campaign" element={<CampaignHomePage />} />
           <Route path="campaign/:candidateId" element={<CampaignCandidatePage />} />
+          {/* Reporting and moderation (spec 13): your reports and appeals */}
+          <Route path="reports" element={<MyReportsPage />} />
+          <Route path="appeals/new" element={<NewAppealPage />} />
           <Route element={<RequireProfileComplete />}>
             <Route path="news/submit" element={<SubmitNewsPage />} />
             <Route path="news/mine/:id" element={<SubmitNewsPage />} />
@@ -119,6 +134,10 @@ export default function App() {
         <Route path="search" element={<SearchPage />} />
         <Route path="states" element={<StatesPage />} />
         <Route path="states/:state" element={<StatePage />} />
+        {/* Community rules, report status and copyright notices (spec 13): public */}
+        <Route path="rules" element={<RulesPage />} />
+        <Route path="reports/status" element={<ReportStatusPage />} />
+        <Route path="report/copyright" element={<CopyrightNoticePage />} />
         {/* Donations (spec 05): guests welcome; the page itself says when donations aren't open */}
         <Route path="donate" element={<DonatePage />} />
         <Route path="donate/complete" element={<DonateCompletePage />} />
@@ -138,7 +157,16 @@ export default function App() {
           <Route element={<RequireAnyAdmin />}>
             <Route path="admin" element={<AdminHomePage />} />
           </Route>
+          {/* Moderation (spec 13): moderators, news reviewers and system admins; legal and compliance are system admin only */}
+          <Route element={<RequireModerationStaff />}>
+            <Route path="admin/moderation" element={<AdminModerationPage />} />
+            <Route path="admin/moderation/appeals" element={<AdminAppealsPage />} />
+            <Route path="admin/moderation/:id" element={<AdminCasePage />} />
+          </Route>
           <Route element={<RequireSystemAdmin />}>
+            <Route path="admin/moderation/legal" element={<AdminLegalPage />} />
+            <Route path="admin/moderation/legal/:id" element={<AdminLegalNoticePage />} />
+            <Route path="admin/moderation/compliance" element={<AdminCompliancePage />} />
             <Route path="admin/team" element={<AdminTeamPage />} />
             <Route path="admin/users" element={<AdminUsersPage />} />
             <Route path="admin/users/:id" element={<AdminUserPage />} />

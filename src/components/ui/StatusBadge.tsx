@@ -66,6 +66,33 @@ const STATUS_SETS = {
     deactivated: ["Deactivated", "error"],
     deleted: ["Deleted in Clerk", "neutral"],
   },
+  /** Spec 13: moderation priorities, in words as well as colour. */
+  priority: {
+    legal: ["Legal: 48 h", "error"],
+    urgent: ["Urgent", "error"],
+    high: ["High", "warning"],
+    normal: ["Normal", "neutral"],
+    low: ["Low", "neutral"],
+  },
+  case: {
+    open: ["Open", "warning"],
+    escalated: ["Escalated", "error"],
+    closed: ["Closed", "neutral"],
+    kept: ["No action", "neutral"],
+    removed: ["Removed", "warning"],
+    restored: ["Restored", "success"],
+    author_removed: ["Removed by author", "neutral"],
+  },
+  report: {
+    open: ["Open", "warning"],
+    actioned: ["Action taken", "success"],
+    dismissed: ["No action", "neutral"],
+  },
+  appeal: {
+    pending: ["Waiting for a decision", "warning"],
+    upheld: ["Upheld", "success"],
+    denied: ["Not upheld", "neutral"],
+  },
   donation: {
     initiated: ["Started", "neutral"],
     pending: ["Pending", "warning"],

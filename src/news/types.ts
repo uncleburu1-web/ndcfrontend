@@ -56,21 +56,10 @@ export interface MyArticle extends ArticleDetail {
   show_author_name: boolean;
   decision_reason: string;
   removed_reason: string;
+  /** Spec 13: the rule it broke ("R4"), "LEGAL", or "" for removals from before the rules. */
+  removed_rule?: string;
   submitted_at: string | null;
   created_at: string;
-}
-
-export interface ArticleReport {
-  id: string;
-  reason: string;
-  reason_label: string;
-  details: string;
-  status: "open" | "dismissed" | "actioned";
-  contact_email: string;
-  reporter_email: string | null;
-  created_at: string;
-  resolved_at: string | null;
-  resolution_note: string;
 }
 
 export interface AdminArticle extends MyArticle {
@@ -82,7 +71,8 @@ export interface AdminArticle extends MyArticle {
   removed_at: string | null;
   decided_at: string | null;
   events?: { event: string; note: string; created_at: string; actor_email: string | null }[];
-  reports?: ArticleReport[];
+  /** Spec 13: reports live in the moderation case. */
+  case?: import("../moderation/types").CaseSummary | null;
 }
 
 export interface AdminNewsPage {
@@ -91,13 +81,25 @@ export interface AdminNewsPage {
   counts: { pending: number; reported: number; oldest_open_report: string | null; paused_until: string | null };
 }
 
+/** Fallback when /rules/ hasn't loaded; the server's list (with rules) wins (spec 13 §4.2). */
 export const REPORT_REASONS = [
-  ["false", "False or misleading"],
-  ["abuse", "Abusive, hateful or inciting"],
-  ["privacy", "Private information about someone"],
-  ["copyright", "Copyright (my content was used)"],
-  ["spam", "Spam or advertising"],
-  ["other", "Other"],
+  ["violence", "Threat or incitement to violence", "R1"],
+  ["abuse", "Abusive or hateful", "R2"],
+  ["results", "Election results not from INEC", "R3"],
+  ["false", "False or misleading", "R4"],
+  ["privacy", "Private information about someone", "R5"],
+  ["ncii", "Intimate image shared without consent", "R6"],
+  ["copyright", "Copyright (my content was used)", "R7"],
+  ["spam", "Spam or advertising", "R8"],
+  ["impersonation", "Impersonation", "R9"],
+  ["other", "Something else", ""],
+] as const;
+
+export const PROFILE_REPORT_REASONS = [
+  ["profile_wrong", "Wrong or out-of-date details"],
+  ["not_ndc", "Not an NDC candidate"],
+  ["impersonation", "Impersonation"],
+  ["other", "Something else"],
 ] as const;
 
 export const REJECT_REASONS = [

@@ -1,0 +1,197 @@
+/* Reporting and moderation (spec 13). Tokens only. */
+
+.mod-removed {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  max-width: var(--measure);
+  margin: var(--space-8) auto;
+  padding: var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--tone-warning-fg);
+  border-radius: var(--radius-md);
+  color: var(--text);
+}
+.mod-removed h1 {
+  font-size: var(--text-xl);
+  margin-bottom: var(--space-2);
+}
+.mod-removed p {
+  margin: var(--space-2) 0 0;
+}
+.mod-removed svg {
+  flex: none;
+  color: var(--tone-warning-fg);
+}
+
+.mod-page {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+}
+.mod-page h1 {
+  margin-bottom: var(--space-3);
+}
+.mod-page h2 {
+  font-size: var(--text-lg);
+  margin: var(--space-8) 0 var(--space-3);
+}
+.mod-lead {
+  color: var(--text-muted);
+}
+
+.mod-rules {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-6) 0 0;
+  display: grid;
+  gap: var(--space-4);
+}
+.mod-rule {
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  scroll-margin-top: var(--space-16);
+}
+.mod-rule:target {
+  border-color: var(--brand-bg);
+  box-shadow: 0 0 0 2px var(--focus-ring);
+}
+.mod-rule h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-lg);
+}
+.mod-rule__id {
+  color: var(--text-brand);
+  margin-right: var(--space-2);
+}
+.mod-rule ul {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-6);
+}
+.mod-rule__law {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.mod-ref {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-brand-tint);
+  border-radius: var(--radius-md);
+}
+.mod-ref strong {
+  font-size: var(--text-lg);
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.mod-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.mod-list__item {
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow-wrap: anywhere;
+}
+.mod-list__item h3 {
+  font-size: var(--text-base);
+  margin: var(--space-2) 0;
+}
+.mod-meta {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: var(--space-1) 0;
+}
+.mod-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.mod-due {
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+.mod-due--overdue {
+  color: var(--tone-error-fg);
+  font-weight: var(--weight-label);
+}
+.mod-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--tone-warning-fg);
+}
+.mod-filters {
+  display: grid;
+  gap: 0 var(--space-4);
+  margin-bottom: var(--space-4);
+}
+@media (min-width: 720px) {
+  .mod-filters {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+    align-items: end;
+  }
+  .mod-filters .ds-checkbox,
+  .mod-filters .ds-check {
+    margin-bottom: var(--space-6);
+  }
+}
+.mod-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.mod-figures {
+  width: 100%;
+  border-collapse: collapse;
+}
+.mod-figures th,
+.mod-figures td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+.mod-figures td:nth-child(2) {
+  font-weight: var(--weight-heading);
+  white-space: nowrap;
+}
+
+.site-footer {
+  margin-top: var(--space-16);
+  padding: var(--space-6) var(--space-4);
+  border-top: 1px solid var(--border);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.site-footer ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+/* Two-panel admin layouts: let panels shrink below their content's width at 360 px. */
+.adm-donation-grid > .adm-panel {
+  min-width: 0;
+}
+.mod-file {
+  max-width: 100%;
+}
