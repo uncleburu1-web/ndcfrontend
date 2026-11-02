@@ -9,11 +9,13 @@ import { formatDate } from "../../lib/format";
 import { STATES } from "../../lib/nigeria";
 import { ArticleImage } from "../../news/ArticleImage";
 import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
+import { CandidatePostItem } from "../../posts/CandidatePostItem";
+import type { FeedPost } from "../../posts/types";
 import { SourceBadges } from "../../news/SourceBadges";
 import { articlePath, type ArticleSummary, type NewsPage as Page } from "../../news/types";
 import "../../news/news.css";
 
-const TABS = [["", "All"], ["official", "Official"], ["community", "Community"]] as const;
+const TABS = [["", "All"], ["official", "Official"], ["community", "Community"], ["candidate", "Candidates"]] as const;
 
 function Item({ a }: { a: ArticleSummary }) {
   return (
@@ -64,7 +66,7 @@ export default function NewsPage() {
   };
   const submitHref = isSignedIn ? "/news/submit" : "/sign-in?redirect_url=%2Fnews%2Fsubmit";
   const stateLabel = STATES.find((s) => s.value === state)?.label;
-  const empty = source === "community" ? `No community news${stateLabel ? ` for ${stateLabel}` : ""} yet`
+  const empty = source === "candidate" ? `No candidate posts${stateLabel ? ` for ${stateLabel}` : ""} yet` : source === "community" ? `No community news${stateLabel ? ` for ${stateLabel}` : ""} yet`
     : source === "official" ? "No official announcements yet" : `No news${stateLabel ? ` for ${stateLabel}` : ""} yet`;
 
   return (
@@ -101,7 +103,9 @@ export default function NewsPage() {
         <>
           <ul className="news-list">
             {res.data.pinned.map((a) => <Item key={a.id} a={a} />)}
-            {res.data.results.map((a) => <Item key={a.id} a={a} />)}
+            {res.data.results.map((a) => (a.source === "candidate"
+              ? <CandidatePostItem key={a.id} post={a as FeedPost} candidate={(a as FeedPost).candidate} />
+              : <Item key={a.id} a={a as ArticleSummary} />))}
           </ul>
           <Pagination page={page} pageCount={Math.ceil(res.data.count / 20)} onChange={(p) => set({ page: p > 1 ? String(p) : "" })} label="News pages" />
         </>

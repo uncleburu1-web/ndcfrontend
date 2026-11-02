@@ -2,7 +2,7 @@
  * /candidates/:slug — public candidate profile (spec 03 §8.2).
  * Unknown or unpublished candidates show the same not-found page.
  */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useApi } from "../../auth/session";
 import type { CandidateProfile } from "../../candidates/types";
@@ -10,7 +10,10 @@ import { useRequest } from "../../candidates/useRequest";
 import { useDonationConfig } from "../../donations/DonationConfigProvider";
 import { CandidateVote } from "../../follows/CandidateVote";
 import { useFollows } from "../../follows/FollowProvider";
-import { Avatar, Banner, Button, DonateButton, EmptyState, Icon, Skeleton } from "../../components/ui";
+import { Avatar, Banner, Button, DonateButton, EmptyState, Icon, Pagination, Skeleton, Tabs } from "../../components/ui";
+import { CandidatePostItem } from "../../posts/CandidatePostItem";
+import type { PostSummary } from "../../posts/types";
+import "../../news/news.css";
 import "./candidates.css";
 
 function Paragraphs({ text }: { text: string }) {
@@ -27,6 +30,14 @@ function Paragraphs({ text }: { text: string }) {
   );
 }
 
+/** Posts tab (spec 09 §4.2): fetched separately and anonymously; 10 per page. */
+function usePosts(slug: string, page: number) {
+  const api = useApi();
+  return useRequest(`candidate-posts:${slug}:${page}`, (signal) =>
+    api<{ count: number; results: PostSummary[] }>(`/candidates/${encodeURIComponent(slug)}/posts/${page > 1 ? `?page=${page}` : ""}`,
+      { anonymous: true, signal }));
+}
+
 export default function CandidateProfilePage() {
   const { slug = "" } = useParams();
   const api = useApi();
@@ -34,6 +45,10 @@ export default function CandidateProfilePage() {
     api<CandidateProfile>(`/candidates/${encodeURIComponent(slug)}/`, { anonymous: true, signal })
   );
 
+  const [tab, setTab] = useState("about");
+  const [postPage, setPostPage] = useState(1);
+  const posts = usePosts(slug, postPage);
+  const postCount = posts.data?.count ?? 0;
   const { loadStates } = useFollows();
   const donationsOpen = useDonationConfig().config.open;
   useEffect(() => {
@@ -104,7 +119,30 @@ export default function CandidateProfilePage() {
         </div>
       </header>
 
-      <div className="cand-about">
+      {postCount > 0 ? (
+        <div className="cand-about">
+          <Tabs label={`${c.full_name} sections`} value={tab} onChange={setTab} tabs={[
+            { id: "about", label: "About", content: <About c={c} /> },
+            { id: "posts", label: `Posts (${postCount})`, content: (
+              <div className="cand-posts">
+                <ul className="news-list">
+                  {posts.data?.results.map((p) => <CandidatePostItem key={p.id} post={p} candidate={c} showAttribution={false} />)}
+                </ul>
+                <Pagination page={postPage} pageCount={Math.ceil(postCount / 10)} onChange={setPostPage} label="Post pages" />
+              </div>
+            ) },
+          ]} />
+        </div>
+      ) : (
+        <div className="cand-about"><About c={c} /></div>
+      )}
+    </article>
+  );
+}
+
+function About({ c }: { c: CandidateProfile }) {
+  return (
+      <>
         <h2>About {c.full_name.split(" ")[0]}</h2>
         {c.campaign_summary && <p className="cand-about__summary">{c.campaign_summary}</p>}
 
@@ -147,7 +185,6 @@ export default function CandidateProfilePage() {
         {!c.campaign_summary && !c.priorities.length && !c.biography && !c.links.length && (
           <p className="cand-about__empty">This candidate hasn’t added details yet.</p>
         )}
-      </div>
-    </article>
+      </>
   );
 }

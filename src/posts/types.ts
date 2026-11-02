@@ -1,0 +1,88 @@
+import type { ArticleImage } from "../news/types";
+
+export type PostKind = "announcement" | "news";
+export type PostStatus = "published" | "removed" | "deleted";
+
+export interface PostCandidate {
+  id?: string;
+  slug: string;
+  full_name: string;
+  position?: string;
+  position_label?: string;
+  state?: string;
+  photo: { url_200: string | null; url_800?: string | null } | null;
+  verified?: boolean;
+}
+
+export interface PostSummary {
+  id: string;
+  kind: PostKind;
+  kind_label: string;
+  title: string;
+  excerpt: string;
+  image: ArticleImage | null;
+  published_at: string;
+  edited_at: string | null;
+}
+
+export interface PostDetail extends PostSummary {
+  body: string;
+  candidate: PostCandidate;
+}
+
+/** A candidate post as a /news feed item (spec 09 §6.4). */
+export interface FeedPost extends PostSummary {
+  source: "candidate";
+  candidate: PostCandidate;
+  state: string;
+  state_label: string;
+}
+
+export interface CampaignPost extends PostDetail {
+  status: PostStatus;
+  status_label: string;
+  removed_reason: string;
+  removed_at: string | null;
+  created_at: string;
+}
+
+export interface CampaignCandidate extends PostCandidate {
+  id: string;
+  status: string;
+  published: boolean;
+  notify_count: number;
+  posting_paused_until: string | null;
+}
+
+export interface PostReportRow {
+  id: string;
+  reason: string;
+  reason_label: string;
+  details: string;
+  status: "open" | "dismissed" | "actioned";
+  contact_email: string;
+  reporter_email: string | null;
+  created_at: string;
+  resolved_at: string | null;
+  resolution_note: string;
+}
+
+export interface AdminPost extends CampaignPost {
+  author_email: string;
+  editor_email: string;
+  open_reports: number;
+  events?: { event: string; note: string; created_at: string; actor_email: string | null }[];
+  reports?: PostReportRow[];
+}
+
+export const postPath = (slug: string, id: string) => `/candidates/${encodeURIComponent(slug)}/posts/${id}`;
+export const TITLE_MAX = 150;
+export const BODY_MAX = 10_000;
+export const REMOVE_REASONS = [
+  "Abusive or inciting language (Electoral Act 2026 s. 96).",
+  "False or unsourced election results.",
+  "Shares someone’s private information.",
+  "Hate speech.",
+  "Copyright complaint.",
+  "Other",
+];

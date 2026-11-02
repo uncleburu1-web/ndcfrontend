@@ -1,0 +1,121 @@
+/* Candidate posts — spec 09. Tokens only. */
+.post-kind {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-label);
+  background: var(--surface-page);
+  border: 1px solid var(--border);
+}
+.post-kind--announcement {
+  border-color: var(--brand-bg);
+  color: var(--text-brand);
+}
+.post-item {
+  border-left: 4px solid var(--action-primary-bg);
+}
+.post-campaign-line {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--action-primary-bg);
+  background: var(--surface);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.campaign-page {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  display: grid;
+  gap: var(--space-4);
+}
+.campaign-page h1 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.campaign-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+.campaign-picker {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.campaign-picker a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  text-decoration: none;
+}
+.campaign-form {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.campaign-form > button,
+.campaign-form .campaign-form__actions {
+  justify-self: start;
+}
+.campaign-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.campaign-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.campaign-post {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.campaign-post h2 {
+  margin: 0;
+  font-size: var(--text-lg);
+  overflow-wrap: anywhere;
+}
+.campaign-post p {
+  margin: 0;
+}
+.campaign-post__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.cand-posts {
+  display: grid;
+  gap: var(--space-3);
+}
+.news-form-fieldset {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.campaign-form h2 {
+  margin: 0;
+  font-size: var(--text-lg);
+}

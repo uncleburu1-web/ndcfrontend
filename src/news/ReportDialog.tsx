@@ -6,7 +6,9 @@ import { useApi } from "../auth/session";
 import { Button, Modal, RadioGroup, TextArea, TextField, useToast } from "../components/ui";
 import { REPORT_REASONS } from "./types";
 
-export function ReportDialog({ articleId, open, onClose }: { articleId: string; open: boolean; onClose: () => void }) {
+/** `path` overrides the endpoint, e.g. a candidate post's report URL (spec 09 §4.4). */
+export function ReportDialog({ articleId, path, title = "Report this article", open, onClose }:
+  { articleId?: string; path?: string; title?: string; open: boolean; onClose: () => void }) {
   const api = useApi();
   const toast = useToast();
   const { isSignedIn } = useAuth();
@@ -20,7 +22,7 @@ export function ReportDialog({ articleId, open, onClose }: { articleId: string; 
     setBusy(true);
     setError("");
     try {
-      await api(`/news/${articleId}/report/`, { method: "POST", body: { reason, details, contact_email: isSignedIn ? "" : email }, anonymous: !isSignedIn });
+      await api(path ?? `/news/${articleId}/report/`, { method: "POST", body: { reason, details, contact_email: isSignedIn ? "" : email }, anonymous: !isSignedIn });
       toast.show({ tone: "success", message: "Thanks. Our reviewers will look at it." });
       setReason("");
       setDetails("");
@@ -33,7 +35,7 @@ export function ReportDialog({ articleId, open, onClose }: { articleId: string; 
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Report this article"
+    <Modal open={open} onClose={onClose} title={title}
       footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button>
         <Button onClick={() => void send()} disabled={!reason} loading={busy} loadingLabel="Sending…">Send report</Button></>}>
       <p>Reports are private. The author never sees who reported.</p>

@@ -4,7 +4,7 @@ import { isFinanceViewer, isMembershipOfficer, isNewsReviewer, isPvcOfficer } fr
 import { useMe } from "../../auth/session";
 import "./admin-nav.css";
 
-export function AdminNav({ current }: { current: "candidates" | "donations" | "pvc" | "membership" | "news" | "announcements" }) {
+export function AdminNav({ current }: { current: "candidates" | "donations" | "pvc" | "membership" | "news" | "announcements" | "posts" }) {
   const { me } = useMe();
   const links = [
     me?.is_system_admin ? { id: "candidates", label: "Candidates", href: "/admin/candidates" } : null,
@@ -13,6 +13,7 @@ export function AdminNav({ current }: { current: "candidates" | "donations" | "p
     isMembershipOfficer(me) ? { id: "membership", label: "Membership", href: "/admin/membership" } : null,
     isNewsReviewer(me) ? { id: "news", label: "News review", href: "/admin/news" } : null,
     me?.is_system_admin ? { id: "announcements", label: "Announcements", href: "/admin/announcements" } : null,
+    me?.is_system_admin ? { id: "posts", label: "Candidate posts", href: "/admin/posts" } : null,
   ].filter(Boolean) as { id: string; label: string; href: string }[];
   if (links.length < 2) return null;
   return (

@@ -9,8 +9,10 @@ import { ApiError } from "../../../auth/api";
 import { useApi } from "../../../auth/session";
 import type { AdminCandidate, LinkedAccount } from "../../../candidates/types";
 import { useRequest } from "../../../candidates/useRequest";
-import { Avatar, Banner, Button, Checkbox, EmptyState, Modal, Skeleton, StatusBadge, TextArea, TextField, useToast } from "../../../components/ui";
+import { Avatar, Banner, Button, Checkbox, EmptyState, Modal, Select, Skeleton, StatusBadge, TextArea, TextField, useToast } from "../../../components/ui";
 import { formatDate } from "../../../lib/format";
+import { moderationError } from "../../../posts/moderation";
+import { REMOVE_REASONS, type AdminPost } from "../../../posts/types";
 import { CandidateForm, IDENTITY_FIELDS, toFormValues, toPayload, type CandidateFormValues } from "./CandidateForm";
 import "./admin.css";
 
@@ -122,6 +124,64 @@ function ActionBar({ candidate, onDone }: { candidate: AdminCandidate; onDone: (
         )}
       </Modal>
     </>
+  );
+}
+
+/* ----------------------------------------------------------------- posts */
+/** The candidate's own posts (spec 09 §4.4). Admins can remove or restore, never edit. */
+function PostsPanel({ candidate }: { candidate: AdminCandidate }) {
+  const api = useApi();
+  const toast = useToast();
+  const { data, error, loading, retry } = useRequest(`admin-candidate-posts:${candidate.id}`, (signal) =>
+    api<{ results: AdminPost[] }>(`/admin/candidates/${candidate.id}/posts/`, { signal })
+  );
+  const list = Array.isArray(data?.results) ? data.results : [];
+  const [removing, setRemoving] = useState<AdminPost | null>(null);
+  const [reason, setReason] = useState(REMOVE_REASONS[0]);
+  const [busy, setBusy] = useState(false);
+  const act = async (post: AdminPost, action: "remove" | "restore") => {
+    setBusy(true);
+    try {
+      await api(`/admin/posts/${post.id}/${action}/`, { method: "POST", body: action === "remove" ? { reason } : undefined });
+      toast.show({ tone: "success", message: action === "remove" ? "Post removed." : "Post restored." });
+      setRemoving(null);
+      retry();
+    } catch (err) {
+      toast.show({ tone: "error", message: moderationError(err) });
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <section className="adm-panel" aria-labelledby="posts-title">
+      <h2 id="posts-title">Posts</h2>
+      {error ? (
+        <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={retry}>Try again</Button>}>{error.message}</Banner>
+      ) : loading && !data ? (
+        <Skeleton height={60} />
+      ) : list.length ? (
+        <ul className="adm-history">
+          {list.slice(0, 10).map((p) => (
+            <li key={p.id}>
+              <a href={`/admin/posts/${p.id}`}>{p.title}</a> · <StatusBadge set="post" status={p.status} /> · {formatDate(p.published_at)}
+              {p.open_reports ? ` · ${p.open_reports} open reports` : ""}
+              {p.status === "published" && <> <Button size="sm" variant="ghost" onClick={() => { setReason(REMOVE_REASONS[0]); setRemoving(p); }}>Remove</Button></>}
+              {p.status === "removed" && <> <Button size="sm" variant="ghost" loading={busy} onClick={() => void act(p, "restore")}>Restore</Button></>}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ds-field__hint">No posts yet. Linked accounts publish from My campaign.</p>
+      )}
+      {list.length > 10 && <p><a href={`/admin/posts?candidate=${candidate.id}`}>See all {list.length} posts</a></p>}
+      <Modal open={Boolean(removing)} onClose={() => setRemoving(null)} title="Remove this post?"
+        footer={<><Button variant="secondary" onClick={() => setRemoving(null)}>Go back</Button>
+          <Button variant="danger" loading={busy} onClick={() => removing && void act(removing, "remove")}>Remove post</Button></>}>
+        <p>The campaign sees this reason. For a custom reason, open the post.</p>
+        <Select label="Reason" value={reason} onChange={(e) => setReason(e.target.value)}
+          options={REMOVE_REASONS.filter((r) => r !== "Other").map((r) => ({ value: r, label: r }))} />
+      </Modal>
+    </section>
   );
 }
 
@@ -406,6 +466,7 @@ export default function AdminCandidateEditPage() {
             {candidate.followers && <FollowersPanel followers={candidate.followers} />}
             <PhotoPanel candidate={candidate} onDone={setCandidate} />
             <AccountsPanel candidate={candidate} />
+            <PostsPanel candidate={candidate} />
           </div>
         )}
       </div>

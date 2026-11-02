@@ -52,6 +52,11 @@ const STATUS_SETS = {
     verified: ["Verified", "success"],
     not_verified: ["Not verified", "neutral"],
   },
+  post: {
+    published: ["Published", "success"],
+    removed: ["Removed", "warning"],
+    deleted: ["Deleted", "neutral"],
+  },
   donation: {
     initiated: ["Started", "neutral"],
     pending: ["Pending", "warning"],

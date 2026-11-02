@@ -194,3 +194,8 @@ export function RequirePvcOfficer({ children }: { children?: ReactNode }) {
   }
   return children ? <>{children}</> : <Outlet />;
 }
+
+/** Spec 09: accounts an admin linked to a candidate see My campaign. Candidate links are never implied by system admin. */
+export function isCampaignAccount(me: { roles: { role: string }[] } | null) {
+  return Boolean(me && me.roles.some((r) => r.role === "candidate"));
+}

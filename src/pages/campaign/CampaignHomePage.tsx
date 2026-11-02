@@ -1,0 +1,46 @@
+/** /campaign — linked campaign accounts pick their candidate (spec 09 §4.1). */
+import { useEffect } from "react";
+import { Link, Navigate } from "react-router-dom";
+import { useApi } from "../../auth/session";
+import { useRequest } from "../../candidates/useRequest";
+import { Avatar, Banner, Button, EmptyState, Skeleton, StatusBadge } from "../../components/ui";
+import type { CampaignCandidate } from "../../posts/types";
+import "../../posts/posts.css";
+
+export default function CampaignHomePage() {
+  const api = useApi();
+  const res = useRequest("campaign-candidates", (signal) => api<{ results: CampaignCandidate[] }>("/campaign/candidates/", { signal }));
+  useEffect(() => {
+    document.title = "My campaign | NDCConnect";
+  }, []);
+  if (res.error) return <div className="page-shell"><Banner tone="error">{res.error.message}</Banner></div>;
+  if (!res.data) return <div className="campaign-page"><Skeleton width="100%" height={120} /></div>;
+  const list = res.data.results;
+  if (list.length === 0) {
+    return (
+      <div className="page-shell">
+        <EmptyState icon="shield" title="You don’t have access to this page" action={<Button href="/candidates">See candidates</Button>}>
+          My campaign is for accounts an NDCConnect admin has linked to a candidate.
+        </EmptyState>
+      </div>
+    );
+  }
+  if (list.length === 1) return <Navigate to={`/campaign/${list[0].id}`} replace />;
+  return (
+    <div className="campaign-page">
+      <h1>My campaign</h1>
+      <p className="news-note">Choose the candidate you’re posting for.</p>
+      <ul className="campaign-picker">
+        {list.map((c) => (
+          <li key={c.id}>
+            <Link to={`/campaign/${c.id}`}>
+              <Avatar name={c.full_name} src={c.photo?.url_200 ?? undefined} size="md" />
+              <span><strong>{c.full_name}</strong><br /><span className="news-meta">{c.position_label}</span></span>
+              <StatusBadge set="candidate" status={c.status as "published"} />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

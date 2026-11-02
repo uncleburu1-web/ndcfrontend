@@ -41,6 +41,11 @@ import AdminAnnouncementsPage from "./pages/admin/announcements/AdminAnnouncemen
 import AnnouncementFormPage from "./pages/admin/announcements/AnnouncementFormPage";
 import AdminNewsDetailPage from "./pages/admin/news/AdminNewsDetailPage";
 import AdminNewsPage from "./pages/admin/news/AdminNewsPage";
+import AdminPostDetailPage from "./pages/admin/posts/AdminPostDetailPage";
+import AdminPostsPage from "./pages/admin/posts/AdminPostsPage";
+import CampaignCandidatePage from "./pages/campaign/CampaignCandidatePage";
+import CampaignHomePage from "./pages/campaign/CampaignHomePage";
+import CandidatePostPage from "./pages/candidates/CandidatePostPage";
 import ArticlePage from "./pages/news/ArticlePage";
 import MyNewsPage from "./pages/news/MyNewsPage";
 import NewsPage from "./pages/news/NewsPage";
@@ -89,6 +94,9 @@ export default function App() {
           {/* News (spec 07): My submissions and notifications need sign-in; submitting also needs a completed profile */}
           <Route path="news/mine" element={<MyNewsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
+          {/* Candidate posts (spec 09): linked campaign accounts; the backend checks the candidate link on every call */}
+          <Route path="campaign" element={<CampaignHomePage />} />
+          <Route path="campaign/:candidateId" element={<CampaignCandidatePage />} />
           <Route element={<RequireProfileComplete />}>
             <Route path="news/submit" element={<SubmitNewsPage />} />
             <Route path="news/mine/:id" element={<SubmitNewsPage />} />
@@ -97,6 +105,7 @@ export default function App() {
         {/* Public — no account, profile or PVC needed (spec 03 §3.4) */}
         <Route path="candidates" element={<CandidatesPage />} />
         <Route path="candidates/:slug" element={<CandidateProfilePage />} />
+        <Route path="candidates/:slug/posts/:id" element={<CandidatePostPage />} />
         {/* Donations (spec 05): guests welcome; the page itself says when donations aren't open */}
         <Route path="donate" element={<DonatePage />} />
         <Route path="donate/complete" element={<DonateCompletePage />} />
@@ -119,6 +128,8 @@ export default function App() {
             <Route path="admin/announcements" element={<AdminAnnouncementsPage />} />
             <Route path="admin/announcements/new" element={<AnnouncementFormPage />} />
             <Route path="admin/announcements/:id" element={<AnnouncementFormPage />} />
+            <Route path="admin/posts" element={<AdminPostsPage />} />
+            <Route path="admin/posts/:id" element={<AdminPostDetailPage />} />
           </Route>
           {/* System admin or finance officer (spec 05 §7.2) */}
           <Route element={<RequireFinanceViewer />}>

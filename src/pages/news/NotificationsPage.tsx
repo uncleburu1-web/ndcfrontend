@@ -5,18 +5,27 @@ import { useApi } from "../../auth/session";
 import { Banner, Button, EmptyState, Icon, Skeleton, Switch, useToast } from "../../components/ui";
 import { formatDate } from "../../lib/format";
 import { notificationsChanged } from "../../notifications/useUnreadCount";
+import { postPath } from "../../posts/types";
+import { Avatar } from "../../components/ui";
 import "../../news/news.css";
 
 export interface NotificationItem {
   id: string;
-  kind: "announcement" | "news_decision" | "pvc_decision";
+  kind: "announcement" | "news_decision" | "pvc_decision" | "candidate_post";
   created_at: string;
   read_at: string | null;
   decision: "" | "approved" | "rejected" | "verified";
   article: { id: string; source: "official" | "community"; title: string; public: boolean } | null;
+  /** Spec 09: candidate_post items. */
+  post?: { id: string; kind: "announcement" | "news"; kind_label: string; title: string };
+  candidate?: { slug: string; full_name: string; photo: { url_200: string | null } | null };
 }
 
-export function describe(n: NotificationItem) {
+export function describe(n: NotificationItem): { text: string; href: string; icon: "shield" | "verified" | "info" | "checkCircle" | null } {
+  if (n.kind === "candidate_post" && n.post && n.candidate) {
+    const what = n.post.kind === "announcement" ? "posted an announcement" : "posted news";
+    return { text: `${n.candidate.full_name} ${what}: ${n.post.title}`, href: postPath(n.candidate.slug, n.post.id), icon: null };
+  }
   if (n.kind === "pvc_decision") {
     return n.decision === "verified"
       ? { text: "Your PVC is verified. You can now join the NDC.", href: "/pvc", icon: "verified" as const }
@@ -75,7 +84,8 @@ export default function NotificationsPage() {
       </header>
       {error ? <Banner tone="error">{error}</Banner> : !items ? <Skeleton width="100%" height={160} /> : items.length === 0 ? (
         <EmptyState title="No notifications yet">
-          Official announcements and decisions about your news and PVC appear here. <Link to="/news">Read the news</Link>
+          Official announcements and decisions about your news and PVC appear here.{" "}
+          Turn on the bell for candidates you follow to hear when they post. <Link to="/following">See who you follow</Link>
         </EmptyState>
       ) : (
         <ul className="notif-list">
@@ -84,7 +94,9 @@ export default function NotificationsPage() {
             return (
               <li key={n.id} className={`notif-item${n.read_at ? "" : " notif-item--unread"}`}>
                 <a href={d.href} onClick={(e) => { e.preventDefault(); void open(n); }}>
-                  <span className="notif-item__icon"><Icon name={d.icon} size={20} /></span>
+                  <span className="notif-item__icon">
+                    {d.icon ? <Icon name={d.icon} size={20} /> : <Avatar name={n.candidate?.full_name ?? ""} src={n.candidate?.photo?.url_200 ?? undefined} size="xs" />}
+                  </span>
                   <span className="notif-item__text">
                     {!n.read_at && <span className="notif-dot" aria-hidden="true" />}
                     {!n.read_at && <span className="visually-hidden">Unread: </span>}

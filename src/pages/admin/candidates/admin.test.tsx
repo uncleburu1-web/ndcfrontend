@@ -107,6 +107,7 @@ describe("workflow actions", () => {
   it("confirms before publishing and explains the effect", async () => {
     h.api.mockImplementation(async (path: string, opts?: { method?: string }) => {
       if (path.endsWith("/accounts/")) return [];
+      if (path.endsWith("/posts/")) return { results: [] };
       if (opts?.method === "POST") return { ...base, status: "published", is_verified: true };
       return { ...base, is_verified: true, verified_at: "2026-10-02T10:00:00Z", verification_notes: "Matched INEC list" };
     });
@@ -121,7 +122,7 @@ describe("workflow actions", () => {
   });
 
   it("offers only the actions allowed in each state", async () => {
-    h.api.mockImplementation(async (path: string) => (path.endsWith("/accounts/") ? [] : base));
+    h.api.mockImplementation(async (path: string) => (path.endsWith("/accounts/") ? [] : path.endsWith("/posts/") ? { results: [] } : base));
     renderAt(`/admin/candidates/${base.id}`);
     expect(await screen.findByRole("button", { name: "Verify" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Publish" })).toBeNull();
@@ -130,6 +131,7 @@ describe("workflow actions", () => {
   it("asks for a reason when unpublishing", async () => {
     h.api.mockImplementation(async (path: string, opts?: { method?: string; body?: unknown }) => {
       if (path.endsWith("/accounts/")) return [];
+      if (path.endsWith("/posts/")) return { results: [] };
       if (opts?.method === "POST") {
         if (!(opts.body as { reason?: string }).reason) throw new ApiError({ status: 400, code: "validation_error", message: "x", fields: { reason: ["Give a reason for unpublishing."] } });
         return { ...base, status: "unpublished", is_verified: true };
@@ -147,7 +149,7 @@ describe("workflow actions", () => {
 describe("followers (spec 04 §7.4)", () => {
   it("shows follower counts only — never who", async () => {
     h.api.mockImplementation(async (path: string) =>
-      path.endsWith("/accounts/") ? [] : { ...base, status: "published", is_verified: true, followers: { total: 1240, notify_on: 312 } }
+      path.endsWith("/accounts/") ? [] : path.endsWith("/posts/") ? { results: [] } : { ...base, status: "published", is_verified: true, followers: { total: 1240, notify_on: 312 } }
     );
     renderAt(`/admin/candidates/${base.id}`);
     const panel = (await screen.findByRole("heading", { name: "Followers" })).closest("section")!;
@@ -161,6 +163,7 @@ describe("identity change on a published candidate", () => {
   it("warns before saving and only PATCHes after confirmation", async () => {
     h.api.mockImplementation(async (path: string, opts?: { method?: string }) => {
       if (path.endsWith("/accounts/")) return [];
+      if (path.endsWith("/posts/")) return { results: [] };
       if (opts?.method === "PATCH") return { ...base, full_name: "Amina B. Bello", status: "unpublished", unpublished_by_edit: true };
       return { ...base, status: "published", is_verified: true };
     });
@@ -176,6 +179,7 @@ describe("identity change on a published candidate", () => {
   it("saves non-identity edits on a published candidate without warning", async () => {
     h.api.mockImplementation(async (path: string, opts?: { method?: string }) => {
       if (path.endsWith("/accounts/")) return [];
+      if (path.endsWith("/posts/")) return { results: [] };
       if (opts?.method === "PATCH") return { ...base, status: "published", is_verified: true, biography: "New bio" };
       return { ...base, status: "published", is_verified: true };
     });

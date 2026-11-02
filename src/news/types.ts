@@ -45,7 +45,8 @@ export interface NewsPage {
   count: number;
   next: string | null;
   previous: string | null;
-  results: ArticleSummary[];
+  /** Spec 09: candidate posts appear in All and Candidates (source "candidate"). */
+  results: (ArticleSummary | import("../posts/types").FeedPost)[];
   pinned: ArticleSummary[];
 }
 

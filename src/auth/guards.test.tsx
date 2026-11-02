@@ -292,3 +292,29 @@ describe("PVC as its own unit (spec 08)", () => {
     expect(screen.getByRole("heading", { level: 1, name: "PVC checks" })).toBeTruthy();
   });
 });
+
+describe("Candidate posts (spec 09)", () => {
+  it("only candidate-linked accounts see My campaign — not admins, not ordinary users", () => {
+    clerkState.isSignedIn = true;
+    session.status = "ready";
+    session.me = { ...complete, roles: [{ role: "candidate", scope_type: "candidate", scope_id: "k1" }] } as Me;
+    renderAt("/", <App />);
+    expect(screen.getAllByRole("link", { name: "My campaign" })[0].getAttribute("href")).toBe("/campaign");
+    cleanup();
+    session.me = { ...complete, is_system_admin: true } as Me;
+    renderAt("/", <App />);
+    expect(screen.queryByRole("link", { name: "My campaign" })).toBeNull();
+    cleanup();
+    session.me = complete;
+    renderAt("/", <App />);
+    expect(screen.queryByRole("link", { name: "My campaign" })).toBeNull();
+  });
+
+  it("/admin/posts is closed to campaign accounts", () => {
+    clerkState.isSignedIn = true;
+    session.status = "ready";
+    session.me = { ...complete, roles: [{ role: "candidate", scope_type: "candidate", scope_id: "k1" }] } as Me;
+    renderAt("/admin/posts", <App />);
+    expect(screen.getByText("You don’t have access to this page")).toBeTruthy();
+  });
+});
