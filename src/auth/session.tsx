@@ -20,6 +20,8 @@ export interface Me {
   /** Spec 08: the caller's own PVC status; the "Verified voter" badge shows only when this is "successful". */
   pvc_status?: "unverified" | "pending" | "successful" | "rejected";
   just_completed?: boolean;
+  /** Spec 11: admin areas the backend says this account can open ("overview", "news", "team"…). Empty = not an admin. */
+  admin_areas?: string[];
 }
 
 type MeStatus = "idle" | "loading" | "ready" | "error";

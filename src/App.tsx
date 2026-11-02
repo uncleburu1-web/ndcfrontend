@@ -10,6 +10,7 @@ import {
   RequireNewsReviewer,
   RequireProfileComplete,
   RequirePvcOfficer,
+  RequireAnyAdmin,
   RequireSignedIn,
   RequireSystemAdmin,
   SignedOutOnly,
@@ -41,7 +42,12 @@ import AdminAnnouncementsPage from "./pages/admin/announcements/AdminAnnouncemen
 import AnnouncementFormPage from "./pages/admin/announcements/AnnouncementFormPage";
 import AdminNewsDetailPage from "./pages/admin/news/AdminNewsDetailPage";
 import AdminNewsPage from "./pages/admin/news/AdminNewsPage";
+import AdminAuditPage from "./pages/admin/audit/AdminAuditPage";
+import AdminHomePage from "./pages/admin/home/AdminHomePage";
 import AdminPostDetailPage from "./pages/admin/posts/AdminPostDetailPage";
+import AdminTeamPage from "./pages/admin/team/AdminTeamPage";
+import AdminUserPage from "./pages/admin/users/AdminUserPage";
+import AdminUsersPage from "./pages/admin/users/AdminUsersPage";
 import AdminPostsPage from "./pages/admin/posts/AdminPostsPage";
 import CampaignCandidatePage from "./pages/campaign/CampaignCandidatePage";
 import CampaignHomePage from "./pages/campaign/CampaignHomePage";
@@ -121,7 +127,15 @@ export default function App() {
         <Route path="news/community/:id" element={<ArticlePage source="community" />} />
         {/* System admin only (spec 03 §8.3); the backend enforces IsSystemAdmin too */}
         <Route element={<RequireSignedIn />}>
+          {/* Admin home: any admin role, each sees only its own cards (spec 11 §4.1) */}
+          <Route element={<RequireAnyAdmin />}>
+            <Route path="admin" element={<AdminHomePage />} />
+          </Route>
           <Route element={<RequireSystemAdmin />}>
+            <Route path="admin/team" element={<AdminTeamPage />} />
+            <Route path="admin/users" element={<AdminUsersPage />} />
+            <Route path="admin/users/:id" element={<AdminUserPage />} />
+            <Route path="admin/audit" element={<AdminAuditPage />} />
             <Route path="admin/candidates" element={<AdminCandidatesPage />} />
             <Route path="admin/candidates/new" element={<AdminCandidateEditPage />} />
             <Route path="admin/candidates/:id" element={<AdminCandidateEditPage />} />

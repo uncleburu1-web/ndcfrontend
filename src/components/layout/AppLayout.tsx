@@ -4,7 +4,7 @@
  */
 import { Show, UserButton } from "@clerk/react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { isCampaignAccount, isFinanceViewer, isMembershipOfficer, isNewsReviewer, isPvcOfficer } from "../../auth/guards";
+import { isAnyAdmin, isCampaignAccount } from "../../auth/guards";
 import { useMe, useSessionIssue } from "../../auth/session";
 import { DonationConfigProvider, useDonationConfig } from "../../donations/DonationConfigProvider";
 import { FollowProvider } from "../../follows/FollowProvider";
@@ -85,9 +85,8 @@ function Chrome() {
   const path = useLocation().pathname;
   const { me } = useMe();
   const { config } = useDonationConfig();
-  // Admin link: system admins land on candidates; other roles on their own area (the backend still enforces access).
-  const adminHref = me?.is_system_admin ? "/admin/candidates" : isMembershipOfficer(me) ? "/admin/membership"
-    : isFinanceViewer(me) ? "/admin/donations" : isNewsReviewer(me) ? "/admin/news" : isPvcOfficer(me) ? "/admin/pvc" : null;
+  // Admin link: every admin role lands on the Admin home (spec 11 §4.1); the backend still enforces access.
+  const adminHref = isAnyAdmin(me) ? "/admin" : null;
   const base = isCampaignAccount(me) ? [...NAV, { label: "My campaign", href: "/campaign" }] : NAV;
   const links = adminHref ? [...base, { label: "Admin", href: adminHref }] : base;
   return (

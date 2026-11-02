@@ -57,6 +57,15 @@ const STATUS_SETS = {
     removed: ["Removed", "warning"],
     deleted: ["Deleted", "neutral"],
   },
+  role: {
+    active: ["Active", "success"],
+    revoked: ["Revoked", "neutral"],
+  },
+  account: {
+    active: ["Active", "success"],
+    deactivated: ["Deactivated", "error"],
+    deleted: ["Deleted in Clerk", "neutral"],
+  },
   donation: {
     initiated: ["Started", "neutral"],
     pending: ["Pending", "warning"],

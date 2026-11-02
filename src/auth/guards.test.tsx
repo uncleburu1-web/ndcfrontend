@@ -218,12 +218,12 @@ describe("membership routes (spec 06)", () => {
     expect(screen.getByText("You don’t have access to this page")).toBeTruthy();
   });
 
-  it("officers with no other admin role get an Admin link to membership", () => {
+  it("officers with no other admin role get an Admin link to the Admin home (spec 11)", () => {
     clerkState.isSignedIn = true;
     session.me = { ...complete, roles: [{ role: "membership_officer" }] } as Me;
     session.status = "ready";
     renderAt("/", <App />);
-    expect(screen.getAllByRole("link", { name: "Admin" })[0].getAttribute("href")).toBe("/admin/membership");
+    expect(screen.getAllByRole("link", { name: "Admin" })[0].getAttribute("href")).toBe("/admin");
   });
 });
 
@@ -249,14 +249,14 @@ describe("news routes (spec 07)", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Submit news" })).toBeTruthy();
   });
 
-  it("signed-in users get the bell and a My news link; reviewers get an Admin link to the queue", () => {
+  it("signed-in users get the bell and a My news link; reviewers get an Admin link to the Admin home", () => {
     clerkState.isSignedIn = true;
     session.me = { ...complete, roles: [{ role: "news_reviewer" }] } as Me;
     session.status = "ready";
     renderAt("/", <App />);
     expect(screen.getAllByRole("link", { name: "Notifications" })[0].getAttribute("href")).toBe("/notifications");
     expect(screen.getAllByRole("link", { name: "My news" })[0].getAttribute("href")).toBe("/news/mine");
-    expect(screen.getAllByRole("link", { name: "Admin" })[0].getAttribute("href")).toBe("/admin/news");
+    expect(screen.getAllByRole("link", { name: "Admin" })[0].getAttribute("href")).toBe("/admin");
   });
 
   it("/admin/news is closed to ordinary users", () => {
@@ -281,12 +281,12 @@ describe("PVC as its own unit (spec 08)", () => {
     expect(screen.getAllByRole("link", { name: "Verified voter" })[0].getAttribute("href")).toBe("/pvc");
   });
 
-  it("PVC-only officers get an Admin link to the queue, and the queue opens", () => {
+  it("PVC-only officers get an Admin link to the Admin home, and the queue opens", () => {
     clerkState.isSignedIn = true;
     session.me = { ...complete, roles: [{ role: "pvc_officer" }] } as Me;
     session.status = "ready";
     renderAt("/", <App />);
-    expect(screen.getAllByRole("link", { name: "Admin" })[0].getAttribute("href")).toBe("/admin/pvc");
+    expect(screen.getAllByRole("link", { name: "Admin" })[0].getAttribute("href")).toBe("/admin");
     cleanup();
     renderAt("/admin/pvc", <App />);
     expect(screen.getByRole("heading", { level: 1, name: "PVC checks" })).toBeTruthy();

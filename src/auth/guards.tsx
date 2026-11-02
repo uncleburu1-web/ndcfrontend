@@ -199,3 +199,48 @@ export function RequirePvcOfficer({ children }: { children?: ReactNode }) {
 export function isCampaignAccount(me: { roles: { role: string }[] } | null) {
   return Boolean(me && me.roles.some((r) => r.role === "candidate"));
 }
+
+type AdminMe = { is_system_admin: boolean; roles: { role: string }[]; admin_areas?: string[] } | null;
+const ADMIN_ROLES = ["system_admin", "news_reviewer", "pvc_officer", "membership_officer", "finance_officer", "moderator"];
+
+/** Spec 11: the backend's `admin_areas` decides; older payloads fall back to the roles list. A candidate link alone isn't admin. */
+export function adminAreas(me: AdminMe): string[] {
+  if (!me) return [];
+  if (me.admin_areas) return me.admin_areas;
+  const has = (r: string) => me.is_system_admin || me.roles.some((x) => x.role === r);
+  if (!me.is_system_admin && !me.roles.some((r) => ADMIN_ROLES.includes(r.role))) return [];
+  const areas = ["overview"];
+  if (me.is_system_admin) areas.push("candidates");
+  if (has("finance_officer")) areas.push("donations");
+  if (isPvcOfficer(me)) areas.push("pvc");
+  if (has("membership_officer")) areas.push("membership");
+  if (has("news_reviewer")) areas.push("news");
+  if (me.is_system_admin) areas.push("announcements", "posts", "team", "audit");
+  return areas;
+}
+
+export function isAnyAdmin(me: AdminMe) {
+  return adminAreas(me).length > 0;
+}
+
+export function RequireAnyAdmin({ children }: { children?: ReactNode }) {
+  const { me, status, error, refresh } = useMe();
+  if (status === "error") {
+    return (
+      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+        {error?.message}
+      </Banner>
+    );
+  }
+  if (!me) return <Pending label="Loading your account" />;
+  if (!isAnyAdmin(me)) {
+    return (
+      <div className="page-shell">
+        <EmptyState icon="shield" title="You don’t have access to this page">
+          The admin is for NDCConnect administrators and officers.
+        </EmptyState>
+      </div>
+    );
+  }
+  return children ? <>{children}</> : <Outlet />;
+}

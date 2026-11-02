@@ -1,20 +1,31 @@
-/** Tabs between admin areas. Each link is shown only to roles that can use it; the backend enforces access anyway. */
+/**
+ * Tabs between admin areas (spec 11 §8.1). Which tabs show comes from the backend's `me.admin_areas`;
+ * the backend enforces access anyway.
+ */
 import { Link } from "react-router-dom";
-import { isFinanceViewer, isMembershipOfficer, isNewsReviewer, isPvcOfficer } from "../../auth/guards";
+import { adminAreas } from "../../auth/guards";
 import { useMe } from "../../auth/session";
 import "./admin-nav.css";
 
-export function AdminNav({ current }: { current: "candidates" | "donations" | "pvc" | "membership" | "news" | "announcements" | "posts" }) {
+export type AdminArea = "overview" | "candidates" | "donations" | "pvc" | "membership" | "news" | "announcements" | "posts" | "team" | "audit";
+
+const TABS: { id: AdminArea; label: string; href: string }[] = [
+  { id: "overview", label: "Overview", href: "/admin" },
+  { id: "candidates", label: "Candidates", href: "/admin/candidates" },
+  { id: "donations", label: "Donations", href: "/admin/donations" },
+  { id: "pvc", label: "PVC checks", href: "/admin/pvc" },
+  { id: "membership", label: "Membership", href: "/admin/membership" },
+  { id: "news", label: "News review", href: "/admin/news" },
+  { id: "announcements", label: "Announcements", href: "/admin/announcements" },
+  { id: "posts", label: "Candidate posts", href: "/admin/posts" },
+  { id: "team", label: "Team", href: "/admin/team" },
+  { id: "audit", label: "Audit log", href: "/admin/audit" },
+];
+
+export function AdminNav({ current }: { current: AdminArea }) {
   const { me } = useMe();
-  const links = [
-    me?.is_system_admin ? { id: "candidates", label: "Candidates", href: "/admin/candidates" } : null,
-    isFinanceViewer(me) ? { id: "donations", label: "Donations", href: "/admin/donations" } : null,
-    isPvcOfficer(me) ? { id: "pvc", label: "PVC checks", href: "/admin/pvc" } : null,
-    isMembershipOfficer(me) ? { id: "membership", label: "Membership", href: "/admin/membership" } : null,
-    isNewsReviewer(me) ? { id: "news", label: "News review", href: "/admin/news" } : null,
-    me?.is_system_admin ? { id: "announcements", label: "Announcements", href: "/admin/announcements" } : null,
-    me?.is_system_admin ? { id: "posts", label: "Candidate posts", href: "/admin/posts" } : null,
-  ].filter(Boolean) as { id: string; label: string; href: string }[];
+  const areas = adminAreas(me);
+  const links = TABS.filter((t) => areas.includes(t.id));
   if (links.length < 2) return null;
   return (
     <nav className="adm-nav" aria-label="Admin sections">

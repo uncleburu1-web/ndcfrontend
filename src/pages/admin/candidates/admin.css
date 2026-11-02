@@ -57,6 +57,8 @@
 }
 
 .adm-table-wrap {
+  /* positioned so visually-hidden header text is clipped by the scroller instead of widening the page */
+  position: relative;
   overflow-x: auto;
   margin-bottom: var(--space-6);
   background: var(--surface);

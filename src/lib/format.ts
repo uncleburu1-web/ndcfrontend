@@ -58,3 +58,24 @@ export function formatDate(value: Date | string | number, { withTime = false, sh
   }
   return text;
 }
+
+/** "3 min", "5 h", "2 days" — how long something has waited (spec 11 §8.1). */
+export function formatAge(value: Date | string | number, now: Date = new Date()): string {
+  const ms = Math.max(0, now.getTime() - new Date(value).getTime());
+  const min = Math.floor(ms / 60_000);
+  if (min < 60) return `${Math.max(1, min)} min`;
+  const h = Math.floor(min / 60);
+  if (h < 48) return `${h} h`;
+  return `${Math.floor(h / 24)} days`;
+}
+
+/** Working days between `from` and now (Mon–Fri): PVC and membership turnaround (specs 08 and 11). */
+export function workingDaysSince(from: Date, now = new Date()) {
+  let days = 0;
+  const d = new Date(from);
+  while (d < now) {
+    d.setDate(d.getDate() + 1);
+    if (d <= now && d.getDay() !== 0 && d.getDay() !== 6) days += 1;
+  }
+  return days;
+}

@@ -8,7 +8,7 @@ import { ApiError } from "../../../auth/api";
 import { useApi } from "../../../auth/session";
 import { useRequest } from "../../../candidates/useRequest";
 import { Banner, Button, EmptyState, MaskedValue, Modal, Pagination, Select, Skeleton, StatusBadge, TextArea, useToast } from "../../../components/ui";
-import { formatDate } from "../../../lib/format";
+import { formatDate, workingDaysSince } from "../../../lib/format";
 import { STATES } from "../../../lib/nigeria";
 import type { AdminPvc, AdminPvcPage } from "../../../pvc/types";
 import { AdminNav } from "../AdminNav";
@@ -22,16 +22,7 @@ export const REJECT_REASONS = [
   "The VIN is incomplete or unreadable.",
   "Other",
 ];
-/** Working days between `from` and now (Mon–Fri), for the turnaround promise of "up to 3 working days". */
-export function workingDaysSince(from: Date, now = new Date()) {
-  let days = 0;
-  const d = new Date(from);
-  while (d < now) {
-    d.setDate(d.getDate() + 1);
-    if (d <= now && d.getDay() !== 0 && d.getDay() !== 6) days += 1;
-  }
-  return days;
-}
+export { workingDaysSince }; // moved to lib/format (shared with the Admin home, spec 11)
 
 export function waitText(from: string, now = new Date()) {
   const ms = now.getTime() - new Date(from).getTime();
