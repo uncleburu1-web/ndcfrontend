@@ -1,0 +1,262 @@
+/* Security and privacy (spec 14). Tokens only; 360 px with no sideways scrolling. */
+
+.privacy-page {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  overflow-wrap: anywhere;
+}
+.privacy-page h1 {
+  margin-bottom: var(--space-3);
+}
+.privacy-page h2 {
+  font-size: var(--text-lg);
+  margin: var(--space-8) 0 var(--space-3);
+  scroll-margin-top: var(--space-16);
+}
+.privacy-page h3 {
+  font-size: var(--text-base);
+  margin: var(--space-4) 0 var(--space-2);
+}
+.privacy-lead {
+  color: var(--text-muted);
+}
+.privacy-meta {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  margin: var(--space-1) 0;
+}
+.privacy-note {
+  white-space: pre-wrap;
+  margin: var(--space-1) 0 0;
+}
+.privacy-list,
+.privacy-consents {
+  padding-left: var(--space-6);
+  display: grid;
+  gap: var(--space-2);
+}
+.privacy-tag {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 0 var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-label);
+  color: var(--tone-warning-fg);
+  background: var(--tone-warning-bg);
+  border-radius: var(--radius-full);
+  vertical-align: middle;
+}
+
+.privacy-categories {
+  display: grid;
+  gap: var(--space-4);
+}
+.privacy-category,
+.privacy-card {
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  scroll-margin-top: var(--space-16);
+  min-width: 0;
+}
+.privacy-category:target,
+.privacy-category:focus {
+  border-color: var(--brand-bg);
+  box-shadow: 0 0 0 2px var(--focus-ring);
+  outline: none;
+}
+.privacy-category h3 {
+  margin-top: 0;
+}
+.privacy-category dl,
+.privacy-dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+}
+.privacy-category dt,
+.privacy-dl dt {
+  font-weight: var(--weight-label);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+.privacy-category dd,
+.privacy-dl dd {
+  margin: 0;
+}
+@media (min-width: 640px) {
+  .privacy-category dl,
+  .privacy-dl {
+    grid-template-columns: 10rem minmax(0, 1fr);
+  }
+  .privacy-category dt,
+  .privacy-dl dt {
+    margin-top: 0;
+  }
+}
+
+.privacy-card {
+  margin-top: var(--space-6);
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+.privacy-card > * {
+  max-width: 100%;
+}
+.privacy-card h2 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.privacy-card--danger {
+  border-left: 4px solid var(--tone-error-fg);
+}
+.privacy-card--notice {
+  border-left: 4px solid var(--tone-warning-fg);
+}
+.privacy-two {
+  display: grid;
+  gap: var(--space-4);
+  width: 100%;
+}
+@media (min-width: 640px) {
+  .privacy-two {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.privacy-rows {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+}
+.privacy-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+.privacy-row > div {
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+.privacy-request {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+.privacy-events {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-2) 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.privacy-form {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+}
+.privacy-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.privacy-gate-actions {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: center;
+}
+
+.privacy-incidents {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.privacy-clocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+}
+
+.consent-dialog__text {
+  margin: 0 0 var(--space-3);
+}
+.consent-dialog__meta {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+.consent-dialog__error {
+  color: var(--tone-error-fg);
+  margin: var(--space-2) 0 0;
+}
+.consent-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.profile-form__under18 {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--text-link);
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+}
+.profile-form__under18:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Tab buttons inside the admin sub-nav (status tabs on /admin/privacy pages). */
+.adm-subnav button {
+  padding: var(--space-1) 0;
+  color: var(--text-muted);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.adm-subnav button:hover {
+  color: var(--text);
+}
+.adm-subnav button.active {
+  color: var(--text-brand);
+  border-bottom-color: var(--brand-bg);
+  font-weight: var(--weight-label);
+}
+.adm-subnav button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Long model names in the data register wrap instead of pushing the page sideways at 360 px. */
+.privacy-dl code,
+.privacy-list code {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+.privacy-dl dd,
+.privacy-list li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

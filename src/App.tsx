@@ -12,6 +12,7 @@ import {
   RequirePvcOfficer,
   RequireAnyAdmin,
   RequireModerationStaff,
+  RequirePrivacyOfficer,
   RequireSignedIn,
   RequireSystemAdmin,
   SignedOutOnly,
@@ -78,6 +79,17 @@ import AccountPage from "./pages/auth/AccountPage";
 import SetupProfilePage from "./pages/auth/SetupProfilePage";
 import SignInPage from "./pages/auth/SignInPage";
 import SignUpPage from "./pages/auth/SignUpPage";
+import AccountDeletedPage from "./pages/privacy/AccountDeletedPage";
+import PrivacyPage from "./pages/privacy/PrivacyPage";
+import SecurityPage from "./pages/privacy/SecurityPage";
+import YourDataPage from "./pages/privacy/YourDataPage";
+import AdminIncidentPage from "./pages/admin/privacy/AdminIncidentPage";
+import AdminIncidentsPage from "./pages/admin/privacy/AdminIncidentsPage";
+import AdminPrivacyRequestPage from "./pages/admin/privacy/AdminPrivacyRequestPage";
+import AdminPrivacyRequestsPage from "./pages/admin/privacy/AdminPrivacyRequestsPage";
+import AdminRegisterPage from "./pages/admin/privacy/AdminRegisterPage";
+import AdminAccessReviewPage from "./pages/admin/team/AdminAccessReviewPage";
+import { AdminMfaGate } from "./privacy/AdminMfaGate";
 
 function HomePage() {
   return (
@@ -106,6 +118,7 @@ export default function App() {
         <Route path="sign-up/*" element={<SignedOutOnly><SignUpPage /></SignedOutOnly>} />
         <Route element={<RequireSignedIn />}>
           <Route path="setup-profile" element={<SetupProfilePage />} />
+          <Route path="account/privacy" element={<YourDataPage />} />
           <Route path="account/*" element={<AccountPage />} />
           {/* Sign-in only — never profile completion or PVC (spec 04 §4.4). */}
           <Route path="following" element={<FollowingPage />} />
@@ -136,6 +149,9 @@ export default function App() {
         <Route path="states/:state" element={<StatePage />} />
         {/* Community rules, report status and copyright notices (spec 13): public */}
         <Route path="rules" element={<RulesPage />} />
+        <Route path="privacy" element={<PrivacyPage />} />
+        <Route path="security" element={<SecurityPage />} />
+        <Route path="account-deleted" element={<AccountDeletedPage />} />
         <Route path="reports/status" element={<ReportStatusPage />} />
         <Route path="report/copyright" element={<CopyrightNoticePage />} />
         {/* Donations (spec 05): guests welcome; the page itself says when donations aren't open */}
@@ -153,6 +169,8 @@ export default function App() {
         <Route path="news/community/:id" element={<ArticlePage source="community" />} />
         {/* System admin only (spec 03 §8.3); the backend enforces IsSystemAdmin too */}
         <Route element={<RequireSignedIn />}>
+          {/* Spec 14 §4.6: every admin page sits behind the two-step verification gate */}
+          <Route element={<AdminMfaGate />}>
           {/* Admin home: any admin role, each sees only its own cards (spec 11 §4.1) */}
           <Route element={<RequireAnyAdmin />}>
             <Route path="admin" element={<AdminHomePage />} />
@@ -168,6 +186,7 @@ export default function App() {
             <Route path="admin/moderation/legal/:id" element={<AdminLegalNoticePage />} />
             <Route path="admin/moderation/compliance" element={<AdminCompliancePage />} />
             <Route path="admin/team" element={<AdminTeamPage />} />
+            <Route path="admin/team/review" element={<AdminAccessReviewPage />} />
             <Route path="admin/users" element={<AdminUsersPage />} />
             <Route path="admin/users/:id" element={<AdminUserPage />} />
             <Route path="admin/audit" element={<AdminAuditPage />} />
@@ -201,6 +220,15 @@ export default function App() {
           <Route element={<RequireNewsReviewer />}>
             <Route path="admin/news" element={<AdminNewsPage />} />
             <Route path="admin/news/:id" element={<AdminNewsDetailPage />} />
+          </Route>
+          {/* Privacy officer, implied by system admin (spec 14 §4.5, §4.7) */}
+          <Route element={<RequirePrivacyOfficer />}>
+            <Route path="admin/privacy" element={<AdminPrivacyRequestsPage />} />
+            <Route path="admin/privacy/requests/:id" element={<AdminPrivacyRequestPage />} />
+            <Route path="admin/privacy/incidents" element={<AdminIncidentsPage />} />
+            <Route path="admin/privacy/incidents/:id" element={<AdminIncidentPage />} />
+            <Route path="admin/privacy/register" element={<AdminRegisterPage />} />
+          </Route>
           </Route>
         </Route>
         <Route path="account-deactivated" element={<AccountDeactivatedPage />} />

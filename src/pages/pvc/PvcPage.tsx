@@ -5,7 +5,7 @@
  */
 import { useAuth } from "@clerk/react";
 import { useEffect, useState, type FormEvent } from "react";
-import { ApiError } from "../../auth/api";
+import { ApiError, CONSENT_DECLINED } from "../../auth/api";
 import { useApi, useMe } from "../../auth/session";
 import { useRequest } from "../../candidates/useRequest";
 import { Banner, Button, Checkbox, Select, Skeleton, StatusBadge, Switch, TextField, useToast } from "../../components/ui";
@@ -140,6 +140,7 @@ export default function PvcPage() {
       setPvc(await api<MyPvc>("/me/pvc/badge/", { method: "PATCH", body: { show_badge: show } }));
       toast.show({ tone: "success", message: show ? "Your Verified voter badge will show beside your name where it’s public." : "Badge hidden from public pages." });
     } catch (err) {
+      if (err instanceof ApiError && err.code === CONSENT_DECLINED) return; // "Not now": nothing changes (spec 14 §4.2)
       toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Couldn’t change that." });
     }
   };

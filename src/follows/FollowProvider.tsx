@@ -12,7 +12,7 @@
 import { useAuth } from "@clerk/react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ApiError } from "../auth/api";
+import { ApiError, CONSENT_DECLINED } from "../auth/api";
 import { useApi } from "../auth/session";
 import { useToast } from "../components/ui";
 import { clearPendingVote, markPendingVoteFailed, readPendingVote, savePendingVote } from "./pendingVote";
@@ -108,6 +108,7 @@ export function FollowProvider({ children }: { children: ReactNode }) {
   const handleKnownError = useCallback(
     (err: unknown, slug: string, name: string, onGone?: () => void) => {
       if (!(err instanceof ApiError)) return false;
+      if (err.code === CONSENT_DECLINED) return true; // spec 14 §4.2: "Not now" changes nothing, says nothing
       if (err.status === 401) {
         promptSignIn(slug, name);
         return true;
@@ -174,7 +175,7 @@ export function FollowProvider({ children }: { children: ReactNode }) {
         const f = await api<Follow>(followPath(slug), { method: "PATCH", body: { notify: on } });
         put(slug, { notify: f.notify });
       } catch (err) {
-        if (err instanceof ApiError && (err.status === 401 || err.status === 429)) {
+        if (err instanceof ApiError && (err.status === 401 || err.status === 429 || err.code === CONSENT_DECLINED)) {
           handleKnownError(err, slug, name);
           return;
         }

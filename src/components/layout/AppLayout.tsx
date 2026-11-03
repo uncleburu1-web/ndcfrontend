@@ -10,6 +10,8 @@ import { DonationConfigProvider, useDonationConfig } from "../../donations/Donat
 import { FollowProvider } from "../../follows/FollowProvider";
 import { NotificationBell } from "../../notifications/NotificationBell";
 import { RulesUpdatedBanner } from "../../moderation/RulesUpdatedBanner";
+import { PrivacyChrome } from "../../privacy/PrivacyChrome";
+import "../../privacy/privacy.css";
 import { HeaderSearch } from "../../search/HeaderSearch";
 import "../../moderation/moderation.css";
 import { Banner, Button, Icon, SiteHeader } from "../ui";
@@ -47,6 +49,7 @@ function AccountArea() {
             {isCampaignAccount(me) && <UserButton.Link label="My campaign" labelIcon={<Icon name="bell" size={16} />} href="/campaign" />}
             {me?.home_state && <UserButton.Link label="Your state" labelIcon={<Icon name="mapPin" size={16} />} href={`/states/${me.home_state}`} />}
             <UserButton.Link label={verified ? "Verified voter" : "Verify your PVC"} labelIcon={<Icon name={verified ? "verified" : "shield"} size={16} />} href="/pvc" />
+            <UserButton.Link label="Your data" labelIcon={<Icon name="lock" size={16} />} href="/account/privacy" />
           </UserButton.MenuItems>
         </UserButton>
       </Show>
@@ -106,6 +109,7 @@ function Chrome() {
       />
       <SessionBanners />
       <RulesUpdatedBanner />
+      <PrivacyChrome />
       <main id="main">
         <Outlet />
       </main>
@@ -114,6 +118,8 @@ function Chrome() {
           <li><Link to="/rules">Community rules</Link></li>
           <li><Link to="/reports/status">Check a report</Link></li>
           <li><Link to="/report/copyright">Copyright notice</Link></li>
+          <li><Link to="/privacy">Privacy</Link></li>
+          <li><Link to="/security">Security</Link></li>
         </ul>
       </footer>
     </>

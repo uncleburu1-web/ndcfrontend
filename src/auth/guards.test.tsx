@@ -15,6 +15,7 @@ const session = vi.hoisted(() => ({
 vi.mock("./session", () => ({
   useMe: () => ({ me: session.me, status: session.status, error: null, setMe: vi.fn(), refresh: vi.fn() }),
   useSessionIssue: () => ({ issue: null, clearIssue: vi.fn() }),
+  useMfaBlocked: () => false,
   useApi: () => () => new Promise(() => {}), // public pages fetch; leave requests pending
 }));
 

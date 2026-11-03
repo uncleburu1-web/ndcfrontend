@@ -12,10 +12,15 @@ import "../../news/news.css";
 export interface NotificationItem {
   id: string;
   kind: "announcement" | "news_decision" | "pvc_decision" | "candidate_post"
-    | "report_outcome" | "content_removed" | "account_warning" | "submissions_paused" | "appeal_decision";
+    | "report_outcome" | "content_removed" | "account_warning" | "submissions_paused" | "appeal_decision"
+    | "security_notice" | "privacy_request_update";
   created_at: string;
   read_at: string | null;
-  decision: "" | "approved" | "rejected" | "verified" | "kept" | "removed" | "warning" | "paused" | "upheld" | "denied";
+  decision: "" | "approved" | "rejected" | "verified" | "kept" | "removed" | "warning" | "paused" | "upheld" | "denied"
+    | "opened" | "waiting" | "reply" | "resumed" | "done" | "refused";
+  /** Spec 14: privacy request updates (reference and status only) and security notices (the officer's text). */
+  privacy_request?: { id: string; reference: string; status: string; status_label: string };
+  security_notice?: { reference: string; text: string };
   /** Spec 13: moderation outcomes — what, which rule; never who decided or who reported. */
   case?: { id: string; target_kind: "article" | "post" | "candidate"; title: string; rule: string; rule_title: string };
   appeal?: { id: string; status: "pending" | "upheld" | "denied"; reason: string };
@@ -52,8 +57,25 @@ function describeModeration(n: NotificationItem): Described | null {
   }
 }
 
+const PRIVACY_WORDS: Record<string, string> = {
+  opened: "We received your privacy request", waiting: "We need more information for your privacy request",
+  reply: "There’s a reply to your privacy request", resumed: "We’re working on your privacy request again",
+  done: "Your privacy request is done", refused: "We couldn’t do what your privacy request asked",
+};
+
+function describePrivacy(n: NotificationItem): Described | null {
+  if (n.kind === "security_notice") {
+    return { text: `Security notice: ${n.security_notice?.text ?? "see Your data"}`, href: "/account/privacy", icon: "shield" };
+  }
+  if (n.kind === "privacy_request_update") {
+    const ref = n.privacy_request?.reference ? ` (${n.privacy_request.reference})` : "";
+    return { text: `${PRIVACY_WORDS[n.decision] ?? "Update on your privacy request"}${ref}.`, href: "/account/privacy#hist-h", icon: "info" };
+  }
+  return null;
+}
+
 export function describe(n: NotificationItem): Described {
-  const mod = describeModeration(n);
+  const mod = describeModeration(n) ?? describePrivacy(n);
   if (mod) return mod;
   if (n.kind === "candidate_post" && n.post && n.candidate) {
     const what = n.post.kind === "announcement" ? "posted an announcement" : "posted news";

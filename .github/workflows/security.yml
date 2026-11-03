@@ -1,0 +1,53 @@
+name: security
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "23 4 * * 1"
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run check:tokens
+      - run: npx vitest run
+      - name: build with dummy public values, then check the generated headers
+        env:
+          VITE_API_BASE_URL: https://api.example.ng/api/v1
+          VITE_CLERK_PUBLISHABLE_KEY: pk_test_Y2xlcmsuZXhhbXBsZS5uZyQ=
+          VITE_SECURITY_CONTACT: security@example.ng
+        run: |
+          npm run build
+          grep -q "frame-ancestors 'none'" dist/_headers
+          grep -q "^Contact: mailto:security@example.ng" dist/.well-known/security.txt
+
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm audit --omit=dev --audit-level=high
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: no live keys and no Clerk secret key in client code
+        run: |
+          ! git grep -nE '(sk|pk)_live_[A-Za-z0-9]{8,}' -- .
+          ! git grep -n 'CLERK_SECRET_KEY' -- src

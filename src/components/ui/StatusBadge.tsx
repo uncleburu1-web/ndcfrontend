@@ -102,6 +102,18 @@ const STATUS_SETS = {
     review: ["Under review", "warning"],
     refunded: ["Refunded", "neutral"],
   },
+  // Spec 14 §8.2: privacy requests and incidents.
+  request: {
+    open: ["Open", "warning"],
+    waiting: ["Waiting for you", "neutral"],
+    done: ["Done", "success"],
+    refused: ["Refused", "error"],
+  },
+  incident: {
+    open: ["Open", "error"],
+    contained: ["Contained", "warning"],
+    closed: ["Closed", "neutral"],
+  },
 } as const satisfies Record<string, Record<string, readonly [string, Tone]>>;
 
 export type StatusSet = keyof typeof STATUS_SETS;

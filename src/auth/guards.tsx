@@ -272,3 +272,30 @@ export function RequireModerationStaff({ children }: { children?: ReactNode }) {
   }
   return children ? <>{children}</> : <Outlet />;
 }
+
+/** Privacy requests, incidents and the data register (spec 14 §4.5, §4.7): privacy officers; implied by system admin. */
+export function isPrivacyOfficer(me: AdminMe) {
+  return adminAreas(me).includes("privacy");
+}
+
+export function RequirePrivacyOfficer({ children }: { children?: ReactNode }) {
+  const { me, status, error, refresh } = useMe();
+  if (status === "error") {
+    return (
+      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+        {error?.message}
+      </Banner>
+    );
+  }
+  if (!me) return <Pending label="Loading your account" />;
+  if (!isPrivacyOfficer(me)) {
+    return (
+      <div className="page-shell">
+        <EmptyState icon="shield" title="You don’t have access to this page">
+          Privacy requests and incidents are for the Data Protection Officer and system administrators.
+        </EmptyState>
+      </div>
+    );
+  }
+  return children ? <>{children}</> : <Outlet />;
+}

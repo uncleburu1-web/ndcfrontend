@@ -4,9 +4,11 @@
  * - `useMe()`   — the caller's NDCConnect profile from GET /me
  * - banners for "session ended" and "sign-in unavailable"
  */
-import { useAuth, useClerk } from "@clerk/react";
+import { useAuth, useClerk, useReverification } from "@clerk/react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { ConsentDialog, type ConsentAsk } from "../privacy/ConsentDialog";
+import "../privacy/privacy.css";
 import { ApiError, createApiClient, type ApiRequest } from "./api";
 
 export interface Me {
@@ -24,6 +26,15 @@ export interface Me {
   admin_areas?: string[];
   /** Spec 12: optional, private; only pre-fills state filters. "" = not set. */
   home_state?: string;
+  /** Spec 14 §4.3: ticked "I'm 18 or older". A complete profile needs it. */
+  adult_confirmed?: boolean;
+  /** Spec 14 §4.6: from the session's `mfa` claim; null when the claim isn't configured. */
+  mfa_enabled?: boolean | null;
+  /** Spec 14 §4.2: purposes to ask about again (material change, or legacy follows to confirm). */
+  consents_needed?: string[];
+  privacy_version?: number;
+  /** Spec 14 §4.6: whether the server refuses admin requests without two-step verification. */
+  admin_mfa_required?: boolean;
 }
 
 type MeStatus = "idle" | "loading" | "ready" | "error";
@@ -38,6 +49,7 @@ interface SessionContextValue {
   refreshMe: () => Promise<void>;
   issue: SessionIssue;
   clearIssue: () => void;
+  mfaBlocked: boolean;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -52,6 +64,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [meStatus, setMeStatus] = useState<MeStatus>("idle");
   const [meError, setMeError] = useState<ApiError | null>(null);
   const [issue, setIssue] = useState<SessionIssue>(null);
+  const [mfaBlocked, setMfaBlocked] = useState(false);
 
   // One API client for the whole session. Clerk's getToken and React Router's navigate can change
   // identity between renders (navigate does on every route change); reading them through refs keeps
@@ -62,6 +75,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   signOutRef.current = signOut;
   const navigateRef = useRef(navigate);
   navigateRef.current = navigate;
+  // Spec 14 §4.6: Clerk's reverification prompt; the client hands it an attempt that returns Clerk's hint when needed.
+  const reverify = useReverification(async (attempt: () => Promise<unknown>) => attempt());
+  const reverifyRef = useRef(reverify);
+  reverifyRef.current = reverify;
+  // Spec 14 §4.2: one consent dialog for every feature; the client waits for the answer and retries.
+  const [consentAsk, setConsentAsk] = useState<(ConsentAsk & { resolve: (ok: boolean) => void }) | null>(null);
 
   const api = useMemo(
     () =>
@@ -70,6 +89,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         getToken: (o) => getTokenRef.current(o),
         onSessionEnded: () => setIssue("session-ended"),
         onAuthUnavailable: () => setIssue("auth-unavailable"),
+        onMfaRequired: () => setMfaBlocked(true),
+        withReverification: <T,>(attempt: () => Promise<T>) => reverifyRef.current(attempt) as Promise<T>,
+        onConsentRequired: (err) =>
+          new Promise<boolean>((resolve) => {
+            const x = err.extra as { purpose?: string; version?: number; label?: string; text?: string };
+            setConsentAsk({ purpose: x.purpose ?? "", version: x.version ?? 1, label: x.label ?? "Your consent", text: x.text ?? err.message, resolve });
+          }),
         onDeactivated: () => {
           setMe(null);
           void signOutRef.current({ redirectUrl: "/account-deactivated" });
@@ -78,6 +104,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       }),
     []
   );
+
+  const agreeConsent = async () => {
+    if (!consentAsk) return;
+    await api(`/me/consents/${consentAsk.purpose}/`, { method: "POST" });
+    consentAsk.resolve(true);
+    setConsentAsk(null);
+  };
+  const declineConsent = () => {
+    consentAsk?.resolve(false);
+    setConsentAsk(null);
+  };
 
   const refreshMe = useCallback(async () => {
     setMeStatus("loading");
@@ -101,10 +138,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [isLoaded, isSignedIn, refreshMe]);
 
   const value = useMemo<SessionContextValue>(
-    () => ({ api, me, meStatus, meError, setMe, refreshMe, issue, clearIssue: () => setIssue(null) }),
-    [api, me, meStatus, meError, refreshMe, issue]
+    () => ({ api, me, meStatus, meError, setMe, refreshMe, issue, clearIssue: () => setIssue(null), mfaBlocked }),
+    [api, me, meStatus, meError, refreshMe, issue, mfaBlocked]
   );
-  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
+  return (
+    <SessionContext.Provider value={value}>
+      {children}
+      <ConsentDialog ask={consentAsk} onAgree={agreeConsent} onDecline={declineConsent} />
+    </SessionContext.Provider>
+  );
 }
 
 function useSession(): SessionContextValue {
@@ -119,6 +161,9 @@ export function useMe() {
   const { me, meStatus, meError, setMe, refreshMe } = useSession();
   return { me, status: meStatus, error: meError, setMe, refresh: refreshMe };
 }
+
+/** Spec 14 §4.6: true once an admin endpoint answered mfa_required in this session. */
+export const useMfaBlocked = () => useSession().mfaBlocked;
 
 export function useSessionIssue() {
   const { issue, clearIssue } = useSession();

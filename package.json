@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "check:tokens": "node scripts/check-tokens.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "headers": "node scripts/security-headers.mjs"
   },
   "dependencies": {
     "@clerk/react": "^6.18.4",
