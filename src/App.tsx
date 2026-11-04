@@ -45,6 +45,7 @@ import AnnouncementFormPage from "./pages/admin/announcements/AnnouncementFormPa
 import AdminNewsDetailPage from "./pages/admin/news/AdminNewsDetailPage";
 import AdminNewsPage from "./pages/admin/news/AdminNewsPage";
 import AdminAuditPage from "./pages/admin/audit/AdminAuditPage";
+import AdminIntegrationsPage from "./pages/admin/integrations/AdminIntegrationsPage";
 import AdminHomePage from "./pages/admin/home/AdminHomePage";
 import AdminPostDetailPage from "./pages/admin/posts/AdminPostDetailPage";
 import AdminTeamPage from "./pages/admin/team/AdminTeamPage";
@@ -190,6 +191,7 @@ export default function App() {
             <Route path="admin/users" element={<AdminUsersPage />} />
             <Route path="admin/users/:id" element={<AdminUserPage />} />
             <Route path="admin/audit" element={<AdminAuditPage />} />
+            <Route path="admin/integrations" element={<AdminIntegrationsPage />} />
             <Route path="admin/candidates" element={<AdminCandidatesPage />} />
             <Route path="admin/candidates/new" element={<AdminCandidateEditPage />} />
             <Route path="admin/candidates/:id" element={<AdminCandidateEditPage />} />

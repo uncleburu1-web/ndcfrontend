@@ -76,7 +76,7 @@ export default function FollowingPage() {
             <ul className="following-list">
               {rows.map((r) => (
                 <li key={r.candidate.slug} className="following-row">
-                  <Avatar name={r.candidate.full_name} src={r.candidate.photo?.url_200} size="md" />
+                  <Avatar name={r.candidate.full_name} src={r.candidate.photo?.url_200} srcSet={r.candidate.photo?.srcset} size="md" />
                   <div className="following-row__text">
                     <Link to={`/candidates/${r.candidate.slug}`} className="following-row__name">
                       {r.candidate.full_name}

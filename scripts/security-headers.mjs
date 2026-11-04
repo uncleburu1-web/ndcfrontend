@@ -1,6 +1,8 @@
 /**
  * Spec 14 §4.9, §4.12: the web app's security headers and security.txt, built from build-time env only
- * (VITE_API_BASE_URL, VITE_CLERK_PUBLISHABLE_KEY, VITE_SECURITY_CONTACT, optional VITE_MEDIA_ORIGIN).
+ * (VITE_API_BASE_URL, VITE_CLERK_PUBLISHABLE_KEY, VITE_SECURITY_CONTACT, optional VITE_MEDIA_ORIGIN and
+ * VITE_MEDIA_UPLOAD_ORIGIN). Spec 15 §15.4: with Cloudinary images (VITE_MEDIA_ORIGIN=https://res.cloudinary.com),
+ * img-src allows the delivery host and connect-src allows https://api.cloudinary.com for signed browser uploads.
  *
  *   npm run headers               print the final headers (check them before deploying)
  *   npm run headers -- --write    also write deploy/_headers and deploy/nginx-security.conf
@@ -35,6 +37,8 @@ export function clerkFrontendApi(publishableKey = "") {
 export function buildHeaders(env = process.env) {
   const api = origin(env.VITE_API_BASE_URL ?? "") ;
   const media = origin(env.VITE_MEDIA_ORIGIN ?? "") || api;
+  const onCloudinary = /(^|\.)cloudinary\.com$/.test(media ? new URL(media).hostname : "");
+  const upload = origin(env.VITE_MEDIA_UPLOAD_ORIGIN ?? "") || (onCloudinary ? "https://api.cloudinary.com" : "");
   const clerk = clerkFrontendApi(env.VITE_CLERK_PUBLISHABLE_KEY ?? "");
   const challenges = "https://challenges.cloudflare.com"; // Clerk's bot protection (Turnstile)
   const clerkImages = "https://img.clerk.com";
@@ -42,7 +46,7 @@ export function buildHeaders(env = process.env) {
   const csp = [
     `default-src 'self'`,
     `script-src ${join_("'self'", clerk, challenges)}`,
-    `connect-src ${join_("'self'", api, clerk)}`,
+    `connect-src ${join_("'self'", api, clerk, upload)}`,
     `img-src ${join_("'self'", "data:", "blob:", media, clerkImages)}`,
     `frame-src ${join_(challenges)}`,
     `worker-src 'self' blob:`,

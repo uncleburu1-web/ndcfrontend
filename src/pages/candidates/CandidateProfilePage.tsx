@@ -98,7 +98,7 @@ export default function CandidateProfilePage() {
     <article>
       <header className="cand-hero">
         <div className="cand-hero__inner">
-          <Avatar name={c.full_name} src={c.photo?.url_800} size="xl" />
+          <Avatar name={c.full_name} src={c.photo?.url_800} srcSet={c.photo?.srcset} size="xl" />
           <div className="cand-hero__text">
             <p className="cand-hero__back">
               <Link to="/candidates">All candidates</Link>

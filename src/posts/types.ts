@@ -10,7 +10,7 @@ export interface PostCandidate {
   position?: string;
   position_label?: string;
   state?: string;
-  photo: { url_200: string | null; url_800?: string | null } | null;
+  photo: { url_200: string | null; url_800?: string | null; srcset?: string | null } | null;
   verified?: boolean;
 }
 

@@ -79,7 +79,7 @@ const READY: Record<string, { words: string; icon: "checkCircle" | "xCircle" | "
 };
 const READY_GROUPS: Record<string, string> = {
   donations: "Donations", membership: "Membership", signin: "Sign-in", payments: "Payments", inec: "INEC links",
-  security: "Security", media: "Media storage",
+  security: "Security", media: "Media storage", integrations: "Integrations",
 };
 
 export function ReadinessList({ items }: { items: ReadinessItem[] }) {

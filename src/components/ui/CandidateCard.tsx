@@ -15,17 +15,18 @@ export interface CandidateCardProps {
   area: string;
   party: string;
   photoSrc?: string;
+  photoSrcSet?: string | null;
   verified?: boolean;
   href?: string;
   actions?: ReactNode;
 }
 
-export function CandidateCard({ name, position, area, party, photoSrc, verified, href, actions }: CandidateCardProps) {
+export function CandidateCard({ name, position, area, party, photoSrc, photoSrcSet, verified, href, actions }: CandidateCardProps) {
   const title = href ? <a href={href}>{name}</a> : name;
   return (
     <article className="ds-candidate">
       <div className="ds-candidate__identity">
-        <Avatar name={name} src={photoSrc} size="lg" />
+        <Avatar name={name} src={photoSrc} srcSet={photoSrcSet} size="lg" />
         <div className="ds-candidate__text">
           <h3 className="ds-candidate__name">
             {title}

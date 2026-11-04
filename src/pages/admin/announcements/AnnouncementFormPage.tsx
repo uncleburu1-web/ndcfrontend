@@ -3,6 +3,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ApiError } from "../../../auth/api";
 import { useApi } from "../../../auth/session";
+import { UploadProgress } from "../../../media/UploadProgress";
+import { checkImage, useImageUpload } from "../../../media/useImageUpload";
 import { Banner, Button, Checkbox, EmptyState, Modal, Select, Skeleton, TextArea, TextField, useToast } from "../../../components/ui";
 import { formatDate } from "../../../lib/format";
 import { STATES } from "../../../lib/nigeria";
@@ -18,6 +20,7 @@ export default function AnnouncementFormPage() {
   const { id } = useParams();
   const api = useApi();
   const toast = useToast();
+  const { upload: uploadImage, progress } = useImageUpload("announcement_image");
   const navigate = useNavigate();
   const [a, setA] = useState<AdminArticle | null>(null);
   const [f, setF] = useState(EMPTY);
@@ -51,6 +54,8 @@ export default function AnnouncementFormPage() {
       e.source_name = "Official Election Updates need a source (e.g. INEC).";
       if (!f.source_url) e.source_url = "Add the link to the source.";
     }
+    const imageProblem = image ? checkImage(image) : null;  // type and size before anything is sent (spec 15 §15.4)
+    if (imageProblem) e.image = imageProblem.message;
     if (image && !rights) e.rights = "Confirm NDCConnect may publish this image.";
     return e;
   };
@@ -64,11 +69,8 @@ export default function AnnouncementFormPage() {
         : await api<AdminArticle>("/admin/announcements/", { method: "POST", body: { ...f, notify } });
       let final = saved;
       if (image) {
-        const form = new FormData();
-        form.append("image", image);
-        form.append("rights_confirmed", "true");
         try {
-          final = await api<AdminArticle>(`/admin/announcements/${saved.id}/image/`, { method: "PUT", body: form });
+          final = await uploadImage<AdminArticle>(image, { targetId: saved.id, url: `/admin/announcements/${saved.id}/image/`, field: "image" });
         } catch (err) {
           toast.show({ tone: "warning", message: `Saved without the image: ${err instanceof ApiError ? err.message : "try again"}` });
         }
@@ -161,13 +163,15 @@ export default function AnnouncementFormPage() {
         <fieldset>
           <legend className="ds-field__label">Image (optional)</legend>
           {a?.image && !image && <div className="news-image-row"><img src={a.image.url_thumb} alt="Current image" /></div>}
-          <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choose an image" onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
+          <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choose an image" aria-invalid={errors.image ? true : undefined} onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
+          {errors.image && <p className="ds-field__error" role="alert">{errors.image}</p>}
           {image && <Checkbox label="NDCConnect has the right to publish this image." checked={rights} onChange={(e) => setRights(e.target.checked)} error={errors.rights} />}
         </fieldset>
         {!id && (
           <Checkbox label="Notify everyone" checked={notify} onChange={(e) => setNotify(e.target.checked)}
             hint="Send an in-app notification to all users who haven’t turned announcements off. Use it for important announcements only." />
         )}
+        <UploadProgress progress={progress} />
         <Button type="submit" loading={busy} loadingLabel="Saving…">{id ? "Save changes" : "Publish now"}</Button>
       </form>
 

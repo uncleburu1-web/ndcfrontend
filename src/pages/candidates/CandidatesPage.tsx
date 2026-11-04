@@ -157,6 +157,7 @@ export default function CandidatesPage() {
                     area={c.area_display}
                     party={c.party}
                     photoSrc={c.photo?.url_200}
+                    photoSrcSet={c.photo?.srcset}
                     verified={c.verified}
                     href={`/candidates/${c.slug}`}
                     actions={<CandidateVote slug={c.slug} name={c.full_name} variant="card" />}

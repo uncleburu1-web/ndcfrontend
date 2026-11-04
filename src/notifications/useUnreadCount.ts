@@ -2,6 +2,7 @@
 import { useAuth } from "@clerk/react";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { apiGet } from "../api/typed";
 import { useApi } from "../auth/session";
 
 export const POLL_MS = 120_000;
@@ -14,7 +15,7 @@ export function useUnreadCount() {
 
   const refresh = useCallback(() => {
     if (!isSignedIn) return;
-    api<{ unread: number }>("/me/notifications/unread-count/")
+    apiGet(api, "/me/notifications/unread-count/")
       .then((r) => setUnread(r.unread))
       .catch(() => setUnread(0)); // no badge on failure; retried next time
   }, [api, isSignedIn]);

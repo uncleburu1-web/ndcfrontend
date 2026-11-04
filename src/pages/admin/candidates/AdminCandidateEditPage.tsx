@@ -11,6 +11,8 @@ import type { AdminCandidate, LinkedAccount } from "../../../candidates/types";
 import { useRequest } from "../../../candidates/useRequest";
 import { Avatar, Banner, Button, Checkbox, EmptyState, Modal, Select, Skeleton, StatusBadge, TextArea, TextField, useToast } from "../../../components/ui";
 import { formatDate } from "../../../lib/format";
+import { UploadProgress } from "../../../media/UploadProgress";
+import { useImageUpload } from "../../../media/useImageUpload";
 import { moderationError } from "../../../posts/moderation";
 import { REMOVE_REASONS, type AdminPost } from "../../../posts/types";
 import { CandidateForm, IDENTITY_FIELDS, toFormValues, toPayload, type CandidateFormValues } from "./CandidateForm";
@@ -209,6 +211,7 @@ function PhotoPanel({ candidate, onDone }: { candidate: AdminCandidate; onDone: 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  const { upload: uploadImage, progress } = useImageUpload("candidate_photo");
 
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
 
@@ -221,13 +224,16 @@ function PhotoPanel({ candidate, onDone }: { candidate: AdminCandidate; onDone: 
   const upload = async (e: FormEvent) => {
     e.preventDefault();
     if (!file) return;
-    const form = new FormData();
-    form.append("photo", file);
-    form.append("rights_confirmed", rights ? "true" : "false");
+    if (!rights) {  // checked before uploading, so nothing is sent for a photo the server would refuse
+      setError(new ApiError({ status: 400, code: "validation_error",
+        fields: { rights_confirmed: ["Confirm you took this photo or have the right to share it."] } }));
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
-      onDone(await api<AdminCandidate>(`/admin/candidates/${candidate.id}/photo/`, { method: "PUT", body: form }));
+      onDone(await uploadImage<AdminCandidate>(file, { targetId: candidate.id, url: `/admin/candidates/${candidate.id}/photo/`, field: "photo",
+        rightsConfirmed: rights }));
       choose(null);
       setRights(false);
       if (input.current) input.current.value = "";
@@ -271,6 +277,7 @@ function PhotoPanel({ candidate, onDone }: { candidate: AdminCandidate; onDone: 
           <Button type="submit" disabled={!file} loading={busy} loadingLabel="Uploading…">Upload photo</Button>
           {candidate.photo && <Button variant="ghost" onClick={remove} disabled={busy}>Remove photo</Button>}
         </div>
+        <UploadProgress progress={progress} />
       </form>
     </section>
   );

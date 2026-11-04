@@ -6,6 +6,8 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ApiError } from "../../auth/api";
 import { useApi } from "../../auth/session";
+import { UploadProgress } from "../../media/UploadProgress";
+import { checkImage, useImageUpload } from "../../media/useImageUpload";
 import { Avatar, Banner, Button, Checkbox, EmptyState, Modal, RadioGroup, Skeleton, StatusBadge, TextArea, TextField, useToast } from "../../components/ui";
 import { formatDate } from "../../lib/format";
 import { BODY_MAX, TITLE_MAX, postPath, type CampaignCandidate, type CampaignPost, type PostKind } from "../../posts/types";
@@ -22,6 +24,7 @@ function PostForm({ candidate, editing, onSaved, onCancel }: {
 }) {
   const api = useApi();
   const toast = useToast();
+  const { upload: uploadImage, progress } = useImageUpload("post_image");
   const [f, setF] = useState<Draft>({ kind: editing?.kind ?? "", title: editing?.title ?? "", body: editing?.body ?? "" });
   const [image, setImage] = useState<File | null>(null);
   const [rights, setRights] = useState(false);
@@ -36,6 +39,8 @@ function PostForm({ candidate, editing, onSaved, onCancel }: {
     if (!f.title.trim()) e.title = "Give it a title.";
     if (!f.body.trim()) e.body = "Write the post.";
     if (f.body.length > BODY_MAX) e.body = `Keep it under ${BODY_MAX.toLocaleString()} characters.`;
+    const imageProblem = image ? checkImage(image) : null;  // type and size before anything is sent (spec 15 §15.4)
+    if (imageProblem) e.image = imageProblem.message;
     if (image && !rights) e.rights = "Confirm you took this photo or have the right to share it.";
     return e;
   };
@@ -53,11 +58,8 @@ function PostForm({ candidate, editing, onSaved, onCancel }: {
         ? await api<CampaignPost>(`${base}${editing.id}/`, { method: "PATCH", body: f })
         : await api<CampaignPost>(base, { method: "POST", body: f });
       if (image) {
-        const form = new FormData();
-        form.append("image", image);
-        form.append("rights_confirmed", "true");
         try {
-          saved = await api<CampaignPost>(`${base}${saved.id}/image/`, { method: "PUT", body: form });
+          saved = await uploadImage<CampaignPost>(image, { targetId: saved.id, url: `${base}${saved.id}/image/`, field: "image" });
         } catch (err) {
           toast.show({ tone: "warning", message: `Your post is live, but the image wasn’t saved: ${err instanceof ApiError ? err.message : "try again"}` });
         }
@@ -90,10 +92,12 @@ function PostForm({ candidate, editing, onSaved, onCancel }: {
         <legend className="ds-field__label">Image (optional)</legend>
         <p className="news-note">JPEG, PNG or WebP, up to 5 MB, at least 400 px on the short side. Location data is removed.</p>
         {editing?.image && !image && <div className="news-image-row"><img src={editing.image.url_thumb} alt="Current image" /></div>}
-        <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choose an image" onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
+        <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choose an image" aria-invalid={errors.image ? true : undefined} onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
+        {errors.image && <p className="ds-field__error" role="alert">{errors.image}</p>}
         {image && <Checkbox label="We took this photo or have the right to share it." checked={rights} onChange={(e) => setRights(e.target.checked)} error={errors.rights} />}
       </fieldset>
       <div className="campaign-form__actions">
+        <UploadProgress progress={progress} />
         <Button type="submit" loading={busy} loadingLabel="Saving…">{editing ? "Save changes" : "Publish"}</Button>
         <Button variant="secondary" onClick={onCancel}>Cancel</Button>
       </div>

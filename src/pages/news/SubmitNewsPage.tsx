@@ -6,6 +6,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ApiError } from "../../auth/api";
 import { useApi, useMe } from "../../auth/session";
+import { UploadProgress } from "../../media/UploadProgress";
+import { checkImage, useImageUpload } from "../../media/useImageUpload";
 import { Banner, Button, Checkbox, EmptyState, RadioGroup, Select, Skeleton, TextArea, TextField, useToast } from "../../components/ui";
 import { STATES } from "../../lib/nigeria";
 import type { MyArticle } from "../../news/types";
@@ -37,6 +39,7 @@ export default function SubmitNewsPage() {
   const editing = Boolean(id);
   const api = useApi();
   const toast = useToast();
+  const { upload: uploadImage, progress } = useImageUpload("news_image");
   const navigate = useNavigate();
   const { me } = useMe();
   const [loaded, setLoaded] = useState<MyArticle | null>(null);
@@ -67,6 +70,8 @@ export default function SubmitNewsPage() {
     if (f.body.length > BODY_MAX) e.body = `Keep it under ${BODY_MAX.toLocaleString()} characters.`;
     if (f.source_url && !f.source_url.startsWith("https://")) e.source_url = "Use a link that starts with https://";
     if (!editing) for (const [k] of DECLARATIONS) if (!decl[k]) e[`declarations.${k}`] = "Tick this to continue.";
+    const imageProblem = image ? checkImage(image) : null;  // type and size before anything is sent (spec 15 §15.4)
+    if (imageProblem) e.image = imageProblem.message;
     if (image && !rights) e.rights = "Confirm you took this photo or have the right to share it.";
     return e;
   };
@@ -82,11 +87,8 @@ export default function SubmitNewsPage() {
         ? await api<MyArticle>(`/me/news/${id}/`, { method: "PATCH", body: f })
         : await api<MyArticle>("/me/news/", { method: "POST", body: { ...f, declarations: decl } });
       if (image) {
-        const form = new FormData();
-        form.append("image", image);
-        form.append("rights_confirmed", "true");
         try {
-          await api(`/me/news/${saved.id}/image/`, { method: "PUT", body: form });
+          await uploadImage(image, { targetId: saved.id, url: `/me/news/${saved.id}/image/`, field: "image" });
         } catch (err) {
           toast.show({ tone: "warning", message: `Your article was saved, but the image wasn’t: ${err instanceof ApiError ? err.message : "try again"}` });
         }
@@ -146,7 +148,8 @@ export default function SubmitNewsPage() {
           <legend className="ds-field__label">Image (optional)</legend>
           <p className="news-note">JPEG, PNG or WebP, up to 5 MB, at least 400 px on the short side. Location data is removed.</p>
           {loaded?.image && !image && <div className="news-image-row"><img src={loaded.image.url_thumb} alt="Current image" /></div>}
-          <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choose an image" onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
+          <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choose an image" aria-invalid={errors.image ? true : undefined} onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
+          {errors.image && <p className="ds-field__error" role="alert">{errors.image}</p>}
           {image && <Checkbox label="I took this photo or have the right to share it." checked={rights} onChange={(e) => setRights(e.target.checked)} error={errors.rights} />}
         </fieldset>
         <RadioGroup legend="Byline" name="byline" value={f.show_author_name ? "name" : "member"}
@@ -160,6 +163,7 @@ export default function SubmitNewsPage() {
             ))}
           </fieldset>
         )}
+        <UploadProgress progress={progress} />
         <Button type="submit" loading={busy} loadingLabel="Sending…">{editing ? (loaded?.status === "rejected" ? "Resubmit for review" : "Save changes") : "Submit for review"}</Button>
       </form>
     </div>

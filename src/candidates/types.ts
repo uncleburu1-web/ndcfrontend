@@ -1,6 +1,8 @@
 export interface CandidatePhoto {
   url_800: string;
   url_200: string;
+  /** "<url> 200w, <url> 400w, <url> 800w" (spec 15 §7.5). */
+  srcset?: string | null;
 }
 
 export interface CandidateLink {

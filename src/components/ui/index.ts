@@ -6,6 +6,7 @@ export { Button } from "./Button";
 export { CandidateCard, CandidateCardSkeleton } from "./CandidateCard";
 export { DonateButton } from "./DonateButton";
 export { EmptyState } from "./EmptyState";
+export { ErrorReference, splitReference } from "./ErrorReference";
 export { Icon } from "./Icon";
 export { MaskedValue } from "./MaskedValue";
 export { BottomSheet, Modal } from "./Modal";

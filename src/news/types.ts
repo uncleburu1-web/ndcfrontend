@@ -13,6 +13,7 @@ export type Category = (typeof CATEGORIES)[number][0];
 export interface ArticleImage {
   url_thumb: string;
   url?: string;
+  srcset?: string | null;
   width: number | null;
   height: number | null;
 }

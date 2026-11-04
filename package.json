@@ -10,7 +10,10 @@
     "typecheck": "tsc --noEmit",
     "check:tokens": "node scripts/check-tokens.mjs",
     "test": "vitest run",
-    "headers": "node scripts/security-headers.mjs"
+    "headers": "node scripts/security-headers.mjs",
+    "api:sync": "node scripts/api-sync.mjs",
+    "api:types": "openapi-typescript api/openapi.json -o src/api/schema.d.ts && node scripts/api-header.mjs",
+    "check:secrets": "node scripts/check-secrets.mjs"
   },
   "dependencies": {
     "@clerk/react": "^6.18.4",
@@ -27,6 +30,7 @@
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.7.0",
     "jsdom": "^25.0.1",
+    "openapi-typescript": "^7.13.0",
     "typescript": "^5.9.3",
     "vite": "^5.4.21",
     "vitest": "^2.1.9"

@@ -1,0 +1,50 @@
+/* /admin/integrations (spec 15 §15.4). Tokens only; one column at 360 px. */
+.adm-int__services,
+.adm-int__list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+.adm-int__service {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--int-fg, var(--border));
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.adm-int__service--success { --int-fg: var(--tone-success-fg); }
+.adm-int__service--warning { --int-fg: var(--tone-warning-fg); }
+.adm-int__service--error { --int-fg: var(--tone-error-fg); }
+.adm-int__service--info { --int-fg: var(--tone-info-fg); }
+.adm-int__service p {
+  margin: 0 0 var(--space-1);
+  overflow-wrap: anywhere;
+}
+.adm-int__list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.adm-int__list li > span {
+  min-width: 0;
+}
+.adm-int__result--failed {
+  color: var(--tone-error-fg);
+  font-weight: var(--weight-label);
+}
+.adm-int__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.adm-int__filters > * {
+  flex: 1 1 12rem;
+  min-width: 0;
+}

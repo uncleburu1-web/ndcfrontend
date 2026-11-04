@@ -7,6 +7,7 @@
  * this page view. Banners are never modals and never block the page.
  */
 import { useState, type ReactNode } from "react";
+import { ErrorReference, splitReference } from "./ErrorReference";
 import { Icon, type IconName } from "./Icon";
 import "./Banner.css";
 
@@ -52,6 +53,13 @@ interface BannerProps {
   action?: ReactNode;
 }
 
+/** An error message ending in "Reference: …" gets a copyable reference (spec 15 §15.4). */
+function withReference(children: ReactNode): ReactNode {
+  if (typeof children !== "string") return children;
+  const parts = splitReference(children);
+  return parts ? <>{parts[0]}<ErrorReference reference={parts[1]} /></> : children;
+}
+
 export function Banner({ tone = "info", title, children, dismissible, dismissKey, onDismiss, action }: BannerProps) {
   const [hidden, setHidden] = useState(() => readDismissed(dismissKey));
   if (hidden) return null;
@@ -70,7 +78,7 @@ export function Banner({ tone = "info", title, children, dismissible, dismissKey
       </span>
       <div className="ds-banner__body">
         {title && <p className="ds-banner__title">{title}</p>}
-        <div className="ds-banner__text">{children}</div>
+        <div className="ds-banner__text">{withReference(children)}</div>
         {action && <div className="ds-banner__action">{action}</div>}
       </div>
       {canDismiss && (

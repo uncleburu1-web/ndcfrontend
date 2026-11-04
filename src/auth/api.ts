@@ -10,6 +10,13 @@
  * - 403 consent_required (spec 14 §4.2) → `onConsentRequired` (the consent dialog). Agreed → retry once; "Not now" →
  *   ApiError "consent_declined"; nothing was done.
  * Errors always surface as ApiError carrying the backend envelope.
+ *
+ * Transport (spec 15 §15.4):
+ * - every request sends an `X-Request-ID`; the server keeps it, so a failure can be quoted as "Reference: 9f2c1a7e"
+ *   even when no response arrived. `ApiError.requestId` holds it (the server's header wins when present);
+ * - a per-request timeout: 20 s, or 120 s for uploads (FormData bodies) and downloads (`responseType: "blob"`);
+ * - one automatic retry for GET on network errors, 502, 503 and 504 (never for writes);
+ * - 429 messages say how long to wait, from `retry_after`.
  */
 
 export interface ApiErrorBody {
@@ -17,12 +24,15 @@ export interface ApiErrorBody {
   code: string;
   message: string;
   fields: Record<string, string[]>;
+  request_id?: string;
 }
 
 export class ApiError extends Error implements ApiErrorBody {
   status: number;
   code: string;
   fields: Record<string, string[]>;
+  /** The request's ID (spec 15 §4.10): quote its first 8 characters as the reference. */
+  requestId: string;
   /** Anything else the envelope carried, e.g. `until` (paused) or `rule` (410 removed, spec 13 §4.5). */
   extra: Record<string, unknown>;
 
@@ -31,10 +41,49 @@ export class ApiError extends Error implements ApiErrorBody {
     this.status = body.status ?? 0;
     this.code = body.code ?? "error";
     this.fields = body.fields ?? {};
-    const { status: _s, code: _c, message: _m, fields: _f, ...rest } = body;
-    void _s; void _c; void _m; void _f;
+    this.requestId = body.request_id ?? "";
+    const { status: _s, code: _c, message: _m, fields: _f, request_id: _r, ...rest } = body;
+    void _s; void _c; void _m; void _f; void _r;
     this.extra = rest;
   }
+
+  /** "9f2c1a7e", or "" when there is none. */
+  get reference(): string {
+    return this.requestId.slice(0, 8);
+  }
+}
+
+/** Server, timeout and network failures show the reference; other errors are about the request itself. */
+export function showsReference(err: ApiError): boolean {
+  return Boolean(err.requestId) && (err.status === 0 || err.status >= 500);
+}
+
+export const DEFAULT_TIMEOUT_MS = 20_000;
+export const LONG_TIMEOUT_MS = 120_000;
+const RETRY_STATUSES = new Set([502, 503, 504]);
+
+export function newRequestId(): string {
+  const c = globalThis.crypto as Crypto | undefined;
+  if (c?.randomUUID) return c.randomUUID().replace(/-/g, "");
+  let out = "";
+  for (let i = 0; i < 32; i++) out += Math.floor(Math.random() * 16).toString(16);
+  return out;
+}
+
+/** "40 seconds", "3 minutes", "2 hours". */
+export function waitWords(seconds: number): string {
+  if (seconds < 90) return `${seconds} second${seconds === 1 ? "" : "s"}`;
+  if (seconds < 90 * 60) {
+    const m = Math.ceil(seconds / 60);
+    return `${m} minute${m === 1 ? "" : "s"}`;
+  }
+  const h = Math.ceil(seconds / 3600);
+  return `${h} hour${h === 1 ? "" : "s"}`;
+}
+
+function withReference(message: string, requestId: string): string {
+  const ref = requestId.slice(0, 8);
+  return ref && !message.includes("Reference:") ? `${message.replace(/\s*$/, "")} Reference: ${ref}.` : message;
 }
 
 export type GetToken = (options?: { skipCache?: boolean }) => Promise<string | null>;
@@ -52,6 +101,8 @@ export interface ApiClientOptions {
   /** Shows the consent dialog for a `consent_required` error. Resolves true once consent is recorded. */
   onConsentRequired?: (err: ApiError) => Promise<boolean>;
   fetchImpl?: typeof fetch;
+  /** Pause before the one GET retry (ms). Tests pass 0. */
+  retryDelayMs?: number;
 }
 
 export const CANCELLED_REVERIFICATION = "reverification_cancelled";
@@ -72,58 +123,114 @@ export interface RequestOptions {
   signal?: AbortSignal;
   /** "blob" for file downloads (e.g. the admin CSV export); default JSON. */
   responseType?: "json" | "blob";
+  /** Override the timeout (ms). Defaults: 20 s; 120 s for uploads and downloads. */
+  timeoutMs?: number;
 }
 
-const NETWORK_ERROR = new ApiError({
-  status: 0,
-  code: "network_error",
-  message: "Couldn't reach NDCConnect. Check your connection and try again.",
-});
+function networkError(requestId: string) {
+  return new ApiError({
+    status: 0,
+    code: "network_error",
+    request_id: requestId,
+    message: withReference("Couldn't reach NDCConnect. Check your connection and try again.", requestId),
+  });
+}
 
-async function readError(res: Response): Promise<ApiError> {
+function timeoutError(requestId: string) {
+  return new ApiError({
+    status: 0,
+    code: "timeout",
+    request_id: requestId,
+    message: withReference("NDCConnect is taking too long to answer. Try again in a moment.", requestId),
+  });
+}
+
+async function readError(res: Response, requestId: string): Promise<ApiError> {
+  const rid = res.headers?.get?.("X-Request-ID") || requestId;
   const data = await res.json().catch(() => null);
-  if (data && typeof data === "object" && "error" in data) return new ApiError(data.error as ApiErrorBody & Record<string, unknown>);
-  return new ApiError({ status: res.status, code: "error", message: `Request failed (${res.status}).` });
+  let err: ApiError;
+  if (data && typeof data === "object" && "error" in data) {
+    err = new ApiError({ request_id: rid, ...(data.error as ApiErrorBody & Record<string, unknown>) });
+  } else {
+    err = new ApiError({ status: res.status, code: "error", request_id: rid,
+      message: res.status >= 500 ? "Something went wrong on our side." : `Request failed (${res.status}).` });
+  }
+  if (err.code === "throttled" && typeof err.extra.retry_after === "number") {
+    err.message = `Too many tries. Try again in ${waitWords(err.extra.retry_after)}.`;
+  }
+  if (showsReference(err)) err.message = withReference(err.message, err.requestId);
+  return err;
 }
 
 export function createApiClient(opts: ApiClientOptions) {
   const doFetch = opts.fetchImpl ?? ((...args: Parameters<typeof fetch>) => fetch(...args));
   const base = opts.baseUrl.replace(/\/$/, "");
+  const retryDelay = opts.retryDelayMs ?? 400;
 
-  async function send(path: string, { method = "GET", body, signal }: RequestOptions, token: string | null) {
-    const headers: Record<string, string> = { Accept: "application/json" };
+  async function sendOnce(path: string, options: RequestOptions, token: string | null, requestId: string) {
+    const { method = "GET", body, signal } = options;
+    const headers: Record<string, string> = { Accept: "application/json", "X-Request-ID": requestId };
     const isForm = typeof FormData !== "undefined" && body instanceof FormData;
     if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
     if (token) headers.Authorization = `Bearer ${token}`;
+    const limit = options.timeoutMs ?? (isForm || options.responseType === "blob" ? LONG_TIMEOUT_MS : DEFAULT_TIMEOUT_MS);
+    // One controller for both: the caller's cancel (rethrown as AbortError) and our timeout (an ApiError).
+    const ctl = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; ctl.abort(); }, limit);
+    const forward = () => ctl.abort();
+    if (signal?.aborted) {
+      clearTimeout(timer);
+      throw new DOMException("The request was cancelled.", "AbortError");
+    }
+    signal?.addEventListener("abort", forward, { once: true });
     try {
       return await doFetch(`${base}${path}`, {
         method,
         headers,
-        signal,
+        signal: ctl.signal,
         body: body === undefined ? undefined : isForm ? (body as FormData) : JSON.stringify(body),
       });
     } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") throw err;
-      throw NETWORK_ERROR;
+      if (timedOut) throw timeoutError(requestId);
+      if (signal?.aborted || (err instanceof DOMException && err.name === "AbortError")) throw err;
+      throw networkError(requestId);
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", forward);
     }
   }
 
+  /** GETs get one more try on a network error, 502, 503 or 504; writes never do (spec 15 §15.4). */
+  async function send(path: string, options: RequestOptions, token: string | null, requestId: string) {
+    const canRetry = (options.method ?? "GET") === "GET";
+    try {
+      const res = await sendOnce(path, options, token, requestId);
+      if (!canRetry || !RETRY_STATUSES.has(res.status)) return res;
+    } catch (err) {
+      if (!canRetry || !(err instanceof ApiError) || err.code !== "network_error") throw err;
+    }
+    if (retryDelay) await new Promise((r) => setTimeout(r, retryDelay));
+    return sendOnce(path, options, token, requestId);
+  }
+
   async function core<T>(path: string, options: RequestOptions, fresh: boolean): Promise<T> {
+    const requestId = newRequestId();
     let token = options.anonymous ? null : await opts.getToken(fresh ? { skipCache: true } : undefined);
-    let res = await send(path, options, token);
+    let res = await send(path, options, token, requestId);
 
     if (res.status === 401 && !options.anonymous) {
       // One retry with a freshly minted token (the cached one may have just expired).
       token = await opts.getToken({ skipCache: true });
-      if (token) res = await send(path, options, token);
+      if (token) res = await send(path, options, token, requestId);
       if (res.status === 401 || !token) {
         opts.onSessionEnded?.();
-        throw await readError(res);
+        throw await readError(res, requestId);
       }
     }
 
     if (!res.ok) {
-      const err = await readError(res);
+      const err = await readError(res, requestId);
       if (err.status === 403 && err.code === "account_deactivated") opts.onDeactivated?.();
       if (err.status === 503 && err.code === "auth_unavailable" && !path.startsWith("/me/delete/")) opts.onAuthUnavailable?.();
       if (err.status === 403 && err.code === "mfa_required") opts.onMfaRequired?.();

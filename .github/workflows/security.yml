@@ -28,6 +28,11 @@ jobs:
           npm run build
           grep -q "frame-ancestors 'none'" dist/_headers
           grep -q "^Contact: mailto:security@example.ng" dist/.well-known/security.txt
+          npm run check:secrets
+      - name: generated API types match the committed schema (spec 15 §14.3)
+        run: |
+          npm run api:types
+          git diff --exit-code -- src/api/schema.d.ts
 
   dependencies:
     runs-on: ubuntu-latest

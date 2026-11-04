@@ -1,6 +1,7 @@
 /** /notifications — spec 07 §4.8. Sign-in only. */
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { apiGet, type Schema } from "../../api/typed";
 import { useApi } from "../../auth/session";
 import { Banner, Button, EmptyState, Icon, Skeleton, Switch, useToast } from "../../components/ui";
 import { formatDate } from "../../lib/format";
@@ -9,26 +10,8 @@ import { postPath } from "../../posts/types";
 import { Avatar } from "../../components/ui";
 import "../../news/news.css";
 
-export interface NotificationItem {
-  id: string;
-  kind: "announcement" | "news_decision" | "pvc_decision" | "candidate_post"
-    | "report_outcome" | "content_removed" | "account_warning" | "submissions_paused" | "appeal_decision"
-    | "security_notice" | "privacy_request_update";
-  created_at: string;
-  read_at: string | null;
-  decision: "" | "approved" | "rejected" | "verified" | "kept" | "removed" | "warning" | "paused" | "upheld" | "denied"
-    | "opened" | "waiting" | "reply" | "resumed" | "done" | "refused";
-  /** Spec 14: privacy request updates (reference and status only) and security notices (the officer's text). */
-  privacy_request?: { id: string; reference: string; status: string; status_label: string };
-  security_notice?: { reference: string; text: string };
-  /** Spec 13: moderation outcomes — what, which rule; never who decided or who reported. */
-  case?: { id: string; target_kind: "article" | "post" | "candidate"; title: string; rule: string; rule_title: string };
-  appeal?: { id: string; status: "pending" | "upheld" | "denied"; reason: string };
-  article: { id: string; source: "official" | "community"; title: string; public: boolean } | null;
-  /** Spec 09: candidate_post items. */
-  post?: { id: string; kind: "announcement" | "news"; kind_label: string; title: string };
-  candidate?: { slug: string; full_name: string; photo: { url_200: string | null } | null };
-}
+/** The API's Notification schema (generated, spec 15 §14.3): kinds, a short decision word and a link per kind. */
+export type NotificationItem = Schema<"Notification">;
 
 type Described = { text: string; href: string; icon: "shield" | "verified" | "info" | "checkCircle" | "alert" | null };
 
@@ -74,8 +57,28 @@ function describePrivacy(n: NotificationItem): Described | null {
   return null;
 }
 
+const MEMBERSHIP_WORDS: Record<string, string> = {
+  approved: "Your NDC membership was approved. Welcome!", activated: "Your NDC membership is active. Welcome!",
+  rejected: "Your membership application wasn’t approved. See why.", cancelled: "Your NDC membership was cancelled.",
+};
+
+/** Spec 15 §9.2: membership decisions and donation receipts (signed-in donors). No amounts in the notice. */
+function describeOwnRecord(n: NotificationItem): Described | null {
+  if (n.kind === "membership_decision") {
+    const good = n.decision === "approved" || n.decision === "activated";
+    return { text: MEMBERSHIP_WORDS[n.decision] ?? "There’s an update on your membership.", href: good ? "/membership/card" : "/join",
+      icon: good ? "checkCircle" : "info" };
+  }
+  if (n.kind === "donation_receipt") {
+    const ref = n.donation?.reference;
+    return { text: `Thank you. Your donation was received${ref ? ` (${ref})` : ""}. See your receipt.`,
+      href: ref ? `/donate/receipt/${encodeURIComponent(ref)}` : "/notifications", icon: "checkCircle" };
+  }
+  return null;
+}
+
 export function describe(n: NotificationItem): Described {
-  const mod = describeModeration(n) ?? describePrivacy(n);
+  const mod = describeModeration(n) ?? describePrivacy(n) ?? describeOwnRecord(n);
   if (mod) return mod;
   if (n.kind === "candidate_post" && n.post && n.candidate) {
     const what = n.post.kind === "announcement" ? "posted an announcement" : "posted news";
@@ -105,8 +108,8 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     document.title = "Notifications | NDCConnect";
-    api<{ results: NotificationItem[] }>("/me/notifications/").then((r) => setItems(r.results)).catch((e) => setError(e.message ?? "Couldn’t load."));
-    api<{ announcements: boolean }>("/me/notifications/preferences/").then(setPrefs).catch(() => {});
+    apiGet(api, "/me/notifications/").then((r) => setItems(r.results)).catch((e) => setError(e.message ?? "Couldn’t load."));
+    apiGet(api, "/me/notifications/preferences/").then(setPrefs).catch(() => {});
   }, [api]);
 
   const open = async (n: NotificationItem) => {

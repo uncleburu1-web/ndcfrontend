@@ -20,6 +20,15 @@ describe("security headers (spec 14 §4.9)", () => {
     expect(h["Permissions-Policy"]).toBe("camera=(), microphone=(), geolocation=(), payment=()");
     expect(h["Cross-Origin-Opener-Policy"]).toBe("same-origin");
   });
+  it("allows Cloudinary delivery and uploads only when images are on Cloudinary (spec 15)", () => {
+    const base = { VITE_API_BASE_URL: "https://api.example.ng/api/v1", VITE_CLERK_PUBLISHABLE_KEY: PK };
+    const local = buildHeaders(base)["Content-Security-Policy"];
+    expect(local).not.toContain("cloudinary");
+    const cld = buildHeaders({ ...base, VITE_MEDIA_ORIGIN: "https://res.cloudinary.com" })["Content-Security-Policy"];
+    expect(cld).toMatch(/img-src [^;]*https:\/\/res\.cloudinary\.com/);
+    expect(cld).toMatch(/connect-src [^;]*https:\/\/api\.cloudinary\.com/);
+    expect(cld).not.toMatch(/script-src [^;]*cloudinary/);
+  });
   it("writes security.txt with Expires one year out", () => {
     const now = new Date("2026-11-03T00:00:00Z");
     const txt = securityTxt({ VITE_SECURITY_CONTACT: "security@example.ng" }, now);
