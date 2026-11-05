@@ -16,7 +16,7 @@ import { HeaderSearch } from "../../search/HeaderSearch";
 import "../../moderation/moderation.css";
 import { Banner, Button, Icon, SiteHeader } from "../ui";
 
-const NAV = [
+export const NAV = [
   { label: "Candidates", href: "/candidates" },
   { label: "News", href: "/news" },
   { label: "Communities", href: "/communities" },
