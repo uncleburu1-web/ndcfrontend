@@ -32,6 +32,12 @@ Without `VITE_CLERK_PUBLISHABLE_KEY` the app shows a "Sign-in isn't configured" 
 | `/setup-profile`, `/account/*` | signed in |
 | everything else | public |
 
+## Communities (spec 17)
+
+- `/communities` (join, choose a state, browse), `/communities/<path>` (one route for every level: `lagos`, `lagos/ikeja/05/001`) and `/communities/<path>/posts/<id>`, `/account/communities` (Leave, Rejoin, new-post switches, change state), `/admin/communities` (system admins).
+- Code in `src/communities/` (types from the OpenAPI schema, `PostCard`, `Composer` with `refusalWords()`, `communities.css` using tokens only); pages in `src/pages/communities/`. Joining relies on the shared consent dialog (`consent_required` with purpose `community_membership`).
+- Who is in a community is never shown; counts come banded from the API.
+
 ## Security and privacy (spec 14)
 
 - `/privacy` (the notice, from the API's data register), `/security` (vulnerability disclosure), `/account/privacy` (Your data: download, consents, requests, delete), `/account-deleted`.

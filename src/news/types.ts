@@ -34,6 +34,8 @@ export interface ArticleSummary {
   /** Spec 08: true only when the byline shows the author's name and they opted in to the public badge. */
   byline_verified?: boolean;
   pinned: boolean;
+  /** Spec 17 §9: an announcement aimed at a community ("For: Ikeja LGA community"). */
+  audience?: { id: string; name: string; path: string } | null;
 }
 
 export interface ArticleDetail extends ArticleSummary {

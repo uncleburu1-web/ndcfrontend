@@ -444,6 +444,37 @@ describe("moderation queue and cases", () => {
     fireEvent.click(save);
     await waitFor(() => expect(decided).toEqual({ upheld: false, reason: "INEC hadn’t published it" }));
   });
+
+  it("community case (spec 17): hide while deciding, unhide, pause with scope", async () => {
+    clerkState.isSignedIn = true;
+    h.me = MOD;
+    const sent: Record<string, unknown> = {};
+    const item: Record<string, unknown> = { kind: "community_post", kind_words: "community post", title: "Lagos roads", public: true, status: "published", body: "Fix the roads now",
+      community: { id: "m1", name: "Ikeja", path: "lagos/ikeja", level: "lga" }, author: { email: "tunde@example.com", name: "Tunde A." } };
+    const standing = { user_id: "u5", removals: 0, warnings: 0, pauses: 0, paused_until: null, suggestion: "", active_pause: null };
+    let current: Record<string, unknown> = detail({ target_kind: "community_post", kind_label: "Community post", assigned_to: { email: MOD.email, me: true }, item, standing });
+    routes({ "/rules/": RULES, "/admin/moderation/cases/c1/": () => current,
+      "POST /admin/moderation/cases/c1/hide/": (o: Record<string, unknown>) => {
+        sent.hide = o.body; current = { ...current, item: { ...item, status: "hidden", hidden_at: "2026-11-05T10:00:00Z" } }; return current; },
+      "POST /admin/moderation/cases/c1/unhide/": (o: Record<string, unknown>) => { sent.unhide = o.body; current = { ...current, item }; return current; },
+      "POST /admin/moderation/cases/c1/pause/": (o: Record<string, unknown>) => { sent.pause = o.body; return current; } });
+    renderAt("/admin/moderation/c1");
+    expect(await screen.findByRole("link", { name: "Ikeja" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Hide while deciding" }));
+    expect(await screen.findByText(/Hidden while deciding/)).toBeTruthy();
+    expect(sent.hide).toEqual({ note: "" });
+    expect(screen.getByText(/nothing reverts on its own/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Unhide" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Hide while deciding" })).toBeTruthy());
+    expect(sent.unhide).toEqual({});
+    fireEvent.click(screen.getByRole("button", { name: "Pause community posting" }));
+    const dialog = await screen.findByRole("dialog", { name: /community posting/ });
+    fireEvent.click(within(dialog).getByLabelText("1 day"));
+    fireEvent.click(within(dialog).getByLabelText(/Ikeja and the levels below/));
+    fireEvent.change(within(dialog).getByLabelText(/Rule it broke/), { target: { value: "R1" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Pause for 1 day" }));
+    await waitFor(() => expect(sent.pause).toEqual({ days: 1, rule: "R1", reason: "", scope: "community" }));
+  });
 });
 
 describe("legal notices and compliance", () => {

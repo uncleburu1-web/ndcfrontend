@@ -49,6 +49,7 @@ export default function ArticlePage({ source }: { source: ArticleSource }) {
         {a.edited_at ? ` · Updated ${formatDate(a.edited_at)}` : ""}
         {a.state_label ? ` · ${a.state_label}` : ""}
       </p>
+      {a.audience && <p className="news-meta">For: <Link to={`/communities/${a.audience.path}`}>{a.audience.name} community</Link></p>}
       {a.image && <ArticleImage image={a.image} alt="" />}
       <ArticleBody body={a.body} />
       {(a.source_url || a.source_name) && (

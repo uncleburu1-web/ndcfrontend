@@ -1,5 +1,5 @@
 /** Spec 14 — privacy and security shapes, as the API returns them. */
-export type Purpose = "political_following" | "membership" | "pvc_check" | "verified_badge";
+export type Purpose = "political_following" | "membership" | "pvc_check" | "verified_badge" | "community_membership";
 
 export interface ConsentPurpose {
   key: Purpose;

@@ -266,6 +266,28 @@ describe("/admin/team", () => {
     expect(sent).toEqual({ reason: "Left" });
   });
 
+  it("moderator for a community (spec 17): Where, then an optional LGA", async () => {
+    h.me = SA;
+    let body: unknown = null;
+    routes({
+      "/admin/team/": { results: [], grantable: [...GRANTABLE, { role: "moderator", label: "Moderator", description: "decide reports" }] },
+      "/communities/": (_o: Record<string, unknown>, path: string) => path.includes("parent=s1")
+        ? [{ id: "l1", name: "Ikeja", level: "lga" }]
+        : [{ id: "n1", name: "Nigeria", level: "national" }, { id: "s1", name: "Lagos", level: "state" }],
+      "POST /admin/team/": (o: Record<string, unknown>) => { body = o.body; return assignment({ id: "a9", role: "moderator", role_label: "Moderator" }); },
+    });
+    renderAt("/admin/team");
+    fireEvent.change(await screen.findByLabelText(/^Email/), { target: { value: "mod@example.com" } });
+    fireEvent.change(screen.getByLabelText(/^Role/), { target: { value: "moderator" } });
+    const where = await screen.findByLabelText(/^Where/);
+    await screen.findByRole("option", { name: "Lagos" });
+    fireEvent.change(where, { target: { value: "s1" } });
+    fireEvent.change(await screen.findByLabelText(/^LGA/), { target: { value: "l1" } });
+    fireEvent.click(screen.getByRole("button", { name: "Grant role" }));
+    fireEvent.click(within(await screen.findByRole("dialog", { name: "Grant this role?" })).getByRole("button", { name: "Grant role" }));
+    await waitFor(() => expect(body).toEqual({ email: "mod@example.com", role: "moderator", note: "", community: "l1" }));
+  });
+
   it("Show revoked asks for revoked rows", async () => {
     h.me = SA;
     routes({ "/admin/team/": { results: [], grantable: GRANTABLE } });

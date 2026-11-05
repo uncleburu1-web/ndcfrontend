@@ -17,8 +17,10 @@ type Described = { text: string; href: string; icon: "shield" | "verified" | "in
 
 function describeModeration(n: NotificationItem): Described | null {
   const c = n.case;
-  const what = c?.target_kind === "post" ? "post" : c?.target_kind === "candidate" ? "profile" : "news story";
-  const own = c?.target_kind === "post" ? "/campaign" : "/news/mine";
+  const community = c?.target_kind === "community_post" || c?.target_kind === "community_comment";
+  const what = c?.target_kind === "post" ? "post" : c?.target_kind === "candidate" ? "profile" : c?.target_kind === "community_post"
+    ? "community post" : c?.target_kind === "community_comment" ? "community comment" : "news story";
+  const own = c?.target_kind === "post" ? "/campaign" : community ? "/communities" : "/news/mine";
   const rule = c?.rule && c.rule !== "LEGAL" ? ` for breaking ${c.rule}: ${c.rule_title}` : "";
   switch (n.kind) {
     case "report_outcome":
@@ -77,8 +79,23 @@ function describeOwnRecord(n: NotificationItem): Described | null {
   return null;
 }
 
+/** Spec 17 §10: where to go, never the post's text. */
+function describeCommunity(n: NotificationItem): Described | null {
+  if (n.kind === "community_placed") {
+    return { text: n.decision === "moved" ? "Your communities changed to match your verified PVC." : "You’ve joined your communities from your verified PVC.",
+      href: "/account/communities", icon: "checkCircle" };
+  }
+  if ((n.kind === "community_reply" || n.kind === "community_post") && n.community_post && n.community) {
+    const href = `/communities/${n.community.path}/posts/${n.community_post.id}`;
+    if (n.kind === "community_post") return { text: `New post in ${n.community.name}`, href, icon: null };
+    const k = n.community_post.count;
+    return { text: k > 1 ? `${k} new comments on your post in ${n.community.name}` : `New comment on your post in ${n.community.name}`, href, icon: null };
+  }
+  return null;
+}
+
 export function describe(n: NotificationItem): Described {
-  const mod = describeModeration(n) ?? describePrivacy(n) ?? describeOwnRecord(n);
+  const mod = describeModeration(n) ?? describePrivacy(n) ?? describeOwnRecord(n) ?? describeCommunity(n);
   if (mod) return mod;
   if (n.kind === "candidate_post" && n.post && n.candidate) {
     const what = n.post.kind === "announcement" ? "posted an announcement" : "posted news";
@@ -104,7 +121,7 @@ export default function NotificationsPage() {
   const navigate = useNavigate();
   const [items, setItems] = useState<NotificationItem[] | null>(null);
   const [error, setError] = useState("");
-  const [prefs, setPrefs] = useState<{ announcements: boolean } | null>(null);
+  const [prefs, setPrefs] = useState<{ announcements: boolean; community_replies: boolean } | null>(null);
 
   useEffect(() => {
     document.title = "Notifications | NDCConnect";
@@ -124,10 +141,12 @@ export default function NotificationsPage() {
     setItems((xs) => xs?.map((x) => ({ ...x, read_at: x.read_at ?? new Date().toISOString() })) ?? null);
     notificationsChanged();
   };
-  const toggle = async (value: boolean) => {
+  const toggle = async (value: boolean, key: "announcements" | "community_replies" = "announcements") => {
     try {
-      setPrefs(await api<{ announcements: boolean }>("/me/notifications/preferences/", { method: "PATCH", body: { announcements: value } }));
-      toast.show({ tone: "success", message: value ? "You’ll get official announcements." : "Official announcements turned off." });
+      setPrefs(await api<{ announcements: boolean; community_replies: boolean }>("/me/notifications/preferences/",
+        { method: "PATCH", body: { [key]: value } }));
+      toast.show({ tone: "success", message: key === "community_replies" ? (value ? "You’ll hear about replies to your community posts." : "Reply notifications off.")
+        : value ? "You’ll get official announcements." : "Official announcements turned off." });
     } catch {
       toast.show({ tone: "error", message: "Couldn’t save that setting." });
     }
@@ -171,6 +190,8 @@ export default function NotificationsPage() {
         <h2 id="notif-settings-h" className="visually-hidden">Settings</h2>
         <Switch label="Official announcements" checked={prefs?.announcements ?? true} disabled={!prefs} onChange={(v) => void toggle(v)}
           hint="Important announcements from NDCConnect. Decisions about your own news are always sent." />
+        <Switch label="Replies to my community posts" checked={prefs?.community_replies ?? true} disabled={!prefs}
+          onChange={(v) => void toggle(v, "community_replies")} hint="One notice per post an hour, however many comments." />
       </section>
     </div>
   );

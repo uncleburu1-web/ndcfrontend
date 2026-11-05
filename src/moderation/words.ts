@@ -12,7 +12,8 @@ export function untilWords(iso: string | null, now = new Date()): { text: string
   return { text: dueWords({ overdue: ms < 0, hours }), overdue: ms < 0 };
 }
 
-export const KIND_LABEL: Record<string, string> = { article: "News", post: "Candidate post", candidate: "Candidate profile" };
+export const KIND_LABEL: Record<string, string> = { article: "News", post: "Candidate post", candidate: "Candidate profile",
+  community_post: "Community post", community_comment: "Community comment" };
 
 export const EVENT_WORDS: Record<string, string> = {
   opened: "Opened",

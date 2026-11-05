@@ -68,6 +68,10 @@ import AdminLegalPage from "./pages/admin/moderation/AdminLegalPage";
 import AdminLegalNoticePage from "./pages/admin/moderation/AdminLegalNoticePage";
 import AdminCompliancePage from "./pages/admin/moderation/AdminCompliancePage";
 import StatePage from "./pages/states/StatePage";
+import CommunitiesPage from "./pages/communities/CommunitiesPage";
+import CommunityPage from "./pages/communities/CommunityPage";
+import AccountCommunitiesPage from "./pages/communities/AccountCommunitiesPage";
+import AdminCommunitiesPage from "./pages/admin/communities/AdminCommunitiesPage";
 import StatesPage from "./pages/states/StatesPage";
 import ArticlePage from "./pages/news/ArticlePage";
 import MyNewsPage from "./pages/news/MyNewsPage";
@@ -120,6 +124,7 @@ export default function App() {
         <Route element={<RequireSignedIn />}>
           <Route path="setup-profile" element={<SetupProfilePage />} />
           <Route path="account/privacy" element={<YourDataPage />} />
+          <Route path="account/communities" element={<AccountCommunitiesPage />} />
           <Route path="account/*" element={<AccountPage />} />
           {/* Sign-in only — never profile completion or PVC (spec 04 §4.4). */}
           <Route path="following" element={<FollowingPage />} />
@@ -148,6 +153,9 @@ export default function App() {
         <Route path="search" element={<SearchPage />} />
         <Route path="states" element={<StatesPage />} />
         <Route path="states/:state" element={<StatePage />} />
+        {/* Spec 17: guests see names and counts; posts need sign-in (the backend decides) */}
+        <Route path="communities" element={<CommunitiesPage />} />
+        <Route path="communities/*" element={<CommunityPage />} />
         {/* Community rules, report status and copyright notices (spec 13): public */}
         <Route path="rules" element={<RulesPage />} />
         <Route path="privacy" element={<PrivacyPage />} />
@@ -200,6 +208,7 @@ export default function App() {
             <Route path="admin/announcements/:id" element={<AnnouncementFormPage />} />
             <Route path="admin/posts" element={<AdminPostsPage />} />
             <Route path="admin/posts/:id" element={<AdminPostDetailPage />} />
+            <Route path="admin/communities" element={<AdminCommunitiesPage />} />
           </Route>
           {/* System admin or finance officer (spec 05 §7.2) */}
           <Route element={<RequireFinanceViewer />}>

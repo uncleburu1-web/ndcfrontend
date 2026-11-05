@@ -14,7 +14,7 @@ import "../candidates/admin.css";
 import "../../../news/news.css";
 
 type Errors = Record<string, string>;
-const EMPTY = { category: "", title: "", body: "", state: "", source_name: "", source_url: "" };
+const EMPTY = { category: "", title: "", body: "", state: "", source_name: "", source_url: "", audience_community: "" };
 
 export default function AnnouncementFormPage() {
   const { id } = useParams();
@@ -35,12 +35,28 @@ export default function AnnouncementFormPage() {
   const [pinPrompt, setPinPrompt] = useState<AdminArticle[] | null>(null);
   const [notFound, setNotFound] = useState(false);
 
+  // Spec 17 §9: show pinned in one community and every level below it
+  const [tops, setTops] = useState<{ id: string; name: string; level: string }[]>([]);
+  const [lgas, setLgas] = useState<{ id: string; name: string }[]>([]);
+  const [top, setTop] = useState("");
+  const [currentAudience, setCurrentAudience] = useState<{ id: string; name: string } | null>(null);
+  useEffect(() => {
+    api<{ id: string; name: string; level: string }[]>("/communities/", { anonymous: true }).then(setTops).catch(() => {});
+  }, [api]);
+  useEffect(() => {
+    setLgas([]);
+    if (!top || tops.find((t) => t.id === top)?.level !== "state") return;
+    api<{ id: string; name: string }[]>(`/communities/?parent=${top}`, { anonymous: true }).then(setLgas).catch(() => {});
+  }, [api, top, tops]);
+
   useEffect(() => {
     document.title = id ? "Edit announcement | NDCConnect admin" : "New announcement | NDCConnect admin";
     if (!id) return;
     api<AdminArticle>(`/admin/announcements/${id}/`).then((x) => {
       setA(x);
-      setF({ category: x.category, title: x.title, body: x.body, state: x.state, source_name: x.source_name, source_url: x.source_url });
+      setF({ category: x.category, title: x.title, body: x.body, state: x.state, source_name: x.source_name, source_url: x.source_url,
+        audience_community: x.audience?.id ?? "" });
+      if (x.audience) setCurrentAudience(x.audience);
     }).catch(() => setNotFound(true));
   }, [api, id]);
 
@@ -49,6 +65,7 @@ export default function AnnouncementFormPage() {
     if (!f.category) e.category = "Choose a category.";
     if (!f.title.trim()) e.title = "Give it a title.";
     if (!f.body.trim()) e.body = "Write the announcement.";
+    if (f.category === "community" && !f.audience_community && !id) e.audience_community = "Community Announcements need a community to show in.";
     if (f.source_url && !f.source_url.startsWith("https://")) e.source_url = "Use a link that starts with https://";
     if (f.category === "election_updates" && !(f.source_name.trim() && f.source_url)) {
       e.source_name = "Official Election Updates need a source (e.g. INEC).";
@@ -65,8 +82,8 @@ export default function AnnouncementFormPage() {
     setConfirm(null);
     try {
       const saved = id
-        ? await api<AdminArticle>(`/admin/announcements/${id}/`, { method: "PATCH", body: f })
-        : await api<AdminArticle>("/admin/announcements/", { method: "POST", body: { ...f, notify } });
+        ? await api<AdminArticle>(`/admin/announcements/${id}/`, { method: "PATCH", body: { ...f, audience_community: f.audience_community || null } })
+        : await api<AdminArticle>("/admin/announcements/", { method: "POST", body: { ...f, audience_community: f.audience_community || null, notify } });
       let final = saved;
       if (image) {
         try {
@@ -154,6 +171,18 @@ export default function AnnouncementFormPage() {
         <TextArea label="Announcement" required rows={10} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} error={errors.body}
           hint="Plain text. Leave a blank line between paragraphs." />
         <p className="news-counter">{f.body.length.toLocaleString()} / 20,000</p>
+        <Select label={f.category === "community" ? "Show pinned in" : "Show pinned in a community (optional)"} required={f.category === "community"}
+          value={top || (currentAudience && f.audience_community === currentAudience.id ? currentAudience.id : "")}
+          onChange={(e) => { setTop(e.target.value); setF({ ...f, audience_community: e.target.value }); }} error={errors.audience_community}
+          options={[{ value: "", label: "No community (the News page only)" },
+            ...(currentAudience && !tops.some((t) => t.id === currentAudience.id) ? [{ value: currentAudience.id, label: `${currentAudience.name} (current)` }] : []),
+            ...tops.map((t) => ({ value: t.id, label: t.name }))]}
+          hint="Pinned for 30 days in this community and every level below it; its members with announcements on are notified." />
+        {lgas.length > 0 && (
+          <Select label="LGA (optional)" value={lgas.some((l) => l.id === f.audience_community) ? f.audience_community : ""}
+            onChange={(e) => setF({ ...f, audience_community: e.target.value || top })}
+            options={[{ value: "", label: "The whole state" }, ...lgas.map((l) => ({ value: l.id, label: l.name }))]} />
+        )}
         <Select label="State (optional)" value={f.state} onChange={(e) => setF({ ...f, state: e.target.value })}
           options={[{ value: "", label: "All of Nigeria" }, ...STATES]} hint="Only filters the News page; everyone can read it." />
         <TextField label={f.category === "election_updates" ? "Source name" : "Source name (optional)"} required={f.category === "election_updates"}

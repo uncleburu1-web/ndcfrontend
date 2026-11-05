@@ -59,6 +59,8 @@ export default function StatePage() {
         <h1>{d.label} on NDCConnect</h1>
         <span className="article-badges">
           <Button variant="secondary" href={`/search?state=${d.state}`}>Search this state</Button>
+          <Button variant="secondary" href={`/communities/${d.state.replace(/_/g, "-")}`}>
+            {d.state === "fct" ? "Federal Capital Territory" : `${d.label} State`} community</Button>
           {me ? (isMine ? <span className="news-meta">Your state</span>
             : <Button variant="secondary" loading={saving} onClick={() => void makeMine()}>Make this my state</Button>)
             : <Button variant="ghost" href={`/sign-in?redirect_url=${encodeURIComponent(`/states/${d.state}`)}`}>Sign in to make this your state</Button>}

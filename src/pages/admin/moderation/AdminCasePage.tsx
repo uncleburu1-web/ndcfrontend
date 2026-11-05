@@ -39,6 +39,7 @@ export default function AdminCasePage() {
   const [internal, setInternal] = useState("");
   const [warn, setWarn] = useState(false);
   const [days, setDays] = useState("7");
+  const [pauseScope, setPauseScope] = useState("community");
   const [busy, setBusy] = useState("");
   const [revealed, setRevealed] = useState<Record<string, string>>({});
 
@@ -88,6 +89,8 @@ export default function AdminCasePage() {
   const mine = c.assigned_to?.me;
   const item = c.item;
   const isCommunityNews = c.target_kind === "article" && !item?.official;
+  const isCommunityItem = c.target_kind === "community_post" || c.target_kind === "community_comment";  // spec 17
+  const hasAuthor = (isCommunityNews || isCommunityItem) && !!item?.author;
   const removable = !closed && c.target_kind !== "candidate" && item?.public;
   const pauseActive = c.standing?.active_pause;
 
@@ -117,6 +120,10 @@ export default function AdminCasePage() {
       </header>
 
       {c.blocked && <Banner tone="info">{BLOCKED[c.blocked] ?? c.blocked_message}</Banner>}
+      {isCommunityItem && item?.community && <p className="mod-meta">In <Link to={`/communities/${item.community.path}`}>{item.community.name}</Link>
+        {item.status === "hidden" && item.hidden_at ? ` · hidden since ${formatDate(item.hidden_at, { withTime: true })}` : ""}</p>}
+      {isCommunityItem && item?.status === "hidden" && <Banner tone="warning" title="Hidden while deciding">
+        Remove it with a rule, restore it, or keep it. After 48 hours the case becomes urgent; nothing reverts on its own.</Banner>}
       {!c.blocked && c.assigned_to && !mine && !closed && <Banner tone="warning">{c.assigned_to.email} has this case open.</Banner>}
       {c.restorable && <Banner tone="info" title="Can be restored">The rights owner didn’t answer the counter-notice in time.</Banner>}
       {c.decision === "removed" && <Banner tone="warning" title={`Removed${c.rule ? ` under ${c.rule}` : ""}`}>
@@ -130,8 +137,14 @@ export default function AdminCasePage() {
             {!closed && <Button variant="secondary" onClick={() => open("keep")}>Keep</Button>}
             {removable && <Button variant="danger" onClick={() => open("remove")}>Remove</Button>}
             {c.decision === "removed" && c.target_kind !== "candidate" && <Button variant="secondary" onClick={() => open("restore")}>Restore</Button>}
-            {isCommunityNews && item?.author && <Button variant="secondary" onClick={() => open("warn")}>Warn the author</Button>}
-            {isCommunityNews && item?.author && !pauseActive && <Button variant="secondary" onClick={() => open("pause")}>Pause community news</Button>}
+            {isCommunityItem && !closed && item?.status === "published" && mine && (
+              <Button variant="secondary" onClick={() => void post("hide", { note }, "Hidden while you decide. Remove, restore or keep it within 48 hours.")}
+                loading={busy === "hide"}>Hide while deciding</Button>)}
+            {isCommunityItem && item?.status === "hidden" && (
+              <Button variant="secondary" onClick={() => void post("unhide", {}, "Shown again.")} loading={busy === "unhide"}>Unhide</Button>)}
+            {hasAuthor && <Button variant="secondary" onClick={() => open("warn")}>Warn the author</Button>}
+            {hasAuthor && !pauseActive && <Button variant="secondary" onClick={() => open("pause")}>
+              {isCommunityItem ? "Pause community posting" : "Pause community news"}</Button>}
             {pauseActive && <Button variant="secondary" onClick={() => void post("lift-pause", { restriction: pauseActive.id }, "Pause lifted.")}>Lift the pause</Button>}
             {!closed && c.status !== "escalated" && !c.is_system_admin && <Button variant="ghost" onClick={() => open("escalate")}>Escalate</Button>}
             {!closed && c.status !== "escalated" && c.is_system_admin && <Button variant="ghost" onClick={() => open("escalate")}>Mark escalated</Button>}
@@ -262,13 +275,28 @@ export default function AdminCasePage() {
         <TextArea label="Reason (shown to the author)" rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
       </Modal>
 
-      <Modal open={modal === "pause"} onClose={() => setModal(null)} title="Pause this author’s community news?"
+      <Modal open={modal === "pause"} onClose={() => setModal(null)}
+        title={isCommunityItem ? "Pause this author’s community posting?" : "Pause this author’s community news?"}
         footer={<><Button variant="secondary" onClick={() => setModal(null)}>Go back</Button>
-          <Button variant="danger" disabled={!rule} onClick={() => void post("pause", { days: Number(days), rule, reason: note }, "Paused. The author is told and can appeal.")}
-            loading={busy === "pause"}>Pause for {days} days</Button></>}>
-        <p>They can’t submit or edit community news until the date. They’re notified and can appeal.</p>
-        <RadioGroup legend="How long?" name="pause-days" required value={days} onChange={setDays}
-          options={[{ value: "7", label: "7 days" }, { value: "30", label: "30 days" }, { value: "90", label: "90 days" }]} />
+          <Button variant="danger" disabled={!rule} onClick={() => void post("pause", { days: Number(days), rule, reason: note, ...(isCommunityItem ? { scope: pauseScope } : {}) },
+            "Paused. The author is told and can appeal.")}
+            loading={busy === "pause"}>Pause for {days} day{days === "1" ? "" : "s"}</Button></>}>
+        {isCommunityItem ? (
+          <>
+            <p>They can read but can’t post, comment or like until the date. They’re notified and can appeal.</p>
+            <RadioGroup legend="How long?" name="pause-days" required value={days} onChange={setDays}
+              options={[{ value: "1", label: "1 day" }, { value: "7", label: "7 days" }, { value: "30", label: "30 days" }]} />
+            <RadioGroup legend="Where?" name="pause-scope" required value={pauseScope} onChange={setPauseScope}
+              options={[{ value: "community", label: `${item?.community?.name ?? "This community"} and the levels below` },
+                        { value: "all", label: "Every community (platform-wide moderators only)" }]} />
+          </>
+        ) : (
+          <>
+            <p>They can’t submit or edit community news until the date. They’re notified and can appeal.</p>
+            <RadioGroup legend="How long?" name="pause-days" required value={days} onChange={setDays}
+              options={[{ value: "7", label: "7 days" }, { value: "30", label: "30 days" }, { value: "90", label: "90 days" }]} />
+          </>
+        )}
         <RuleSelect value={rule} onChange={setRule} />
         <TextArea label="Reason (shown to the author)" rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
       </Modal>

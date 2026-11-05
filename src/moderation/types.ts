@@ -1,5 +1,5 @@
 /** Reporting and moderation (spec 13). Shapes mirror ndcbackend/apps/moderation. */
-export type TargetKind = "article" | "post" | "candidate";
+export type TargetKind = "article" | "post" | "candidate" | "community_post" | "community_comment";
 export type Priority = "legal" | "urgent" | "high" | "normal" | "low";
 export type CaseStatus = "open" | "escalated" | "closed";
 export type Decision = "" | "kept" | "removed" | "restored" | "author_removed";
@@ -83,6 +83,9 @@ export interface CaseDetail extends CaseRow {
     body: string;
     official?: boolean;
     candidate?: { slug: string; full_name: string };
+    /** Spec 17: community posts and comments */
+    community?: { id: string; name: string; path: string; level: string };
+    hidden_at?: string | null;
     author: { email?: string; name?: string; label?: string } | null;
   } | null;
   reports: CaseReport[];
@@ -102,6 +105,7 @@ export interface CaseDetail extends CaseRow {
     paused_until: string | null;
     suggestion: string;
     active_pause: { id: string; ends_at: string } | null;
+    pause_kind?: "news_pause" | "community_pause";
   } | null;
   blocked: string;
   blocked_message?: string;
@@ -158,7 +162,7 @@ export interface AuthorView {
   }[];
   restrictions: {
     id: string;
-    kind: "warning" | "news_pause";
+    kind: "warning" | "news_pause" | "community_pause";
     kind_label: string;
     rule: string;
     rule_title: string;

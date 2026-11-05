@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ApiError, CANCELLED_REVERIFICATION } from "../../auth/api";
 import { useApi, useMe } from "../../auth/session";
-import { Banner, Button, Icon, Modal, Select, Skeleton, TextArea, TextField, useToast } from "../../components/ui";
+import { Banner, Button, Checkbox, Icon, Modal, Select, Skeleton, TextArea, TextField, useToast } from "../../components/ui";
 import { formatDate } from "../../lib/format";
 import type { ConsentState, MyPrivacy, PrivacyRequest } from "../../privacy/types";
 import { RequestStatusBadge } from "../../privacy/badges";
@@ -60,11 +60,13 @@ function ConsentsSection({ consents, onChanged }: { consents: ConsentState[]; on
   const toast = useToast();
   const [confirm, setConfirm] = useState<ConsentState | null>(null);
   const [busy, setBusy] = useState(false);
+  const [deleteContent, setDeleteContent] = useState(false);  // communities only (spec 17 §5.4)
   const withdraw = async () => {
     if (!confirm) return;
     setBusy(true);
     try {
-      const r = await api<{ effect: string }>(`/me/consents/${confirm.purpose}/`, { method: "DELETE" });
+      const extra = confirm.purpose === "community_membership" && deleteContent ? "?delete_content=true" : "";
+      const r = await api<{ effect: string }>(`/me/consents/${confirm.purpose}/${extra}`, { method: "DELETE" });
       toast.show({ tone: "success", message: r.effect || "Consent withdrawn." });
       setConfirm(null);
       onChanged();
@@ -106,6 +108,10 @@ function ConsentsSection({ consents, onChanged }: { consents: ConsentState[]; on
         }
       >
         <p>{confirm?.withdraw_effect}</p>
+        {confirm?.purpose === "community_membership" && (
+          <Checkbox label="Also delete my posts, comments and likes" checked={deleteContent} onChange={(e) => setDeleteContent(e.target.checked)}
+            hint="Removed posts are kept until their deletion date, as the law requires." />
+        )}
         <p className="privacy-meta">It takes effect at once. You can give consent again later.</p>
       </Modal>
     </section>

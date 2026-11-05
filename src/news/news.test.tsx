@@ -380,6 +380,30 @@ describe("announcements", () => {
       body: expect.objectContaining({ category: "election_updates", notify: true, source_name: "INEC" }) })));
   });
 
+  it("Community Announcements need a community; the LGA narrows it (spec 17)", async () => {
+    clerkState.isSignedIn = true;
+    h.me = ADMIN;
+    h.api.mockImplementation(async (path: string, opts: Record<string, unknown> = {}) => {
+      if (path.startsWith("/communities/?parent=s1")) return [{ id: "l1", name: "Ikeja", level: "lga" }];
+      if (path.startsWith("/communities/")) return [{ id: "n1", name: "Nigeria", level: "national" }, { id: "s1", name: "Lagos", level: "state" }];
+      if (path === "/admin/announcements/notify-count/") return { count: 10 };
+      if (path === "/admin/announcements/" && opts.method === "POST") return { ...official(), id: "o9" };
+      throw new ApiError({ status: 404, message: `unmocked ${path}` });
+    });
+    renderAt("/admin/announcements/new");
+    fireEvent.change(screen.getByLabelText(/^Category/), { target: { value: "community" } });
+    fireEvent.change(screen.getByLabelText(/^Title/), { target: { value: "Ward meeting" } });
+    fireEvent.change(screen.getByLabelText(/^Announcement/), { target: { value: "Meet on Saturday." } });
+    fireEvent.click(screen.getByRole("button", { name: "Publish now" }));
+    expect(screen.getByText("Community Announcements need a community to show in.")).toBeTruthy();
+    await screen.findByRole("option", { name: "Lagos" });
+    fireEvent.change(screen.getByLabelText(/^Show pinned in/), { target: { value: "s1" } });
+    fireEvent.change(await screen.findByLabelText(/^LGA/), { target: { value: "l1" } });
+    fireEvent.click(screen.getByRole("button", { name: "Publish now" }));
+    await waitFor(() => expect(h.api).toHaveBeenCalledWith("/admin/announcements/", expect.objectContaining({ method: "POST",
+      body: expect.objectContaining({ category: "community", audience_community: "l1" }) })));
+  });
+
   it("editing never offers to notify; pinning a 4th asks which to unpin", async () => {
     clerkState.isSignedIn = true;
     h.me = ADMIN;

@@ -1517,7 +1517,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Turn announcement notifications on or off */
+        /** Turn announcement or community-reply notifications on or off */
         patch: operations["my_notifications_preferences_patch"];
         trace?: never;
     };
@@ -2275,6 +2275,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/moderation/cases/{id}/hide/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hide or unhide a community post or comment while deciding (spec 17 §8.3) */
+        post: operations["admin_moderation_case_hide_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/moderation/cases/{id}/unhide/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hide or unhide a community post or comment while deciding (spec 17 §8.3) */
+        post: operations["admin_moderation_case_unhide_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/moderation/cases/{id}/reports/{report_id}/reporter/": {
         parameters: {
             query?: never;
@@ -2965,12 +2999,434 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/communities/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Communities: Nigeria and the 37 states, or ?parent=<id> for the level below */
+        get: operations["communities_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/communities/lookup/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find a community by its path (national, lagos, lagos/ikeja, …) */
+        get: operations["community_lookup_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/communities/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One community: breadcrumb, what you can do here, your membership */
+        get: operations["community_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/communities/{id}/posts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pinned announcements, then posts, newest first (cursor pages of 20) */
+        get: operations["community_posts_get"];
+        put?: never;
+        /** Post in this community */
+        post: operations["community_posts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/community-posts/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One community post */
+        get: operations["community_post_get"];
+        put?: never;
+        post?: never;
+        /** Delete your post */
+        delete: operations["community_post_delete"];
+        options?: never;
+        head?: never;
+        /** Edit your post (30 minutes, unless reported) */
+        patch: operations["community_post_patch"];
+        trace?: never;
+    };
+    "/api/v1/community-posts/{id}/comments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Comments on a post, oldest first (50 a page) */
+        get: operations["community_post_comments_get"];
+        put?: never;
+        /** Comment on a post */
+        post: operations["community_post_comments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/community-posts/{id}/reaction/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Like a post */
+        put: operations["community_post_reaction_put"];
+        post?: never;
+        /** Remove your like */
+        delete: operations["community_post_reaction_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/community-posts/{id}/report/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report a community post (13's reasons) */
+        post: operations["community_post_report_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/community-comments/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete your comment */
+        delete: operations["community_comment_delete"];
+        options?: never;
+        head?: never;
+        /** Edit your comment (30 minutes, unless reported) */
+        patch: operations["community_comment_patch"];
+        trace?: never;
+    };
+    "/api/v1/community-comments/{id}/report/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report a community comment (13's reasons) */
+        post: operations["community_comment_report_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/communities/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your communities and what's available to you */
+        get: operations["my_communities_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/communities/join/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Join communities: asks for the communities consent, then places you from your verified PVC (§5.2) */
+        post: operations["my_communities_join_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/communities/state/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Choose your state community (not yet verified; once every 30 days) */
+        post: operations["my_communities_state_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/communities/rejoin/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rejoin a level you left */
+        post: operations["my_communities_rejoin_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/communities/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Leave a community (leaving the state also leaves the levels below) */
+        delete: operations["my_community_delete"];
+        options?: never;
+        head?: never;
+        /** Turn new-post notifications on or off (LGA, ward and polling unit) */
+        patch: operations["my_community_patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/communities/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Communities tree for admins (?parent=<id>) */
+        get: operations["admin_communities_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/communities/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One community: settings, counts, moderators, open cases (audited) */
+        get: operations["admin_community_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change a community's settings */
+        patch: operations["admin_community_patch"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AdminCommunitySchema: {
+            /** Format: uuid */
+            id: string;
+            level: components["schemas"]["LevelEnum"];
+            level_label: string;
+            name: string;
+            path: string;
+            state: string;
+            /** Format: uuid */
+            parent_id: string | null;
+            active: boolean;
+            /** @description Banded: 'Fewer than 10', '10–99', '100–999', '1,000+' (spec 17 §4.4) */
+            members: string;
+            post_count: number;
+            has_children: boolean;
+            /** @description Exact for national, state and LGA; banded below (§4.4) */
+            member_count: string;
+            read_scope: string;
+            posting_open: boolean;
+            ndc_members_only: boolean;
+            open_cases: number;
+            /** @description Emails of moderators scoped to this community */
+            moderators: string[];
+        };
+        AuthorSchema: {
+            /** @description First name and last initial, or 'Former member' */
+            name: string;
+            verified: boolean;
+            /** @description 'Campaign team · <candidate>' or null */
+            campaign: string | null;
+            is_you: boolean;
+        };
+        BlockSchema: {
+            code: string;
+            message: string;
+            until?: string;
+        };
+        CaseHideRequestRequest: {
+            note?: string;
+        };
+        ChooseStateRequest: {
+            state: string;
+        };
+        CommentSchema: {
+            /** Format: uuid */
+            id: string;
+            body: string;
+            status: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            edited_at: string | null;
+            author: components["schemas"]["AuthorSchema"];
+            can_edit: boolean;
+            can_delete: boolean;
+            notice: components["schemas"]["NoticeSchema"] | null;
+        };
+        CommunityBriefSchema: {
+            /** Format: uuid */
+            id: string;
+            level: components["schemas"]["LevelEnum"];
+            level_label: string;
+            name: string;
+            path: string;
+        };
+        CommunityCommentPage: {
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["CommentSchema"][];
+        };
+        CommunityDetailSchema: {
+            /** Format: uuid */
+            id: string;
+            level: components["schemas"]["LevelEnum"];
+            level_label: string;
+            name: string;
+            path: string;
+            state: string;
+            /** Format: uuid */
+            parent_id: string | null;
+            active: boolean;
+            /** @description Banded: 'Fewer than 10', '10–99', '100–999', '1,000+' (spec 17 §4.4) */
+            members: string;
+            post_count: number;
+            has_children: boolean;
+            breadcrumb: components["schemas"]["CommunityBriefSchema"][];
+            read_scope: string;
+            posting_open: boolean;
+            ndc_members_only: boolean;
+            can_read: boolean;
+            can_post: boolean;
+            post_block: components["schemas"]["BlockSchema"] | null;
+            membership: components["schemas"]["MembershipSchema"] | null;
+            /** @description Linked campaigns to post for (rule 7): [{id, name}] */
+            campaigns: {
+                [key: string]: unknown;
+            }[];
+        };
+        CommunityReportResponse: {
+            reference?: string;
+            route?: string;
+        };
+        CommunitySchema: {
+            /** Format: uuid */
+            id: string;
+            level: components["schemas"]["LevelEnum"];
+            level_label: string;
+            name: string;
+            path: string;
+            state: string;
+            /** Format: uuid */
+            parent_id: string | null;
+            active: boolean;
+            /** @description Banded: 'Fewer than 10', '10–99', '100–999', '1,000+' (spec 17 §4.4) */
+            members: string;
+            post_count: number;
+            has_children: boolean;
+        };
         /** @enum {string} */
         DatabaseEnum: "ok" | "unavailable";
+        FeedSchema: {
+            pinned: components["schemas"]["PinnedSchema"][];
+            results: components["schemas"]["PostSchema"][];
+            next: string | null;
+            previous: string | null;
+        };
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
             database: components["schemas"]["DatabaseEnum"];
@@ -3001,13 +3457,49 @@ export interface components {
             webhooks: components["schemas"]["WebhookCounts"][];
             outbox: components["schemas"]["OutboxStats"];
         };
+        /** @enum {string} */
+        LevelEnum: "national" | "state" | "lga" | "ward" | "polling_unit";
         MarkedRead: {
             updated: number;
         };
+        MembershipSchema: {
+            how: string;
+            how_label: string;
+            /** Format: date-time */
+            joined_at: string;
+            notify_new_posts: boolean;
+        };
         /** @enum {string} */
         ModeEnum: "direct" | "server";
+        MyCommunitiesSchema: {
+            consented: boolean;
+            verified: boolean;
+            memberships: components["schemas"]["MyMembershipSchema"][];
+            left_levels: string[];
+            /** Format: date-time */
+            state_change_available_at: string | null;
+            /** @description Verified, but the polling unit isn't matched to INEC's list yet (§18) */
+            unmatched: boolean;
+            geography_loaded: boolean;
+        };
+        MyMembershipSchema: {
+            community: components["schemas"]["CommunitySchema"];
+            level: string;
+            how: string;
+            how_label: string;
+            /** Format: date-time */
+            joined_at: string;
+            notify_new_posts: boolean;
+        };
         /** @enum {string} */
         NigerianStateEnum: "abia" | "adamawa" | "akwa_ibom" | "anambra" | "bauchi" | "bayelsa" | "benue" | "borno" | "cross_river" | "delta" | "ebonyi" | "edo" | "ekiti" | "enugu" | "gombe" | "imo" | "jigawa" | "kaduna" | "kano" | "katsina" | "kebbi" | "kogi" | "kwara" | "lagos" | "nasarawa" | "niger" | "ogun" | "ondo" | "osun" | "oyo" | "plateau" | "rivers" | "sokoto" | "taraba" | "yobe" | "zamfara" | "fct";
+        NoticeSchema: {
+            kind: components["schemas"]["NoticeSchemaKindEnum"];
+            rule: string;
+            rule_title: string;
+        };
+        /** @enum {string} */
+        NoticeSchemaKindEnum: "hidden" | "removed" | "deleted";
         Notification: {
             /** Format: uuid */
             id: string;
@@ -3027,6 +3519,8 @@ export interface components {
             security_notice?: components["schemas"]["NotificationSecurityNotice"];
             membership?: components["schemas"]["NotificationMembership"];
             donation?: components["schemas"]["NotificationDonation"] | null;
+            community_post?: components["schemas"]["NotificationCommunityPost"];
+            community?: components["schemas"]["NotificationCommunity"];
         };
         NotificationAppeal: {
             /** Format: uuid */
@@ -3057,11 +3551,22 @@ export interface components {
             rule: string;
             rule_title: string;
         };
+        NotificationCommunity: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            path: string;
+        };
+        NotificationCommunityPost: {
+            /** Format: uuid */
+            id: string;
+            count: number;
+        };
         NotificationDonation: {
             reference: string;
         };
         /** @enum {string} */
-        NotificationKindEnum: "announcement" | "news_decision" | "pvc_decision" | "candidate_post" | "report_outcome" | "content_removed" | "account_warning" | "submissions_paused" | "appeal_decision" | "security_notice" | "privacy_request_update" | "membership_decision" | "donation_receipt";
+        NotificationKindEnum: "announcement" | "news_decision" | "pvc_decision" | "candidate_post" | "report_outcome" | "content_removed" | "account_warning" | "submissions_paused" | "appeal_decision" | "security_notice" | "privacy_request_update" | "membership_decision" | "donation_receipt" | "community_reply" | "community_post" | "community_placed";
         NotificationMembership: {
             status: string;
         };
@@ -3080,6 +3585,7 @@ export interface components {
         };
         NotificationPreferences: {
             announcements: boolean;
+            community_replies: boolean;
         };
         NotificationPrivacyRequest: {
             id: string;
@@ -3147,11 +3653,52 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["PublicCandidateList"][];
         };
+        PatchedCommunityBellRequest: {
+            notify_new_posts?: boolean;
+        };
+        PatchedCommunitySettingsChangeRequest: {
+            posting_open?: boolean;
+            read_scope?: components["schemas"]["ReadScopeEnum"];
+            ndc_members_only?: boolean;
+        };
         PatchedNotificationPreferencesRequest: {
             announcements?: boolean;
+            community_replies?: boolean;
+        };
+        PatchedWritePostSchemaRequest: {
+            body?: string;
+            /** Format: uuid */
+            campaign_candidate?: string | null;
+        };
+        PinnedSchema: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            category_label: string;
+            /** Format: date-time */
+            published_at: string;
+            audience: components["schemas"]["CommunityBriefSchema"];
         };
         /** @enum {string} */
         PositionEnum: "president" | "governor" | "senator" | "house_of_reps" | "state_assembly" | "lga_chairman" | "councillor";
+        PostSchema: {
+            /** Format: uuid */
+            id: string;
+            body: string;
+            status: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            edited_at: string | null;
+            author: components["schemas"]["AuthorSchema"];
+            can_edit: boolean;
+            can_delete: boolean;
+            notice: components["schemas"]["NoticeSchema"] | null;
+            community: components["schemas"]["CommunityBriefSchema"];
+            comment_count: number;
+            reaction_count: number;
+            liked: boolean;
+        };
         /** @description §7.1 — public fields ONLY. Never notes, verifier, linked accounts, creator, status history. */
         PublicCandidate: {
             readonly slug: string;
@@ -3190,6 +3737,12 @@ export interface components {
         };
         /** @enum {string} */
         PurposeEnum: "candidate_photo" | "post_image" | "news_image" | "announcement_image";
+        ReactionSchema: {
+            liked: boolean;
+            reaction_count: number;
+        };
+        /** @enum {string} */
+        ReadScopeEnum: "signed_in" | "members";
         Ready: {
             status: components["schemas"]["ReadyStatusEnum"];
             checks: {
@@ -3198,6 +3751,15 @@ export interface components {
         };
         /** @enum {string} */
         ReadyStatusEnum: "ready" | "not_ready";
+        RejoinLevelRequest: {
+            level: string;
+        };
+        ReportRequest: {
+            reason: string;
+            details?: string;
+            /** Format: email */
+            contact_email?: string;
+        };
         UnreadCount: {
             unread: number;
         };
@@ -3249,6 +3811,11 @@ export interface components {
         };
         /** @enum {string} */
         WebhookReceiptStatusEnum: "processed" | "ignored" | "failed";
+        WritePostSchemaRequest: {
+            body: string;
+            /** Format: uuid */
+            campaign_candidate?: string | null;
+        };
         Error: {
             error: {
                 status: number;
@@ -6889,6 +7456,66 @@ export interface operations {
             };
         };
     };
+    admin_moderation_case_hide_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CaseHideRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CaseHideRequestRequest"];
+                "multipart/form-data": components["schemas"]["CaseHideRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description The case, as GET /admin/moderation/cases/{id}/ returns it */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    admin_moderation_case_unhide_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CaseHideRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CaseHideRequestRequest"];
+                "multipart/form-data": components["schemas"]["CaseHideRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description The case, as GET /admin/moderation/cases/{id}/ returns it */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
     admin_moderation_reporter_post: {
         parameters: {
             query?: never;
@@ -7971,6 +8598,580 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UploadSignature"];
+                };
+            };
+        };
+    };
+    communities_get: {
+        parameters: {
+            query?: {
+                /** @description A community ID */
+                parent?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunitySchema"][];
+                };
+            };
+        };
+    };
+    community_lookup_get: {
+        parameters: {
+            query: {
+                path: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunityDetailSchema"];
+                };
+            };
+        };
+    };
+    community_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunityDetailSchema"];
+                };
+            };
+        };
+    };
+    community_posts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedSchema"];
+                };
+            };
+        };
+    };
+    community_posts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WritePostSchemaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["WritePostSchemaRequest"];
+                "multipart/form-data": components["schemas"]["WritePostSchemaRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostSchema"];
+                };
+            };
+        };
+    };
+    community_post_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostSchema"];
+                };
+            };
+        };
+    };
+    community_post_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    community_post_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedWritePostSchemaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedWritePostSchemaRequest"];
+                "multipart/form-data": components["schemas"]["PatchedWritePostSchemaRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostSchema"];
+                };
+            };
+        };
+    };
+    community_post_comments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunityCommentPage"];
+                };
+            };
+        };
+    };
+    community_post_comments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WritePostSchemaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["WritePostSchemaRequest"];
+                "multipart/form-data": components["schemas"]["WritePostSchemaRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentSchema"];
+                };
+            };
+        };
+    };
+    community_post_reaction_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReactionSchema"];
+                };
+            };
+        };
+    };
+    community_post_reaction_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    community_post_report_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReportRequest"];
+                "multipart/form-data": components["schemas"]["ReportRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunityReportResponse"];
+                };
+            };
+        };
+    };
+    community_comment_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    community_comment_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedWritePostSchemaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedWritePostSchemaRequest"];
+                "multipart/form-data": components["schemas"]["PatchedWritePostSchemaRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentSchema"];
+                };
+            };
+        };
+    };
+    community_comment_report_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReportRequest"];
+                "multipart/form-data": components["schemas"]["ReportRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunityReportResponse"];
+                };
+            };
+        };
+    };
+    my_communities_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyCommunitiesSchema"];
+                };
+            };
+        };
+    };
+    my_communities_join_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyCommunitiesSchema"];
+                };
+            };
+        };
+    };
+    my_communities_state_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChooseStateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ChooseStateRequest"];
+                "multipart/form-data": components["schemas"]["ChooseStateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyCommunitiesSchema"];
+                };
+            };
+        };
+    };
+    my_communities_rejoin_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejoinLevelRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["RejoinLevelRequest"];
+                "multipart/form-data": components["schemas"]["RejoinLevelRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyCommunitiesSchema"];
+                };
+            };
+        };
+    };
+    my_community_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    my_community_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCommunityBellRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedCommunityBellRequest"];
+                "multipart/form-data": components["schemas"]["PatchedCommunityBellRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyCommunitiesSchema"];
+                };
+            };
+        };
+    };
+    admin_communities_get: {
+        parameters: {
+            query?: {
+                parent?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminCommunitySchema"][];
+                };
+            };
+        };
+    };
+    admin_community_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminCommunitySchema"];
+                };
+            };
+        };
+    };
+    admin_community_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCommunitySettingsChangeRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedCommunitySettingsChangeRequest"];
+                "multipart/form-data": components["schemas"]["PatchedCommunitySettingsChangeRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminCommunitySchema"];
                 };
             };
         };

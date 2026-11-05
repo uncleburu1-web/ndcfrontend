@@ -19,6 +19,7 @@ import { Banner, Button, Icon, SiteHeader } from "../ui";
 const NAV = [
   { label: "Candidates", href: "/candidates" },
   { label: "News", href: "/news" },
+  { label: "Communities", href: "/communities" },
   { label: "States", href: "/states" },
   { label: "Communities", href: "/communities" },
   { label: "Finance", href: "/finance" },

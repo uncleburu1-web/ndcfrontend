@@ -19,7 +19,8 @@ interface Props {
   onDecline: () => void;
 }
 
-const ANCHOR: Record<string, string> = { political_following: "follows", membership: "membership", pvc_check: "pvc", verified_badge: "pvc" };
+const ANCHOR: Record<string, string> = { political_following: "follows", membership: "membership", pvc_check: "pvc", verified_badge: "pvc",
+  community_membership: "communities" };
 
 export function ConsentDialog({ ask, onAgree, onDecline }: Props) {
   const [busy, setBusy] = useState(false);

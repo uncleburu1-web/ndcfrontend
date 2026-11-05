@@ -26,6 +26,11 @@ export default function AdminTeamPage() {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
   const [note, setNote] = useState("");
+  // Spec 17 §8.2: a moderator for one national, state or LGA community (and everything below it)
+  const [where, setWhere] = useState("");
+  const [lga, setLga] = useState("");
+  const [tops, setTops] = useState<{ id: string; name: string; level: string }[]>([]);
+  const [lgas, setLgas] = useState<{ id: string; name: string }[]>([]);
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState("");
@@ -33,6 +38,18 @@ export default function AdminTeamPage() {
     document.title = "Team | NDCConnect admin";
   }, []);
 
+  useEffect(() => {
+    if (role !== "moderator" || tops.length) return;
+    api<{ id: string; name: string; level: string }[]>("/communities/", { anonymous: true }).then(setTops).catch(() => {});
+  }, [api, role, tops.length]);
+  useEffect(() => {
+    setLga("");
+    setLgas([]);
+    const top = tops.find((t) => t.id === where);
+    if (!top || top.level !== "state") return;
+    api<{ id: string; name: string }[]>(`/communities/?parent=${where}`, { anonymous: true }).then(setLgas).catch(() => {});
+  }, [api, where, tops]);
+  const community = role === "moderator" ? lga || where : "";
   const grantable = res.data?.grantable ?? [];
   const chosen = grantable.find((g) => g.role === role);
   const submit = (e: FormEvent) => {
@@ -44,9 +61,9 @@ export default function AdminTeamPage() {
   const grant = async () => {
     setBusy(true);
     try {
-      const a = await api<Assignment>("/admin/team/", { method: "POST", body: { email: email.trim(), role, note } });
+      const a = await api<Assignment>("/admin/team/", { method: "POST", body: { email: email.trim(), role, note, ...(community ? { community } : {}) } });
       toast.show({ tone: "success", message: `${a.user.full_name || a.user.email} is now a ${a.role_label.toLowerCase()}.` });
-      setEmail(""); setRole(""); setNote("");
+      setEmail(""); setRole(""); setNote(""); setWhere(""); setLga("");
       res.retry();
     } catch (err) {
       setFormError(roleErrorMessage(err));
@@ -75,6 +92,15 @@ export default function AdminTeamPage() {
           <Select label="Role" value={role} onChange={(e) => setRole(e.target.value)}
             options={[{ value: "", label: "Choose a role" }, ...grantable.map((g) => ({ value: g.role, label: g.label }))]}
             hint={chosen ? `Can ${chosen.description}.` : undefined} />
+          {role === "moderator" && (
+            <Select label="Where" value={where} onChange={(e) => setWhere(e.target.value)}
+              options={[{ value: "", label: "Everywhere (every community, news and posts)" }, ...tops.map((t) => ({ value: t.id, label: t.name }))]}
+              hint="A community moderator covers that community and every level below it." />
+          )}
+          {role === "moderator" && lgas.length > 0 && (
+            <Select label="LGA (optional)" value={lga} onChange={(e) => setLga(e.target.value)}
+              options={[{ value: "", label: "The whole state" }, ...lgas.map((l) => ({ value: l.id, label: l.name }))]} />
+          )}
           <TextField label="Note (optional)" maxLength={255} value={note} onChange={(e) => setNote(e.target.value)} />
           <Button type="submit">Grant role</Button>
         </form>
