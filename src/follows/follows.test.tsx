@@ -325,9 +325,12 @@ describe("/following", () => {
     expect(screen.getByText("Some candidates you followed are no longer listed.")).toBeTruthy();
     expect(screen.getByRole("switch", { name: /Amina Bello/ }).getAttribute("aria-checked")).toBe("true");
 
+    // The follow state is seeded just after the rows render: wait for it, and for each tap to land, so slow machines don't race.
+    await waitFor(() => expect(voteButton().textContent).toContain("Voted · Following"));
     fireEvent.click(voteButton());
+    await waitFor(() => expect(voteButton().textContent).toContain("Tap again to unfollow"));
     fireEvent.click(voteButton());
-    await waitFor(() => expect(screen.queryByRole("link", { name: "Amina Bello" })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("link", { name: "Amina Bello" })).toBeNull(), { timeout: 5000 });
     expect(screen.getByRole("link", { name: "Musa Ibrahim" })).toBeTruthy();
   });
 

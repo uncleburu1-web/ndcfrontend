@@ -2,7 +2,7 @@
  * Toast — spec §6.11. Floating, short-lived message (gets --shadow-overlay).
  * Wrap the app in <ToastProvider>; call useToast().show({ tone, message }).
  */
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Icon, type IconName } from "./Icon";
 import "./Toast.css";
 
@@ -37,6 +37,16 @@ const TONE_ICON: Record<ToastTone, IconName> = {
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
   const nextId = useRef(1);
+  const timers = useRef(new Set<number>());
+
+  // Auto-dismiss timers stop when the provider unmounts, so none fires into a page that has gone.
+  useEffect(() => {
+    const all = timers.current;
+    return () => {
+      all.forEach((t) => window.clearTimeout(t));
+      all.clear();
+    };
+  }, []);
 
   const dismiss = useCallback((id: number) => setItems((all) => all.filter((t) => t.id !== id)), []);
 
@@ -44,7 +54,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     ({ tone = "info", message, durationMs = 5000, action }) => {
       const id = nextId.current++;
       setItems((all) => [...all, { id, tone, message, action }]);
-      window.setTimeout(() => dismiss(id), durationMs);
+      const t = window.setTimeout(() => {
+        timers.current.delete(t);
+        dismiss(id);
+      }, durationMs);
+      timers.current.add(t);
     },
     [dismiss]
   );
