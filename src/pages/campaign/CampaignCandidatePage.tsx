@@ -8,7 +8,9 @@ import { ApiError } from "../../auth/api";
 import { useApi } from "../../auth/session";
 import { UploadProgress } from "../../media/UploadProgress";
 import { checkImage, useImageUpload } from "../../media/useImageUpload";
-import { Avatar, Banner, Button, Checkbox, EmptyState, Modal, RadioGroup, Skeleton, StatusBadge, TextArea, TextField, useToast } from "../../components/ui";
+import { Avatar, Banner, Button, Checkbox, EmptyState, Modal, RadioGroup, Skeleton, StatusBadge, Tabs, TextArea, TextField, useToast } from "../../components/ui";
+import { CampaignVolunteers } from "../../events/CampaignVolunteers";
+import { OrganiserEvents } from "../../events/OrganiserEvents";
 import { formatDate } from "../../lib/format";
 import { BODY_MAX, TITLE_MAX, postPath, type CampaignCandidate, type CampaignPost, type PostKind } from "../../posts/types";
 import { KindBadge } from "../../posts/KindBadge";
@@ -125,6 +127,7 @@ export default function CampaignCandidatePage() {
   const [error, setError] = useState<ApiError | null>(null);
   const [mode, setMode] = useState<"list" | "new" | CampaignPost>("list");
   const [deleting, setDeleting] = useState<CampaignPost | null>(null);
+  const [tab, setTab] = useState("posts");  // spec 18: Posts · Events · Volunteers
   const standing = useAuthorView();
 
   const load = useCallback(() => {
@@ -174,7 +177,7 @@ export default function CampaignCandidatePage() {
             <p className="news-meta">{candidate.position_label} · My campaign · {candidate.notify_count.toLocaleString()} {candidate.notify_count === 1 ? "follower" : "followers"} with notifications on</p>
           </div>
         </div>
-        {mode === "list" && canWrite && <Button onClick={() => setMode("new")}>New post</Button>}
+        {tab === "posts" && mode === "list" && canWrite && <Button onClick={() => setMode("new")}>New post</Button>}
       </header>
       {paused && (
         <Banner tone="warning" title="Posting is paused">
@@ -183,6 +186,8 @@ export default function CampaignCandidatePage() {
       )}
       {!candidate.published && <Banner tone="warning">This candidate isn’t published, so posts can’t go out right now.</Banner>}
 
+      <Tabs label="Campaign sections" value={tab} onChange={setTab} tabs={[
+        { id: "posts", label: "Posts", content: (<>
       {mode !== "list" ? (
         <PostForm candidate={candidate} editing={mode === "new" ? null : mode} onCancel={() => setMode("list")}
           onSaved={(p) => { setPosts((xs) => [p, ...(xs ?? []).filter((x) => x.id !== p.id)]); setMode("list"); }} />
@@ -209,6 +214,10 @@ export default function CampaignCandidatePage() {
           ))}
         </ul>
       )}
+        </>) },
+        { id: "events", label: "Events", content: <OrganiserEvents base={`/campaign/${candidateId}/events/`} canWrite={candidate.published} /> },
+        { id: "volunteers", label: "Volunteers", content: <CampaignVolunteers candidateId={candidateId} /> },
+      ]} />
       <Modal open={Boolean(deleting)} onClose={() => setDeleting(null)} title="Delete this post?"
         footer={<><Button variant="secondary" onClick={() => setDeleting(null)}>Keep it</Button><Button variant="danger" onClick={() => void remove()}>Delete post</Button></>}>
         <p>This removes it from NDCConnect and from followers’ notifications. You can’t undo this.</p>

@@ -67,6 +67,10 @@ export default function AccountPage() {
           <ProfileForm submitLabel="Save changes" busyLabel="Saving…" successMessage="Changes saved." />
           <VoterStatus />
           <HomeState />
+          <div className="account-voter">
+            <h2>Events and volunteering</h2>
+            <p><Link to="/account/events">My events</Link> · <Link to="/account/volunteering">My volunteering</Link></p>
+          </div>
         </div>
         <div className="account-page__clerk">
           <h2>Sign-in and security</h2>

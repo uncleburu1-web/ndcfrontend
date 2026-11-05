@@ -8,7 +8,7 @@ import { useMe } from "../../auth/session";
 import "./admin-nav.css";
 
 export type AdminArea = "overview" | "candidates" | "donations" | "pvc" | "membership" | "moderation" | "news" | "announcements" | "posts" | "team"
-  | "audit" | "privacy" | "integrations" | "communities";
+  | "audit" | "privacy" | "integrations" | "communities" | "events";
 
 const TABS: { id: AdminArea; label: string; href: string }[] = [
   { id: "overview", label: "Overview", href: "/admin" },
@@ -21,6 +21,7 @@ const TABS: { id: AdminArea; label: string; href: string }[] = [
   { id: "announcements", label: "Announcements", href: "/admin/announcements" },
   { id: "posts", label: "Candidate posts", href: "/admin/posts" },
   { id: "communities", label: "Communities", href: "/admin/communities" },
+  { id: "events", label: "Events", href: "/admin/events" },  // spec 18
   { id: "privacy", label: "Privacy", href: "/admin/privacy" },
   { id: "team", label: "Team", href: "/admin/team" },
   { id: "audit", label: "Audit log", href: "/admin/audit" },

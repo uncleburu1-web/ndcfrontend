@@ -94,8 +94,40 @@ function describeCommunity(n: NotificationItem): Described | null {
   return null;
 }
 
+const EVENT_WORDS: Record<string, string> = { time: "time changed", venue: "venue changed", mode: "changed to online or in person",
+  link: "online link changed", postponed: "postponed", update: "update from the organiser", cancelled: "was cancelled",
+  removed: "is no longer available", blackout: "a campaign blackout window now covers it" };
+
+/** Spec 18 §10: which event and a short word; never who else registered. */
+function describeEvent(n: NotificationItem): Described | null {
+  if (n.event && ["event_update", "event_reminder", "event_waitlist", "candidate_event"].includes(n.kind)) {
+    const href = `/events/${n.event.id}`;
+    if (n.kind === "event_reminder") return { text: `${n.event.title} starts ${n.decision === "hour" ? "within the hour" : "tomorrow"}`, href, icon: "info" };
+    if (n.kind === "event_waitlist") return { text: `You’re in: a place opened at ${n.event.title}`, href, icon: "checkCircle" };
+    if (n.kind === "candidate_event") return { text: `${n.event.organiser} posted an event: ${n.event.title}`, href, icon: null };
+    return { text: `${n.event.title}: ${EVENT_WORDS[n.decision] ?? "updated"}`, href, icon: "info" };
+  }
+  if (n.kind === "volunteer_decision" && n.candidate) {
+    const w = n.decision === "accepted" ? "accepted your volunteer application" : n.decision === "declined" ? "declined your volunteer application"
+      : "closed volunteering, so your application ended";
+    return { text: `${n.candidate.full_name}’s campaign ${w}`, href: "/account/volunteering", icon: n.decision === "accepted" ? "checkCircle" : "info" };
+  }
+  if (n.kind === "volunteer_update" && n.candidate) {
+    return { text: `Update from ${n.candidate.full_name}’s campaign: ${n.volunteer_update?.text ?? ""}`, href: "/account/volunteering", icon: null };
+  }
+  return null;
+}
+
+type Prefs = { announcements: boolean; community_replies: boolean; event_reminders: boolean; candidate_events: boolean };
+const PREF_WORDS: Record<keyof Prefs, [string, string]> = {
+  announcements: ["You’ll get official announcements.", "Official announcements turned off."],
+  community_replies: ["You’ll hear about replies to your community posts.", "Reply notifications off."],
+  event_reminders: ["You’ll get event reminders.", "Event reminders off."],
+  candidate_events: ["You’ll hear about new events from candidates you follow.", "New-event notifications off."],
+};
+
 export function describe(n: NotificationItem): Described {
-  const mod = describeModeration(n) ?? describePrivacy(n) ?? describeOwnRecord(n) ?? describeCommunity(n);
+  const mod = describeModeration(n) ?? describePrivacy(n) ?? describeOwnRecord(n) ?? describeCommunity(n) ?? describeEvent(n);
   if (mod) return mod;
   if (n.kind === "candidate_post" && n.post && n.candidate) {
     const what = n.post.kind === "announcement" ? "posted an announcement" : "posted news";
@@ -121,7 +153,7 @@ export default function NotificationsPage() {
   const navigate = useNavigate();
   const [items, setItems] = useState<NotificationItem[] | null>(null);
   const [error, setError] = useState("");
-  const [prefs, setPrefs] = useState<{ announcements: boolean; community_replies: boolean } | null>(null);
+  const [prefs, setPrefs] = useState<Prefs | null>(null);
 
   useEffect(() => {
     document.title = "Notifications | NDCConnect";
@@ -141,12 +173,10 @@ export default function NotificationsPage() {
     setItems((xs) => xs?.map((x) => ({ ...x, read_at: x.read_at ?? new Date().toISOString() })) ?? null);
     notificationsChanged();
   };
-  const toggle = async (value: boolean, key: "announcements" | "community_replies" = "announcements") => {
+  const toggle = async (value: boolean, key: keyof Prefs = "announcements") => {
     try {
-      setPrefs(await api<{ announcements: boolean; community_replies: boolean }>("/me/notifications/preferences/",
-        { method: "PATCH", body: { [key]: value } }));
-      toast.show({ tone: "success", message: key === "community_replies" ? (value ? "You’ll hear about replies to your community posts." : "Reply notifications off.")
-        : value ? "You’ll get official announcements." : "Official announcements turned off." });
+      setPrefs(await api<Prefs>("/me/notifications/preferences/", { method: "PATCH", body: { [key]: value } }));
+      toast.show({ tone: "success", message: PREF_WORDS[key][value ? 0 : 1] });
     } catch {
       toast.show({ tone: "error", message: "Couldn’t save that setting." });
     }
@@ -192,6 +222,10 @@ export default function NotificationsPage() {
           hint="Important announcements from NDCConnect. Decisions about your own news are always sent." />
         <Switch label="Replies to my community posts" checked={prefs?.community_replies ?? true} disabled={!prefs}
           onChange={(v) => void toggle(v, "community_replies")} hint="One notice per post an hour, however many comments." />
+        <Switch label="Event reminders" checked={prefs?.event_reminders ?? true} disabled={!prefs}
+          onChange={(v) => void toggle(v, "event_reminders")} hint="A day before events you registered for (an hour before online ones)." />
+        <Switch label="New events from candidates I follow" checked={prefs?.candidate_events ?? true} disabled={!prefs}
+          onChange={(v) => void toggle(v, "candidate_events")} hint="Only for candidates whose bell you turned on." />
       </section>
     </div>
   );

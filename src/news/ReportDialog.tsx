@@ -18,7 +18,7 @@ interface Props {
   path?: string;
   title?: string;
   /** "profile": the candidate-profile reasons, decided by system admins (spec 13 §4.2). */
-  variant?: "content" | "profile";
+  variant?: "content" | "profile" | "event";
   open: boolean;
   onClose: () => void;
 }
@@ -38,7 +38,11 @@ export function ReportDialog({ articleId, path, title = "Report this article", v
 
   const reasons = variant === "profile"
     ? (rules?.profile_reasons ?? PROFILE_REPORT_REASONS.map(([reason, label]) => ({ reason, label }))).map((r) => ({ ...r, rule: "" }))
-    : (rules?.reasons ?? REPORT_REASONS.map(([reason, label, rule]) => ({ reason, label, rule })));
+    : variant === "event"  // spec 18 §8: 13's reasons plus two for events (R11)
+      ? (rules?.event_reasons ?? [...REPORT_REASONS.map(([reason, label, rule]) => ({ reason, label, rule })),
+        { reason: "inducement", label: "Offers money or gifts to attend or vote", rule: "R11" },
+        { reason: "banned_venue", label: "At a place of worship, police station or public office", rule: "R11" }])
+      : (rules?.reasons ?? REPORT_REASONS.map(([reason, label, rule]) => ({ reason, label, rule })));
 
   const close = () => {
     setReason("");

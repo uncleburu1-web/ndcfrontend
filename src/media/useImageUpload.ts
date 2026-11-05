@@ -17,7 +17,7 @@ import { ApiError, newRequestId, type ApiRequest } from "../auth/api";
 import { apiPost } from "../api/typed";
 import { useApi } from "../auth/session";
 
-export type ImagePurpose = "candidate_photo" | "post_image" | "news_image" | "announcement_image";
+export type ImagePurpose = "candidate_photo" | "post_image" | "news_image" | "announcement_image" | "event_image";  // event_image: spec 18
 
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 export const IMAGE_MAX_BYTES = 5 * 1024 * 1024;

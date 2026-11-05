@@ -90,6 +90,8 @@ export default function AdminCasePage() {
   const item = c.item;
   const isCommunityNews = c.target_kind === "article" && !item?.official;
   const isCommunityItem = c.target_kind === "community_post" || c.target_kind === "community_comment";  // spec 17
+  const isEvent = c.target_kind === "event";  // spec 18 §8: hideable like community items; the organiser is a campaign, not warned here
+  const hideable = isCommunityItem || isEvent;
   const hasAuthor = (isCommunityNews || isCommunityItem) && !!item?.author;
   const removable = !closed && c.target_kind !== "candidate" && item?.public;
   const pauseActive = c.standing?.active_pause;
@@ -122,7 +124,10 @@ export default function AdminCasePage() {
       {c.blocked && <Banner tone="info">{BLOCKED[c.blocked] ?? c.blocked_message}</Banner>}
       {isCommunityItem && item?.community && <p className="mod-meta">In <Link to={`/communities/${item.community.path}`}>{item.community.name}</Link>
         {item.status === "hidden" && item.hidden_at ? ` · hidden since ${formatDate(item.hidden_at, { withTime: true })}` : ""}</p>}
-      {isCommunityItem && item?.status === "hidden" && <Banner tone="warning" title="Hidden while deciding">
+      {isEvent && item?.event && <p className="mod-meta">{item.event.type_label} · {formatDate(item.event.starts_at, { withTime: true })} · {item.event.venue}
+        {item.event.venue_type_label ? ` (${item.event.venue_type_label})` : ""} · {item.event.registered} registered · by {item.author?.label}
+        {item.status === "hidden" && item.hidden_at ? ` · hidden since ${formatDate(item.hidden_at, { withTime: true })}` : ""}</p>}
+      {hideable && item?.status === "hidden" && <Banner tone="warning" title="Hidden while deciding">
         Remove it with a rule, restore it, or keep it. After 48 hours the case becomes urgent; nothing reverts on its own.</Banner>}
       {!c.blocked && c.assigned_to && !mine && !closed && <Banner tone="warning">{c.assigned_to.email} has this case open.</Banner>}
       {c.restorable && <Banner tone="info" title="Can be restored">The rights owner didn’t answer the counter-notice in time.</Banner>}
@@ -137,10 +142,10 @@ export default function AdminCasePage() {
             {!closed && <Button variant="secondary" onClick={() => open("keep")}>Keep</Button>}
             {removable && <Button variant="danger" onClick={() => open("remove")}>Remove</Button>}
             {c.decision === "removed" && c.target_kind !== "candidate" && <Button variant="secondary" onClick={() => open("restore")}>Restore</Button>}
-            {isCommunityItem && !closed && item?.status === "published" && mine && (
+            {hideable && !closed && item?.status === "published" && mine && (
               <Button variant="secondary" onClick={() => void post("hide", { note }, "Hidden while you decide. Remove, restore or keep it within 48 hours.")}
                 loading={busy === "hide"}>Hide while deciding</Button>)}
-            {isCommunityItem && item?.status === "hidden" && (
+            {hideable && item?.status === "hidden" && (
               <Button variant="secondary" onClick={() => void post("unhide", {}, "Shown again.")} loading={busy === "unhide"}>Unhide</Button>)}
             {hasAuthor && <Button variant="secondary" onClick={() => open("warn")}>Warn the author</Button>}
             {hasAuthor && !pauseActive && <Button variant="secondary" onClick={() => open("pause")}>

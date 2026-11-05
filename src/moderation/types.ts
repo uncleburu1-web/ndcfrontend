@@ -1,5 +1,5 @@
 /** Reporting and moderation (spec 13). Shapes mirror ndcbackend/apps/moderation. */
-export type TargetKind = "article" | "post" | "candidate" | "community_post" | "community_comment";
+export type TargetKind = "article" | "post" | "candidate" | "community_post" | "community_comment" | "event";
 export type Priority = "legal" | "urgent" | "high" | "normal" | "low";
 export type CaseStatus = "open" | "escalated" | "closed";
 export type Decision = "" | "kept" | "removed" | "restored" | "author_removed";
@@ -20,6 +20,7 @@ export interface RulesPayload {
   changes: { date: string; text: string }[];
   reasons: { reason: string; label: string; rule: string }[];
   profile_reasons: { reason: string; label: string }[];
+  event_reasons?: { reason: string; label: string; rule: string }[];  // spec 18 §8
   legal_email: string;
   counter_notice_days: number;
   appeal_days: number;
@@ -86,6 +87,8 @@ export interface CaseDetail extends CaseRow {
     /** Spec 17: community posts and comments */
     community?: { id: string; name: string; path: string; level: string };
     hidden_at?: string | null;
+    /** Spec 18 §8: the event as readers see it; never who registered */
+    event?: { type_label: string; starts_at: string; venue: string; venue_type_label: string; registered: number };
     author: { email?: string; name?: string; label?: string } | null;
   } | null;
   reports: CaseReport[];

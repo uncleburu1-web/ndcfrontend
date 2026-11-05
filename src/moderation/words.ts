@@ -13,7 +13,7 @@ export function untilWords(iso: string | null, now = new Date()): { text: string
 }
 
 export const KIND_LABEL: Record<string, string> = { article: "News", post: "Candidate post", candidate: "Candidate profile",
-  community_post: "Community post", community_comment: "Community comment" };
+  community_post: "Community post", community_comment: "Community comment", event: "Event" };
 
 export const EVENT_WORDS: Record<string, string> = {
   opened: "Opened",

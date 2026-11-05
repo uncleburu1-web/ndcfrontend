@@ -11,6 +11,7 @@ import { Banner, Button, EmptyState, Skeleton } from "../../components/ui";
 import { formatDate } from "../../lib/format";
 import { Composer } from "../../communities/Composer";
 import { PostCard } from "../../communities/PostCard";
+import { UpcomingStrip } from "../../events/UpcomingStrip";
 import type { CommentPage, CommunityComment, CommunityDetail, CommunityPost, Feed } from "../../communities/types";
 import { LEVEL_WORDS, communityHref } from "../../communities/types";
 import "../../communities/communities.css";
@@ -95,6 +96,7 @@ function FeedView({ c }: { c: CommunityDetail }) {
           <p className="news-meta">For: {a.audience.name} · {formatDate(a.published_at)}</p>
         </div>
       ))}
+      {c.level !== "national" && <UpcomingStrip query={`community=${c.id}`} title="Upcoming events here" more={`/events?state=${c.state}`} />}
       {posts.length === 0 ? <EmptyState title="No posts yet">Start the conversation.</EmptyState> : (
         <ul className="comm-feed">
           {posts.map((p) => <li key={p.id}><PostCard item={p} kind="post" communityPath={c.path} showCommentsLink

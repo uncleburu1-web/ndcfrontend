@@ -177,7 +177,7 @@ describe("/campaign", () => {
     expect(screen.getByText("Give it a title.")).toBeTruthy();
     fireEvent.click(screen.getByLabelText("News"));
     fireEvent.change(screen.getByLabelText(/^Title/), { target: { value: "Rally Saturday" } });
-    fireEvent.change(screen.getByLabelText(/^Post/), { target: { value: "Come out." } });
+    fireEvent.change(screen.getByRole("textbox", { name: /^Post/ }), { target: { value: "Come out." } });
     expect(screen.getByText("14 / 150")).toBeTruthy();
     const file = new File(["x"], "a.jpg", { type: "image/jpeg" });
     fireEvent.change(screen.getByLabelText("Choose an image"), { target: { files: [file] } });

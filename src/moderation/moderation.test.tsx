@@ -477,6 +477,32 @@ describe("moderation queue and cases", () => {
   });
 });
 
+describe("event cases (spec 18 §8)", () => {
+  it("shows the event as readers see it, hides and unhides, and never offers warn or pause", async () => {
+    clerkState.isSignedIn = true;
+    h.me = MOD;
+    const sent: Record<string, unknown> = {};
+    const item: Record<string, unknown> = { kind: "event", kind_words: "event", title: "Ikeja rally", public: true, status: "published",
+      body: "Come out.", state: "lagos", author: { label: "Campaign account for Amina Bello" },
+      event: { type_label: "Rally", starts_at: "2026-11-14T09:00:00Z", venue: "Ikeja Grounds", venue_type_label: "Open ground or field", registered: 42 } };
+    let current: Record<string, unknown> = detail({ target_kind: "event", kind_label: "Event", assigned_to: { email: MOD.email, me: true }, item });
+    routes({ "/rules/": RULES, "/admin/moderation/cases/c1/": () => current,
+      "POST /admin/moderation/cases/c1/hide/": (o: Record<string, unknown>) => {
+        sent.hide = o.body; current = { ...current, item: { ...item, status: "hidden", hidden_at: "2026-11-05T10:00:00Z" } }; return current; },
+      "POST /admin/moderation/cases/c1/unhide/": () => { current = { ...current, item }; return current; } });
+    renderAt("/admin/moderation/c1");
+    expect(await screen.findByText(/Ikeja Grounds \(Open ground or field\)/)).toBeTruthy();
+    expect(screen.getByText(/42 registered/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Warn the author" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Pause community/ })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Hide while deciding" }));
+    expect(await screen.findByRole("button", { name: "Unhide" })).toBeTruthy();
+    expect(sent.hide).toEqual({ note: "" });
+    fireEvent.click(screen.getByRole("button", { name: "Unhide" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Hide while deciding" })).toBeTruthy());
+  });
+});
+
 describe("legal notices and compliance", () => {
   const notice = (over: Record<string, unknown> = {}) => ({
     id: "n1", reference: "LGL-ABC234", kind: "agency", kind_label: "Government agency notice", sender_name: "Officer", sender_org: "NITDA",

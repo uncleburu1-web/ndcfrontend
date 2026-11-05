@@ -20,7 +20,7 @@ interface Props {
 }
 
 const ANCHOR: Record<string, string> = { political_following: "follows", membership: "membership", pvc_check: "pvc", verified_badge: "pvc",
-  community_membership: "communities" };
+  community_membership: "communities", event_registration: "events", volunteering: "volunteering" };
 
 export function ConsentDialog({ ask, onAgree, onDecline }: Props) {
   const [busy, setBusy] = useState(false);

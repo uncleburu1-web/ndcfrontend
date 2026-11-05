@@ -11,6 +11,7 @@ import { useDonationConfig } from "../../donations/DonationConfigProvider";
 import { CandidateVote } from "../../follows/CandidateVote";
 import { useFollows } from "../../follows/FollowProvider";
 import { Avatar, Banner, Button, DonateButton, EmptyState, Icon, Pagination, Skeleton, Tabs } from "../../components/ui";
+import { UpcomingStrip } from "../../events/UpcomingStrip";
 import { CandidatePostItem } from "../../posts/CandidatePostItem";
 import { ReportDialog } from "../../news/ReportDialog";
 import type { PostSummary } from "../../posts/types";
@@ -53,6 +54,8 @@ export default function CandidateProfilePage() {
   const postCount = posts.data?.count ?? 0;
   const { loadStates } = useFollows();
   const donationsOpen = useDonationConfig().config.open;
+  const volunteering = useRequest(`volunteering-open:${slug}`, (signal) =>  // spec 18 §9.1: the button shows while it's open
+    api<{ open: boolean }>(`/candidates/${encodeURIComponent(slug)}/volunteering/`, { anonymous: true, signal }).catch(() => ({ open: false })));
   useEffect(() => {
     if (c?.slug) loadStates([c.slug]);
   }, [c?.slug, loadStates]);
@@ -115,12 +118,15 @@ export default function CandidateProfilePage() {
               <CandidateVote slug={c.slug} name={c.full_name} variant="profile" onGone={retry} />
               {/* Separate action, never a step toward voting (spec 01 §6.2, spec 04 §8.3). */}
               {donationsOpen && <DonateButton href={`/donate?candidate=${encodeURIComponent(c.slug)}`} />}
+              {volunteering.data?.open && <Button variant="secondary" href={`/candidates/${encodeURIComponent(c.slug)}/volunteer`}>Volunteer for {c.full_name}</Button>}
             </div>
             <p className="cand-hero__private">Who you follow is private.</p>
           </div>
         </div>
       </header>
 
+      <div className="cand-about"><UpcomingStrip query={`candidate=${encodeURIComponent(c.slug)}`} title="Events" limit={5}
+        more={`/events?candidate=${encodeURIComponent(c.slug)}`} /></div>
       {postCount > 0 ? (
         <div className="cand-about">
           <Tabs label={`${c.full_name} sections`} value={tab} onChange={setTab} tabs={[

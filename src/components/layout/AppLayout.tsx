@@ -20,8 +20,8 @@ const NAV = [
   { label: "Candidates", href: "/candidates" },
   { label: "News", href: "/news" },
   { label: "Communities", href: "/communities" },
+  { label: "Events", href: "/events" },  // spec 18
   { label: "States", href: "/states" },
-  { label: "Communities", href: "/communities" },
   { label: "Finance", href: "/finance" },
   { label: "PVC", href: "/pvc" },
 ];

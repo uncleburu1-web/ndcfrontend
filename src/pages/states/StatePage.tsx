@@ -6,6 +6,7 @@ import { useApi, useMe } from "../../auth/session";
 import { useRequest } from "../../candidates/useRequest";
 import { Banner, Button, EmptyState, Skeleton, useToast } from "../../components/ui";
 import { CandidatePostItem } from "../../posts/CandidatePostItem";
+import { UpcomingStrip } from "../../events/UpcomingStrip";
 import { SourceBadges } from "../../news/SourceBadges";
 import { articlePath } from "../../news/types";
 import { formatDate } from "../../lib/format";
@@ -80,6 +81,7 @@ export default function StatePage() {
         ))}
       </section>
 
+      <UpcomingStrip query={`state=${d.state}`} title={`Upcoming events in ${d.label}`} limit={5} more={`/events?state=${d.state}`} />
       <section className="search-section" aria-labelledby="st-n">
         <div className="search-section__head"><h2 id="st-n">Latest news</h2><Link to={`/news?state=${d.state}`}>All news for {d.label}</Link></div>
         {d.news.length === 0 ? <p className="news-meta">No news yet.</p> : (

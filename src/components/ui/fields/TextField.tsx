@@ -4,7 +4,7 @@
 import type { InputHTMLAttributes } from "react";
 import { Field, type FieldFrameProps } from "./Field";
 
-type InputType = "text" | "email" | "tel";
+type InputType = "text" | "email" | "tel" | "number" | "datetime-local";  // number, datetime-local: spec 18 event editor
 
 interface TextFieldProps extends FieldFrameProps, Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "id"> {
   type?: InputType;
@@ -14,6 +14,8 @@ const DEFAULTS: Record<InputType, Partial<InputHTMLAttributes<HTMLInputElement>>
   text: {},
   email: { autoComplete: "email", inputMode: "email" },
   tel: { autoComplete: "tel", inputMode: "tel", placeholder: "0803 123 4567" },
+  number: { inputMode: "numeric" },
+  "datetime-local": {},
 };
 
 export function TextField({ label, hint, error, required, type = "text", ...input }: TextFieldProps) {

@@ -72,6 +72,12 @@ import CommunitiesPage from "./pages/communities/CommunitiesPage";
 import CommunityPage from "./pages/communities/CommunityPage";
 import AccountCommunitiesPage from "./pages/communities/AccountCommunitiesPage";
 import AdminCommunitiesPage from "./pages/admin/communities/AdminCommunitiesPage";
+import AdminEventsPage from "./pages/admin/events/AdminEventsPage";
+import AccountVolunteeringPage from "./pages/events/AccountVolunteeringPage";
+import EventPage from "./pages/events/EventPage";
+import EventsPage from "./pages/events/EventsPage";
+import MyEventsPage from "./pages/events/MyEventsPage";
+import VolunteerPage from "./pages/events/VolunteerPage";
 import StatesPage from "./pages/states/StatesPage";
 import ArticlePage from "./pages/news/ArticlePage";
 import MyNewsPage from "./pages/news/MyNewsPage";
@@ -125,6 +131,8 @@ export default function App() {
           <Route path="setup-profile" element={<SetupProfilePage />} />
           <Route path="account/privacy" element={<YourDataPage />} />
           <Route path="account/communities" element={<AccountCommunitiesPage />} />
+          <Route path="account/events" element={<MyEventsPage />} />
+          <Route path="account/volunteering" element={<AccountVolunteeringPage />} />
           <Route path="account/*" element={<AccountPage />} />
           {/* Sign-in only — never profile completion or PVC (spec 04 §4.4). */}
           <Route path="following" element={<FollowingPage />} />
@@ -149,6 +157,7 @@ export default function App() {
         <Route path="candidates" element={<CandidatesPage />} />
         <Route path="candidates/:slug" element={<CandidateProfilePage />} />
         <Route path="candidates/:slug/posts/:id" element={<CandidatePostPage />} />
+        <Route path="candidates/:slug/volunteer" element={<VolunteerPage />} />
         {/* Search and discovery (spec 12): public, anonymous */}
         <Route path="search" element={<SearchPage />} />
         <Route path="states" element={<StatesPage />} />
@@ -156,6 +165,8 @@ export default function App() {
         {/* Spec 17: guests see names and counts; posts need sign-in (the backend decides) */}
         <Route path="communities" element={<CommunitiesPage />} />
         <Route path="communities/*" element={<CommunityPage />} />
+        <Route path="events" element={<EventsPage />} />
+        <Route path="events/:id" element={<EventPage />} />
         {/* Community rules, report status and copyright notices (spec 13): public */}
         <Route path="rules" element={<RulesPage />} />
         <Route path="privacy" element={<PrivacyPage />} />
@@ -209,6 +220,7 @@ export default function App() {
             <Route path="admin/posts" element={<AdminPostsPage />} />
             <Route path="admin/posts/:id" element={<AdminPostDetailPage />} />
             <Route path="admin/communities" element={<AdminCommunitiesPage />} />
+            <Route path="admin/events" element={<AdminEventsPage />} />
           </Route>
           {/* System admin or finance officer (spec 05 §7.2) */}
           <Route element={<RequireFinanceViewer />}>

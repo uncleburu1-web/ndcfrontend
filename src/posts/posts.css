@@ -28,6 +28,7 @@
   margin: 0 auto;
   padding: var(--space-8) var(--space-4) var(--space-16);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);  /* children (event editor fieldsets) can't widen the page */
   gap: var(--space-4);
 }
 .campaign-page h1 {

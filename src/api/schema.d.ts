@@ -1517,7 +1517,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Turn announcement or community-reply notifications on or off */
+        /** Turn announcement, community-reply, event-reminder or new-event notifications on or off */
         patch: operations["my_notifications_preferences_patch"];
         trace?: never;
     };
@@ -3296,10 +3296,586 @@ export interface paths {
         patch: operations["admin_community_patch"];
         trace?: never;
     };
+    "/api/v1/events/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Upcoming (or past) events, soonest first, 20 a page (spec 18 §5) */
+        get: operations["events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/events/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One event; the online link and a private address only via /events/{id}/me/ */
+        get: operations["event_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/events/{id}/calendar.ics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Calendar file (.ics): never the online link */
+        get: operations["event_calendar_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/events/{id}/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your registration, and the online link or private address if you're registered */
+        get: operations["event_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/events/{id}/registration/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register (or join the waitlist); consent `event_registration` first */
+        post: operations["event_registration_post"];
+        /** Cancel your registration */
+        delete: operations["event_registration_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/events/{id}/report/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report an event (13's reasons plus `inducement` and `banned_venue`) */
+        post: operations["event_report_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/events/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your upcoming (or past, 90 days) registrations */
+        get: operations["my_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/events/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your campaign's events (drafts included) */
+        get: operations["campaign_events_get"];
+        put?: never;
+        /** Create a draft event */
+        post: operations["campaign_events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/events/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One of your events with counts */
+        get: operations["campaign_event_get"];
+        put?: never;
+        post?: never;
+        /** Delete a draft (published events are cancelled instead) */
+        delete: operations["campaign_event_delete"];
+        options?: never;
+        head?: never;
+        /** Edit (until it starts; date, time, venue or link changes notify registrants) */
+        patch: operations["campaign_event_patch"];
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/events/{id}/publish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** publish (with declarations), cancel (with reason), close-registration, updates (with text) */
+        post: operations["campaign_event_publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/events/{id}/cancel/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** publish (with declarations), cancel (with reason), close-registration, updates (with text) */
+        post: operations["campaign_event_cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/events/{id}/close-registration/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** publish (with declarations), cancel (with reason), close-registration, updates (with text) */
+        post: operations["campaign_event_close_registration_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/events/{id}/updates/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** publish (with declarations), cancel (with reason), close-registration, updates (with text) */
+        post: operations["campaign_event_updates_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/events/{id}/checkin/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The check-in list: short names and ticket codes, 24 h before to 24 h after (audited) */
+        get: operations["campaign_event_checkin_get"];
+        put?: never;
+        /** Check someone in by ticket code */
+        post: operations["campaign_event_checkin_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/events/{id}/image/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set the cover image (rights checkbox required) */
+        put: operations["campaign_event_image_put"];
+        post?: never;
+        /** Remove the cover image */
+        delete: operations["campaign_event_image_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/events/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** All events (counts only), newest first; ?status=&state= */
+        get: operations["admin_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/events/party/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your campaign's events (drafts included) */
+        get: operations["admin_party_events_get"];
+        put?: never;
+        /** Create a draft event */
+        post: operations["admin_party_events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/events/party/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One of your events with counts */
+        get: operations["admin_party_event_get"];
+        put?: never;
+        post?: never;
+        /** Delete a draft (published events are cancelled instead) */
+        delete: operations["admin_party_event_delete"];
+        options?: never;
+        head?: never;
+        /** Edit (until it starts; date, time, venue or link changes notify registrants) */
+        patch: operations["admin_party_event_patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/events/party/{id}/publish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** publish (with declarations), cancel (with reason), close-registration, updates (with text) */
+        post: operations["admin_party_event_publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/events/party/{id}/cancel/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** publish (with declarations), cancel (with reason), close-registration, updates (with text) */
+        post: operations["admin_party_event_cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/events/party/{id}/close-registration/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** publish (with declarations), cancel (with reason), close-registration, updates (with text) */
+        post: operations["admin_party_event_close_registration_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/events/party/{id}/updates/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** publish (with declarations), cancel (with reason), close-registration, updates (with text) */
+        post: operations["admin_party_event_updates_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/events/party/{id}/checkin/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The check-in list: short names and ticket codes, 24 h before to 24 h after (audited) */
+        get: operations["admin_party_event_checkin_get"];
+        put?: never;
+        /** Check someone in by ticket code */
+        post: operations["admin_party_event_checkin_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/events/party/{id}/image/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set the cover image (rights checkbox required) */
+        put: operations["admin_party_event_image_put"];
+        post?: never;
+        /** Remove the cover image */
+        delete: operations["admin_party_event_image_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/candidates/{slug}/volunteering/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A campaign's volunteer opening (intro, roles, states, open) */
+        get: operations["candidate_volunteering_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/candidates/{slug}/volunteering/apply/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply to volunteer; consent `volunteering` first */
+        post: operations["candidate_volunteering_apply_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/volunteering/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your applications, decisions and the updates campaigns sent you */
+        get: operations["my_volunteering_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/volunteering/{id}/withdraw/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Withdraw an application (contact details disappear at once) */
+        post: operations["my_volunteering_withdraw_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/volunteering/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your campaign's volunteer opening */
+        get: operations["campaign_volunteering_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change the opening (open, intro, roles, states) */
+        patch: operations["campaign_volunteering_patch"];
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/volunteers/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Applications to your campaign (short names only) */
+        get: operations["campaign_volunteers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/volunteers/updates/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Updates sent to your accepted volunteers */
+        get: operations["campaign_volunteer_updates_get"];
+        put?: never;
+        /** Send an update to accepted volunteers (all, or one role) */
+        post: operations["campaign_volunteer_updates_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/volunteers/{id}/decide/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept or decline (reason optional, shown to the person) */
+        post: operations["campaign_volunteer_decide_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaign/{candidate_id}/volunteers/{id}/contact/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** An accepted volunteer's full name, and phone if they chose to share it (audited) */
+        get: operations["campaign_volunteer_contact_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @enum {string} */
+        AddressVisibilityEnum: "public" | "registered";
         AdminCommunitySchema: {
             /** Format: uuid */
             id: string;
@@ -3324,6 +3900,12 @@ export interface components {
             /** @description Emails of moderators scoped to this community */
             moderators: string[];
         };
+        AdminEventList: {
+            results: components["schemas"]["EventCardSchema"][];
+            counts: {
+                [key: string]: unknown;
+            };
+        };
         AuthorSchema: {
             /** @description First name and last initial, or 'Former member' */
             name: string;
@@ -3332,6 +3914,10 @@ export interface components {
             campaign: string | null;
             is_you: boolean;
         };
+        /** @enum {string} */
+        AvailabilityEnum: "weekdays" | "weekday_evenings" | "weekends";
+        /** @enum {unknown} */
+        BlankEnum: "";
         BlockSchema: {
             code: string;
             message: string;
@@ -3339,6 +3925,14 @@ export interface components {
         };
         CaseHideRequestRequest: {
             note?: string;
+        };
+        CheckinRequestRequest: {
+            code: string;
+        };
+        CheckinResult: {
+            ticket_code: string;
+            name: string;
+            checked_in: boolean;
         };
         ChooseStateRequest: {
             state: string;
@@ -3419,8 +4013,153 @@ export interface components {
             post_count: number;
             has_children: boolean;
         };
+        CountsSchema: {
+            registered: number;
+            waitlisted: number;
+            checked_in: number;
+            cancelled: number;
+        };
         /** @enum {string} */
         DatabaseEnum: "ok" | "unavailable";
+        EventActionRequestRequest: {
+            declarations?: {
+                [key: string]: unknown;
+            };
+            reason?: string;
+            text?: string;
+        };
+        EventCardSchema: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            type: components["schemas"]["TypeEnum"];
+            type_label: string;
+            mode: components["schemas"]["EventModeEnum"];
+            mode_label: string;
+            /** Format: date-time */
+            starts_at: string;
+            /** Format: date-time */
+            ends_at: string;
+            state: string;
+            state_label: string;
+            lga: string;
+            /** @description Venue name, 'Online', or 'Address shown when you register' */
+            place: string;
+            organiser: components["schemas"]["OrganiserSchema"];
+            status: components["schemas"]["EventStatusEnum"];
+            /** @description Banded below 10 (spec 18 rule 7) */
+            going: string;
+            full: boolean;
+            registration: components["schemas"]["RegistrationEnum"];
+            cover: components["schemas"]["ImageSchema"] | null;
+            ended: boolean;
+        };
+        EventCheckin: {
+            counts: {
+                [key: string]: unknown;
+            };
+            results: {
+                [key: string]: unknown;
+            }[];
+        };
+        EventDetailSchema: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            type: components["schemas"]["TypeEnum"];
+            type_label: string;
+            mode: components["schemas"]["EventModeEnum"];
+            mode_label: string;
+            /** Format: date-time */
+            starts_at: string;
+            /** Format: date-time */
+            ends_at: string;
+            state: string;
+            state_label: string;
+            lga: string;
+            /** @description Venue name, 'Online', or 'Address shown when you register' */
+            place: string;
+            organiser: components["schemas"]["OrganiserSchema"];
+            status: components["schemas"]["EventStatusEnum"];
+            /** @description Banded below 10 (spec 18 rule 7) */
+            going: string;
+            full: boolean;
+            registration: components["schemas"]["RegistrationEnum"];
+            cover: components["schemas"]["ImageSchema"] | null;
+            ended: boolean;
+            description: string;
+            venue_name: string;
+            /** @description Null when only registered people may see it */
+            venue_address: string | null;
+            venue_type: string;
+            venue_type_label: string;
+            address_visibility: components["schemas"]["AddressVisibilityEnum"];
+            /** @description Only for registered people and the organiser */
+            online_url: string | null;
+            accessibility_notes: string;
+            capacity: number | null;
+            places_left: number | null;
+            /** Format: date-time */
+            registration_closes_at: string | null;
+            members_only: boolean;
+            cancelled_reason: string;
+            material_change: components["schemas"]["MaterialChangeSchema"] | null;
+            removed: components["schemas"]["RemovedSchema"] | null;
+            /** @description Organiser updates; only for registered people and the organiser */
+            updates: components["schemas"]["UpdateSchema"][];
+            can_register: boolean;
+            register_block: components["schemas"]["RegisterBlockSchema"] | null;
+            calendar_url: string;
+        };
+        EventList: {
+            results: components["schemas"]["EventCardSchema"][];
+            next: string | null;
+            previous: string | null;
+        };
+        EventMeSchema: {
+            registration: components["schemas"]["MyRegistrationSchema"] | null;
+            is_organiser: boolean;
+            online_url: string | null;
+            venue_address: string | null;
+            updates: components["schemas"]["UpdateSchema"][];
+            can_register?: boolean;
+            register_block?: components["schemas"]["RegisterBlockSchema"] | null;
+        };
+        /** @enum {string} */
+        EventModeEnum: "in_person" | "online" | "hybrid";
+        /** @enum {string} */
+        EventRegistrationStatusEnum: "registered" | "waitlisted" | "cancelled";
+        EventReportResponse: {
+            reference?: string;
+            route?: string;
+        };
+        /** @enum {string} */
+        EventStatusEnum: "draft" | "published" | "hidden" | "cancelled" | "removed";
+        EventWriteSchemaRequest: {
+            type: components["schemas"]["TypeEnum"];
+            mode: components["schemas"]["EventModeEnum"];
+            title: string;
+            description: string;
+            /** Format: date-time */
+            starts_at: string;
+            /** Format: date-time */
+            ends_at: string;
+            venue_name?: string;
+            venue_address?: string;
+            venue_type?: components["schemas"]["VenueTypeEnum"] | components["schemas"]["BlankEnum"];
+            address_visibility?: components["schemas"]["AddressVisibilityEnum"];
+            state?: string;
+            lga_text?: string;
+            /** Format: uuid */
+            geo_lga?: string | null;
+            online_url?: string;
+            accessibility_notes?: string;
+            capacity?: number | null;
+            registration?: components["schemas"]["RegistrationEnum"];
+            /** Format: date-time */
+            registration_closes_at?: string | null;
+            members_only?: boolean;
+        };
         FeedSchema: {
             pinned: components["schemas"]["PinnedSchema"][];
             results: components["schemas"]["PostSchema"][];
@@ -3433,6 +4172,11 @@ export interface components {
         };
         /** @enum {string} */
         HealthStatusEnum: "ok" | "degraded";
+        ImageSchema: {
+            url: string;
+            url_thumb: string;
+            srcset: string | null;
+        };
         IntegrationService: {
             key: string;
             name: string;
@@ -3462,6 +4206,14 @@ export interface components {
         MarkedRead: {
             updated: number;
         };
+        MaterialChangeSchema: {
+            /** Format: date-time */
+            at: string;
+            kind: components["schemas"]["MaterialChangeSchemaKindEnum"];
+            words: string;
+        };
+        /** @enum {string} */
+        MaterialChangeSchemaKindEnum: "time" | "venue" | "mode" | "link" | "postponed";
         MembershipSchema: {
             how: string;
             how_label: string;
@@ -3469,8 +4221,6 @@ export interface components {
             joined_at: string;
             notify_new_posts: boolean;
         };
-        /** @enum {string} */
-        ModeEnum: "direct" | "server";
         MyCommunitiesSchema: {
             consented: boolean;
             verified: boolean;
@@ -3482,6 +4232,14 @@ export interface components {
             unmatched: boolean;
             geography_loaded: boolean;
         };
+        MyEventSchema: {
+            event: components["schemas"]["EventCardSchema"];
+            registration: components["schemas"]["MyRegistrationSchema"];
+            online_url: string | null;
+        };
+        MyEvents: {
+            results: components["schemas"]["MyEventSchema"][];
+        };
         MyMembershipSchema: {
             community: components["schemas"]["CommunitySchema"];
             level: string;
@@ -3490,6 +4248,18 @@ export interface components {
             /** Format: date-time */
             joined_at: string;
             notify_new_posts: boolean;
+        };
+        MyRegistrationSchema: {
+            status: components["schemas"]["EventRegistrationStatusEnum"];
+            ticket_code: string;
+            waitlist_position: number | null;
+            checked_in: boolean;
+        };
+        MyVolunteering: {
+            results: components["schemas"]["VolunteerApplicationMine"][];
+            updates: {
+                [key: string]: unknown;
+            }[];
         };
         /** @enum {string} */
         NigerianStateEnum: "abia" | "adamawa" | "akwa_ibom" | "anambra" | "bauchi" | "bayelsa" | "benue" | "borno" | "cross_river" | "delta" | "ebonyi" | "edo" | "ekiti" | "enugu" | "gombe" | "imo" | "jigawa" | "kaduna" | "kano" | "katsina" | "kebbi" | "kogi" | "kwara" | "lagos" | "nasarawa" | "niger" | "ogun" | "ondo" | "osun" | "oyo" | "plateau" | "rivers" | "sokoto" | "taraba" | "yobe" | "zamfara" | "fct";
@@ -3521,6 +4291,8 @@ export interface components {
             donation?: components["schemas"]["NotificationDonation"] | null;
             community_post?: components["schemas"]["NotificationCommunityPost"];
             community?: components["schemas"]["NotificationCommunity"];
+            event?: components["schemas"]["NotificationEvent"];
+            volunteer_update?: components["schemas"]["NotificationVolunteerUpdate"];
         };
         NotificationAppeal: {
             /** Format: uuid */
@@ -3565,8 +4337,17 @@ export interface components {
         NotificationDonation: {
             reference: string;
         };
+        NotificationEvent: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** Format: date-time */
+            starts_at: string;
+            status: string;
+            organiser: string;
+        };
         /** @enum {string} */
-        NotificationKindEnum: "announcement" | "news_decision" | "pvc_decision" | "candidate_post" | "report_outcome" | "content_removed" | "account_warning" | "submissions_paused" | "appeal_decision" | "security_notice" | "privacy_request_update" | "membership_decision" | "donation_receipt" | "community_reply" | "community_post" | "community_placed";
+        NotificationKindEnum: "announcement" | "news_decision" | "pvc_decision" | "candidate_post" | "report_outcome" | "content_removed" | "account_warning" | "submissions_paused" | "appeal_decision" | "security_notice" | "privacy_request_update" | "membership_decision" | "donation_receipt" | "community_reply" | "community_post" | "community_placed" | "event_update" | "event_reminder" | "event_waitlist" | "candidate_event" | "volunteer_decision" | "volunteer_update";
         NotificationMembership: {
             status: string;
         };
@@ -3586,6 +4367,8 @@ export interface components {
         NotificationPreferences: {
             announcements: boolean;
             community_replies: boolean;
+            event_reminders: boolean;
+            candidate_events: boolean;
         };
         NotificationPrivacyRequest: {
             id: string;
@@ -3597,9 +4380,90 @@ export interface components {
             reference: string;
             text: string;
         };
+        NotificationVolunteerUpdate: {
+            text: string;
+        };
         Ok: {
             ok: boolean;
         };
+        OrganiserCandidateSchema: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            full_name: string;
+            position_label: string;
+        };
+        OrganiserEventList: {
+            results: components["schemas"]["OrganiserEventSchema"][];
+        };
+        OrganiserEventSchema: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            type: components["schemas"]["TypeEnum"];
+            type_label: string;
+            mode: components["schemas"]["EventModeEnum"];
+            mode_label: string;
+            /** Format: date-time */
+            starts_at: string;
+            /** Format: date-time */
+            ends_at: string;
+            state: string;
+            state_label: string;
+            lga: string;
+            /** @description Venue name, 'Online', or 'Address shown when you register' */
+            place: string;
+            organiser: components["schemas"]["OrganiserSchema"];
+            status: components["schemas"]["EventStatusEnum"];
+            /** @description Banded below 10 (spec 18 rule 7) */
+            going: string;
+            full: boolean;
+            registration: components["schemas"]["RegistrationEnum"];
+            cover: components["schemas"]["ImageSchema"] | null;
+            ended: boolean;
+            description: string;
+            venue_name: string;
+            /** @description Null when only registered people may see it */
+            venue_address: string | null;
+            venue_type: string;
+            venue_type_label: string;
+            address_visibility: components["schemas"]["AddressVisibilityEnum"];
+            /** @description Only for registered people and the organiser */
+            online_url: string | null;
+            accessibility_notes: string;
+            capacity: number | null;
+            places_left: number | null;
+            /** Format: date-time */
+            registration_closes_at: string | null;
+            members_only: boolean;
+            cancelled_reason: string;
+            material_change: components["schemas"]["MaterialChangeSchema"] | null;
+            removed: components["schemas"]["RemovedSchema"] | null;
+            /** @description Organiser updates; only for registered people and the organiser */
+            updates: components["schemas"]["UpdateSchema"][];
+            can_register: boolean;
+            register_block: components["schemas"]["RegisterBlockSchema"] | null;
+            calendar_url: string;
+            counts: components["schemas"]["CountsSchema"];
+            declarations_needed: string[];
+            declarations: {
+                [key: string]: unknown;
+            };
+            checkin_open: boolean;
+            blackout_flagged: boolean;
+            /** Format: uuid */
+            geo_lga: string | null;
+            online_url_value: string;
+            venue_address_value: string;
+        };
+        OrganiserSchema: {
+            kind: components["schemas"]["OrganiserSchemaKindEnum"];
+            /** @description 'NDC' or '<candidate>'s campaign' */
+            label: string;
+            candidate: components["schemas"]["OrganiserCandidateSchema"] | null;
+        };
+        /** @enum {string} */
+        OrganiserSchemaKindEnum: "campaign" | "party";
         OutboxJob: {
             /** Format: uuid */
             id: string;
@@ -3661,9 +4525,42 @@ export interface components {
             read_scope?: components["schemas"]["ReadScopeEnum"];
             ndc_members_only?: boolean;
         };
+        PatchedEventPatchSchemaRequest: {
+            type?: components["schemas"]["TypeEnum"];
+            mode?: components["schemas"]["EventModeEnum"];
+            title?: string;
+            description?: string;
+            /** Format: date-time */
+            starts_at?: string;
+            /** Format: date-time */
+            ends_at?: string;
+            venue_name?: string;
+            venue_address?: string;
+            venue_type?: components["schemas"]["VenueTypeEnum"] | components["schemas"]["BlankEnum"];
+            address_visibility?: components["schemas"]["AddressVisibilityEnum"];
+            state?: string;
+            lga_text?: string;
+            /** Format: uuid */
+            geo_lga?: string | null;
+            online_url?: string;
+            accessibility_notes?: string;
+            capacity?: number | null;
+            registration?: components["schemas"]["RegistrationEnum"];
+            /** Format: date-time */
+            registration_closes_at?: string | null;
+            members_only?: boolean;
+        };
         PatchedNotificationPreferencesRequest: {
             announcements?: boolean;
             community_replies?: boolean;
+            event_reminders?: boolean;
+            candidate_events?: boolean;
+        };
+        PatchedVolunteerOpeningWriteRequest: {
+            open?: boolean;
+            intro?: string;
+            roles?: string[];
+            states?: string[];
         };
         PatchedWritePostSchemaRequest: {
             body?: string;
@@ -3736,7 +4633,7 @@ export interface components {
             readonly verified: boolean;
         };
         /** @enum {string} */
-        PurposeEnum: "candidate_photo" | "post_image" | "news_image" | "announcement_image";
+        PurposeEnum: "candidate_photo" | "post_image" | "news_image" | "announcement_image" | "event_image";
         ReactionSchema: {
             liked: boolean;
             reaction_count: number;
@@ -3751,8 +4648,18 @@ export interface components {
         };
         /** @enum {string} */
         ReadyStatusEnum: "ready" | "not_ready";
+        RegisterBlockSchema: {
+            code: string;
+            message: string;
+        };
+        /** @enum {string} */
+        RegistrationEnum: "open" | "closed" | "none";
         RejoinLevelRequest: {
             level: string;
+        };
+        RemovedSchema: {
+            rule: string;
+            rule_title: string;
         };
         ReportRequest: {
             reason: string;
@@ -3760,12 +4667,21 @@ export interface components {
             /** Format: email */
             contact_email?: string;
         };
+        /** @enum {string} */
+        RolesEnum: "canvassing" | "events" | "social_media" | "logistics" | "data_and_tech" | "outreach_youth" | "outreach_women" | "outreach_disability" | "other";
+        /** @enum {string} */
+        TypeEnum: "rally" | "canvass" | "town_hall" | "meeting" | "training" | "other";
         UnreadCount: {
             unread: number;
         };
+        UpdateSchema: {
+            text: string;
+            /** Format: date-time */
+            created_at: string;
+        };
         UploadSignature: {
             /** @description server: send the file to the image endpoint as multipart instead. */
-            mode: components["schemas"]["ModeEnum"];
+            mode: components["schemas"]["UploadSignatureModeEnum"];
             upload_url?: string;
             cloud_name?: string;
             api_key?: string;
@@ -3776,10 +4692,109 @@ export interface components {
             signature?: string;
             max_bytes?: number;
         };
+        /** @enum {string} */
+        UploadSignatureModeEnum: "direct" | "server";
         UploadSignatureRequestRequest: {
             purpose: components["schemas"]["PurposeEnum"];
             /** @description The candidate, post or article the image is for. */
             target_id: string;
+        };
+        /** @enum {string} */
+        VenueTypeEnum: "open_ground" | "hall" | "hotel" | "school" | "market" | "street" | "private_premises" | "online";
+        VolunteerApplicationMine: {
+            /** Format: uuid */
+            id: string;
+            candidate: {
+                [key: string]: unknown;
+            };
+            roles: string[];
+            state: string;
+            lga: string;
+            availability: string[];
+            note: string;
+            share_phone: boolean;
+            status: string;
+            status_label: string;
+            decline_reason: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            decided_at: string | null;
+        };
+        VolunteerApplicationRow: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            state: string;
+            state_label: string;
+            lga: string;
+            roles: string[];
+            availability: string[];
+            note: string;
+            status: string;
+            status_label: string;
+            can_share_phone: boolean;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            decided_at: string | null;
+        };
+        VolunteerApplicationRows: {
+            results: components["schemas"]["VolunteerApplicationRow"][];
+            counts: {
+                [key: string]: unknown;
+            };
+        };
+        VolunteerApplyRequest: {
+            roles: components["schemas"]["RolesEnum"][];
+            state: string;
+            lga_text?: string;
+            /** Format: uuid */
+            geo_lga?: string | null;
+            availability?: components["schemas"]["AvailabilityEnum"][];
+            note?: string;
+            share_phone?: boolean;
+        };
+        VolunteerContact: {
+            full_name: string;
+            phone_number: string | null;
+        };
+        VolunteerDecideRequest: {
+            accept: boolean;
+            reason?: string;
+        };
+        VolunteerOpening: {
+            open: boolean;
+            intro: string;
+            roles: {
+                [key: string]: unknown;
+            }[];
+            states: string[];
+            all_roles: {
+                [key: string]: unknown;
+            }[];
+            availability: {
+                [key: string]: unknown;
+            }[];
+            candidate: {
+                [key: string]: unknown;
+            };
+        };
+        VolunteerUpdateSent: {
+            text: string;
+            role: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        VolunteerUpdateWriteRequest: {
+            text: string;
+            role?: string;
+        };
+        VolunteerUpdates: {
+            results: {
+                [key: string]: unknown;
+            }[];
+            left_this_week: number;
         };
         WebhookCounts: {
             provider: string;
@@ -9172,6 +10187,1122 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminCommunitySchema"];
+                };
+            };
+        };
+    };
+    events_get: {
+        parameters: {
+            query?: {
+                candidate?: string;
+                community?: string;
+                lga?: string;
+                mode?: string;
+                organiser?: string;
+                state?: string;
+                this_week?: string;
+                type?: string;
+                when?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventList"];
+                };
+            };
+        };
+    };
+    event_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventDetailSchema"];
+                };
+            };
+        };
+    };
+    event_calendar_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    event_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventMeSchema"];
+                };
+            };
+        };
+    };
+    event_registration_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventMeSchema"];
+                };
+            };
+        };
+    };
+    event_registration_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    event_report_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReportRequest"];
+                "multipart/form-data": components["schemas"]["ReportRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventReportResponse"];
+                };
+            };
+        };
+    };
+    my_events_get: {
+        parameters: {
+            query?: {
+                when?: "past" | "upcoming";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyEvents"];
+                };
+            };
+        };
+    };
+    campaign_events_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventList"];
+                };
+            };
+        };
+    };
+    campaign_events_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventWriteSchemaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventWriteSchemaRequest"];
+                "multipart/form-data": components["schemas"]["EventWriteSchemaRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    campaign_event_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    campaign_event_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Response (untyped; see docs/api.md) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    campaign_event_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedEventPatchSchemaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedEventPatchSchemaRequest"];
+                "multipart/form-data": components["schemas"]["PatchedEventPatchSchemaRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    campaign_event_publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EventActionRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventActionRequestRequest"];
+                "multipart/form-data": components["schemas"]["EventActionRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    campaign_event_cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EventActionRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventActionRequestRequest"];
+                "multipart/form-data": components["schemas"]["EventActionRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    campaign_event_close_registration_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EventActionRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventActionRequestRequest"];
+                "multipart/form-data": components["schemas"]["EventActionRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    campaign_event_updates_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EventActionRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventActionRequestRequest"];
+                "multipart/form-data": components["schemas"]["EventActionRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    campaign_event_checkin_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventCheckin"];
+                };
+            };
+        };
+    };
+    campaign_event_checkin_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckinRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CheckinRequestRequest"];
+                "multipart/form-data": components["schemas"]["CheckinRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckinResult"];
+                };
+            };
+        };
+    };
+    campaign_event_image_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "application/json": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    campaign_event_image_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_events_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminEventList"];
+                };
+            };
+        };
+    };
+    admin_party_events_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventList"];
+                };
+            };
+        };
+    };
+    admin_party_events_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventWriteSchemaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventWriteSchemaRequest"];
+                "multipart/form-data": components["schemas"]["EventWriteSchemaRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    admin_party_event_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    admin_party_event_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Response (untyped; see docs/api.md) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_party_event_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedEventPatchSchemaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedEventPatchSchemaRequest"];
+                "multipart/form-data": components["schemas"]["PatchedEventPatchSchemaRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    admin_party_event_publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EventActionRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventActionRequestRequest"];
+                "multipart/form-data": components["schemas"]["EventActionRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    admin_party_event_cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EventActionRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventActionRequestRequest"];
+                "multipart/form-data": components["schemas"]["EventActionRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    admin_party_event_close_registration_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EventActionRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventActionRequestRequest"];
+                "multipart/form-data": components["schemas"]["EventActionRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    admin_party_event_updates_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EventActionRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventActionRequestRequest"];
+                "multipart/form-data": components["schemas"]["EventActionRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    admin_party_event_checkin_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventCheckin"];
+                };
+            };
+        };
+    };
+    admin_party_event_checkin_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckinRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CheckinRequestRequest"];
+                "multipart/form-data": components["schemas"]["CheckinRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckinResult"];
+                };
+            };
+        };
+    };
+    admin_party_event_image_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "application/json": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganiserEventSchema"];
+                };
+            };
+        };
+    };
+    admin_party_event_image_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    candidate_volunteering_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VolunteerOpening"];
+                };
+            };
+        };
+    };
+    candidate_volunteering_apply_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VolunteerApplyRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["VolunteerApplyRequest"];
+                "multipart/form-data": components["schemas"]["VolunteerApplyRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VolunteerApplicationMine"];
+                };
+            };
+        };
+    };
+    my_volunteering_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyVolunteering"];
+                };
+            };
+        };
+    };
+    my_volunteering_withdraw_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VolunteerApplicationMine"];
+                };
+            };
+        };
+    };
+    campaign_volunteering_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VolunteerOpening"];
+                };
+            };
+        };
+    };
+    campaign_volunteering_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedVolunteerOpeningWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedVolunteerOpeningWriteRequest"];
+                "multipart/form-data": components["schemas"]["PatchedVolunteerOpeningWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VolunteerOpening"];
+                };
+            };
+        };
+    };
+    campaign_volunteers_get: {
+        parameters: {
+            query?: {
+                role?: string;
+                state?: string;
+                status?: string;
+            };
+            header?: never;
+            path: {
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VolunteerApplicationRows"];
+                };
+            };
+        };
+    };
+    campaign_volunteer_updates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VolunteerUpdates"];
+                };
+            };
+        };
+    };
+    campaign_volunteer_updates_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VolunteerUpdateWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["VolunteerUpdateWriteRequest"];
+                "multipart/form-data": components["schemas"]["VolunteerUpdateWriteRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VolunteerUpdateSent"];
+                };
+            };
+        };
+    };
+    campaign_volunteer_decide_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VolunteerDecideRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["VolunteerDecideRequest"];
+                "multipart/form-data": components["schemas"]["VolunteerDecideRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VolunteerApplicationRow"];
+                };
+            };
+        };
+    };
+    campaign_volunteer_contact_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidate_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VolunteerContact"];
                 };
             };
         };

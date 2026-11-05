@@ -38,6 +38,12 @@ Without `VITE_CLERK_PUBLISHABLE_KEY` the app shows a "Sign-in isn't configured" 
 - Code in `src/communities/` (types from the OpenAPI schema, `PostCard`, `Composer` with `refusalWords()`, `communities.css` using tokens only); pages in `src/pages/communities/`. Joining relies on the shared consent dialog (`consent_required` with purpose `community_membership`).
 - Who is in a community is never shown; counts come banded from the API.
 
+## Events and volunteering (spec 18)
+
+- `/events` (filters State, Type, Online, This week in the address; Upcoming · Past), `/events/:id` (details in Lagos time, calendar file, registration box, report), `/account/events`, `/account/volunteering`, `/candidates/:slug/volunteer`, campaign tabs Posts · Events · Volunteers on `/campaign/:candidateId`, `/admin/events` (system admins: party events and all events with counts). "Upcoming events" strips on candidate, state and community pages.
+- Code in `src/events/` (types from the OpenAPI schema, `EventCardItem`, `EventEditor`/`EventDashboard` with `refusal()`, `OrganiserEvents`, `CampaignVolunteers`, `UpcomingStrip`, `events.css` using tokens only); pages in `src/pages/events/`. Registering and applying rely on the shared consent dialog (purposes `event_registration` and `volunteering`).
+- Times are always shown in Lagos time (`whenWords`); the editor sends `+01:00` (`fromLocalInput`). Nobody's registration is shown to anyone else; counts come banded from the API.
+
 ## Security and privacy (spec 14)
 
 - `/privacy` (the notice, from the API's data register), `/security` (vulnerability disclosure), `/account/privacy` (Your data: download, consents, requests, delete), `/account-deleted`.
