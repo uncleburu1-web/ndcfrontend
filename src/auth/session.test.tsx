@@ -21,14 +21,14 @@ afterEach(cleanup);
 
 it("useApi() is stable across re-renders and route changes", () => {
   const { rerender } = render(
-    <MemoryRouter initialEntries={["/"]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <MemoryRouter initialEntries={["/"]}>
       <SessionProvider><Routes><Route path="*" element={<Probe />} /></Routes></SessionProvider>
     </MemoryRouter>
   );
   fireEvent.click(screen.getByRole("button", { name: "go" }));
   fireEvent.click(screen.getByRole("button", { name: "go" }));
   rerender(
-    <MemoryRouter initialEntries={["/"]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <MemoryRouter initialEntries={["/"]}>
       <SessionProvider><Routes><Route path="*" element={<Probe />} /></Routes></SessionProvider>
     </MemoryRouter>
   );

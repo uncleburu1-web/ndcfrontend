@@ -36,7 +36,7 @@ function Where() {
 function renderAt(path: string) {
   return render(
     <ToastProvider>
-      <MemoryRouter initialEntries={[path]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <MemoryRouter initialEntries={[path]}>
         <Routes>
           <Route path="/news" element={<NewsPage />} />
           <Route path="/news/official/:id" element={<ArticlePage source="official" />} />

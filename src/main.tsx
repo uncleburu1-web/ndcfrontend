@@ -45,7 +45,7 @@ function Root() {
   if (import.meta.env.DEV && window.location.pathname === "/design-system") return <DevDesignSystem />;
   if (!PUBLISHABLE_KEY) return <MissingClerkKey />;
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <BrowserRouter>
       <ClerkWithRouter>
         <SessionProvider>
           <App />

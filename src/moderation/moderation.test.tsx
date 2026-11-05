@@ -49,7 +49,7 @@ function Where() {
 function renderAt(path: string, extra?: React.ReactNode) {
   return render(
     <ToastProvider>
-      <MemoryRouter initialEntries={[path]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <MemoryRouter initialEntries={[path]}>
         <FollowProvider>
           {extra}
           <Routes>

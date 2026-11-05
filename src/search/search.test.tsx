@@ -34,7 +34,7 @@ function Where() {
 function renderAt(path: string, withHeader = false) {
   return render(
     <ToastProvider>
-      <MemoryRouter initialEntries={[path]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <MemoryRouter initialEntries={[path]}>
         <FollowProvider>
           {withHeader && <HeaderSearch />}
           <Routes>

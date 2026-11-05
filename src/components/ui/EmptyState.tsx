@@ -19,7 +19,8 @@ export function EmptyState({ icon = "inbox", title, children, action }: EmptySta
         <Icon name={icon} size={28} />
       </span>
       <h3 className="ds-empty__title">{title}</h3>
-      {children && <p className="ds-empty__text">{children}</p>}
+      {/* a div, not a p: callers pass lists, buttons and paragraphs too */}
+      {children && <div className="ds-empty__text">{children}</div>}
       {action && <div className="ds-empty__action">{action}</div>}
     </div>
   );

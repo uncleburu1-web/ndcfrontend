@@ -99,7 +99,7 @@ function Where() {
 function renderAt(path: string) {
   return render(
     <ToastProvider>
-      <MemoryRouter initialEntries={[path]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <MemoryRouter initialEntries={[path]}>
         <FollowProvider>
           <Routes>
             <Route path="/candidates" element={<CandidatesPage />} />
@@ -358,7 +358,7 @@ describe("signing out", () => {
     await act(async () => {
       view.rerender(
         <ToastProvider>
-          <MemoryRouter initialEntries={["/candidates/amina-bello"]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <MemoryRouter initialEntries={["/candidates/amina-bello"]}>
             <FollowProvider>
               <Routes>
                 <Route path="/candidates/:slug" element={<CandidateProfilePage />} />

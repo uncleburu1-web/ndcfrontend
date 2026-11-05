@@ -34,7 +34,7 @@ function renderAt(path: string, ui: React.ReactNode) {
   // main.tsx wraps the whole app in ToastProvider; mirror that here.
   return render(
     <ToastProvider>
-      <MemoryRouter initialEntries={[path]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <MemoryRouter initialEntries={[path]}>
         {ui}
         <Where />
       </MemoryRouter>

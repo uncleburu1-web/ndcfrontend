@@ -41,7 +41,7 @@ const MEMBER = { ...ADMIN, is_system_admin: false, admin_areas: [], email: "ada@
 function renderAt(path: string, routes: React.ReactNode) {
   return render(
     <ToastProvider>
-      <MemoryRouter initialEntries={[path]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <MemoryRouter initialEntries={[path]}>
         <Routes>{routes}</Routes>
       </MemoryRouter>
     </ToastProvider>,

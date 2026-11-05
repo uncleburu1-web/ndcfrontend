@@ -184,7 +184,7 @@ function routes(map: Record<string, unknown>) {
 function renderPage() {
   return render(
     <ToastProvider>
-      <MemoryRouter initialEntries={["/admin/integrations"]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <MemoryRouter initialEntries={["/admin/integrations"]}>
         <Routes><Route path="/admin/integrations" element={<AdminIntegrationsPage />} /></Routes>
       </MemoryRouter>
     </ToastProvider>
