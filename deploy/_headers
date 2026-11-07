@@ -1,6 +1,6 @@
 # NDCConnect web app security headers (spec 14 §4.9). Generated: npm run headers -- --write
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://clerk.ndcconnect.example https://challenges.cloudflare.com; connect-src 'self' https://api.ndcconnect.example https://clerk.ndcconnect.example; img-src 'self' data: blob: https://api.ndcconnect.example https://img.clerk.com; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://clerk.ndcconnect.example https://challenges.cloudflare.com https://*.protect.clerk.com; connect-src 'self' https://api.ndcconnect.example https://clerk.ndcconnect.example https://*.protect.clerk.com:*; img-src 'self' data: blob: https://api.ndcconnect.example https://img.clerk.com; frame-src https://challenges.cloudflare.com https://*.protect.clerk.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

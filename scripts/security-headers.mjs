@@ -42,13 +42,17 @@ export function buildHeaders(env = process.env) {
   const clerk = clerkFrontendApi(env.VITE_CLERK_PUBLISHABLE_KEY ?? "");
   const challenges = "https://challenges.cloudflare.com"; // Clerk's bot protection (Turnstile)
   const clerkImages = "https://img.clerk.com";
+  // Clerk's abuse and fraud protection (Protect, Device Intelligence): scripts and frames on *.protect.clerk.com, and
+  // requests to it on ports other than 443, hence the :* (a source without a port matches 443 only). Without these,
+  // Clerk shows "Couldn't load verification" and blocks sign-up.
+  const protect = "https://*.protect.clerk.com";
   const join_ = (...xs) => [...new Set(xs.filter(Boolean))].join(" ");
   const csp = [
     `default-src 'self'`,
-    `script-src ${join_("'self'", clerk, challenges)}`,
-    `connect-src ${join_("'self'", api, clerk, upload)}`,
+    `script-src ${join_("'self'", clerk, challenges, protect)}`,
+    `connect-src ${join_("'self'", api, clerk, upload, `${protect}:*`)}`,
     `img-src ${join_("'self'", "data:", "blob:", media, clerkImages)}`,
-    `frame-src ${join_(challenges)}`,
+    `frame-src ${join_(challenges, protect)}`,
     `worker-src 'self' blob:`,
     `style-src 'self' 'unsafe-inline'`,
     `font-src 'self'`,

@@ -12,7 +12,10 @@ describe("security headers (spec 14 §4.9)", () => {
     const h = buildHeaders({ VITE_API_BASE_URL: "https://api.example.ng/api/v1", VITE_CLERK_PUBLISHABLE_KEY: PK });
     const csp = h["Content-Security-Policy"];
     expect(csp).toContain("default-src 'self'");
-    expect(csp).toContain("script-src 'self' https://clerk.example.ng");
+    expect(csp).toContain("script-src 'self' https://clerk.example.ng https://challenges.cloudflare.com https://*.protect.clerk.com;");
+    // Clerk Protect / Device Intelligence (spec 14 §4.9 follow-up): blocked sign-ups without these
+    expect(csp).toMatch(/connect-src [^;]*https:\/\/\*\.protect\.clerk\.com:\*/);
+    expect(csp).toContain("frame-src https://challenges.cloudflare.com https://*.protect.clerk.com;");
     expect(csp).not.toMatch(/script-src[^;]*'unsafe-inline'/);
     expect(csp).toContain("connect-src 'self' https://api.example.ng https://clerk.example.ng");
     expect(csp).toContain("frame-ancestors 'none'");
