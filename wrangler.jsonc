@@ -1,0 +1,12 @@
+// Cloudflare Workers static hosting for the NDCConnect web app (deployment ahead of spec 19).
+// Build: `npm run build` (Vite writes dist/, including dist/_headers with the CSP built from VITE_* build variables).
+// SPA mode serves index.html for app routes such as /events/<id>, so a refresh doesn't 404.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ndcfrontend",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}

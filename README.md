@@ -38,6 +38,12 @@ Without `VITE_CLERK_PUBLISHABLE_KEY` the app shows a "Sign-in isn't configured" 
 - Code in `src/communities/` (types from the OpenAPI schema, `PostCard`, `Composer` with `refusalWords()`, `communities.css` using tokens only); pages in `src/pages/communities/`. Joining relies on the shared consent dialog (`consent_required` with purpose `community_membership`).
 - Who is in a community is never shown; counts come banded from the API.
 
+## Hosting on Cloudflare (ahead of spec 19)
+
+- `wrangler.jsonc` serves `dist/` as Workers static assets in single-page-app mode (every app route gets `index.html`); Vite's `dist/_headers` sets the security headers. Pages projects ignore the file and work the same way.
+- **Build** variables (Settings → Build → Variables and secrets, not the runtime ones): `VITE_API_BASE_URL`, `VITE_CLERK_PUBLISHABLE_KEY`, `VITE_SECURITY_CONTACT`, `NODE_VERSION=22`; later `VITE_MEDIA_ORIGIN=https://res.cloudinary.com` with Cloudinary. Build command `npm run build`; deploy command `npx wrangler deploy`.
+- The site's address goes into the backend's `CLERK_AUTHORIZED_PARTIES` and `CORS_ALLOWED_ORIGINS`.
+
 ## Events and volunteering (spec 18)
 
 - `/events` (filters State, Type, Online, This week in the address; Upcoming · Past), `/events/:id` (details in Lagos time, calendar file, registration box, report), `/account/events`, `/account/volunteering`, `/candidates/:slug/volunteer`, campaign tabs Posts · Events · Volunteers on `/campaign/:candidateId`, `/admin/events` (system admins: party events and all events with counts). "Upcoming events" strips on candidate, state and community pages.
