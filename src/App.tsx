@@ -101,16 +101,7 @@ import AdminPrivacyRequestsPage from "./pages/admin/privacy/AdminPrivacyRequests
 import AdminRegisterPage from "./pages/admin/privacy/AdminRegisterPage";
 import AdminAccessReviewPage from "./pages/admin/team/AdminAccessReviewPage";
 import { AdminMfaGate } from "./privacy/AdminMfaGate";
-
-function HomePage() {
-  return (
-    <div className="page-shell">
-      <EmptyState title="NDCConnect is being built">
-        Sign-in and accounts are ready. Communities and events arrive with their own specs.
-      </EmptyState>
-    </div>
-  );
-}
+import HomePage from "./pages/HomePage";
 
 function NotFound() {
   return (
