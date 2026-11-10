@@ -54,6 +54,7 @@ Without `VITE_CLERK_PUBLISHABLE_KEY` the app shows a "Sign-in isn't configured" 
 
 - `/states/:state` adds capital, LGAs (area councils in the FCT) with counts, constituencies and "About this data"; `/states/:state/:lga` (candidates standing there, events, community, wards); `/polling-units` (by code or by place, INEC's names and codes, "Check with INEC" on every result, never a VIN); Account "Confirm where you vote"; `/admin/geography` (system admins: Files, Review, Other names; PVC and membership officers: Review). Footer link "Find a polling unit"; search shows Places.
 - Code in `src/geo/` (`GeoPicker`, `LgaPicker`, `ConstituencyPicker`, `GeoConfirmCard`, shared sections, cached anonymous lookups in `useGeo`, `geoBody()` for request fields); pages in `src/pages/geo/` and `src/pages/admin/geography/`. The membership, PVC, candidate, event and volunteer forms send IDs from the pickers; "My place isn't listed" sends the typed text for an officer to check.
+- `/admin/candidates/:id` shows "Research notes to check before verifying" for an unverified draft that has notes (for example the imported NDC 2027 candidates); verifying replaces them with the admin's own note.
 
 ## Security and privacy (spec 14)
 

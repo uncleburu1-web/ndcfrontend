@@ -455,6 +455,13 @@ export default function AdminCandidateEditPage() {
           {candidate.is_verified && (
             <p className="ds-field__hint">Verified {candidate.verified_at ? formatDate(candidate.verified_at) : ""}{candidate.verified_by_email ? ` by ${candidate.verified_by_email}` : ""}. Note: {candidate.verification_notes}</p>
           )}
+          {!candidate.is_verified && candidate.verification_notes && (
+            <details className="adm-notes" open>
+              <summary>Research notes to check before verifying</summary>
+              <p className="adm-notes__body">{candidate.verification_notes}</p>
+              <p className="ds-field__hint">Only admins see these. Verifying replaces them with your own note.</p>
+            </details>
+          )}
           <ActionBar candidate={candidate} onDone={(c) => { setCandidate(c); setFormKey((k) => k + 1); }} />
         </section>
       )}

@@ -121,6 +121,17 @@ describe("workflow actions", () => {
     await waitFor(() => expect(h.api).toHaveBeenCalledWith(`/admin/candidates/${base.id}/publish/`, { method: "POST", body: {} }));
   });
 
+  it("shows imported research notes on an unverified draft only", async () => {
+    h.api.mockImplementation(async (path: string) => {
+      if (path.endsWith("/accounts/")) return [];
+      if (path.endsWith("/posts/")) return { results: [] };
+      return { ...base, verification_notes: "import-key: ndc-2027:x\nSources:\n- https://example.com/a" };
+    });
+    renderAt(`/admin/candidates/${base.id}`);
+    expect(await screen.findByText("Research notes to check before verifying")).toBeTruthy();
+    expect(screen.getByText(/https:\/\/example.com\/a/)).toBeTruthy();
+  });
+
   it("offers only the actions allowed in each state", async () => {
     h.api.mockImplementation(async (path: string) => (path.endsWith("/accounts/") ? [] : path.endsWith("/posts/") ? { results: [] } : base));
     renderAt(`/admin/candidates/${base.id}`);
