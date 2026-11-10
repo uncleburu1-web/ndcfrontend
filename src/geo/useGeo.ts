@@ -37,22 +37,24 @@ interface Loaded<T> {
   data: T[];
   loading: boolean;
   error: boolean;
+  /** True once this list has come back (so an empty list means "nothing loaded for this place", not "not asked yet"). */
+  loaded: boolean;
 }
 
 /** One list for a parent; empty while there's no parent. */
 export function useGeoList<T>(load: ((api: ApiRequest) => Promise<T[]>) | null, key: string): Loaded<T> {
   const api = useApi();
-  const [state, setState] = useState<Loaded<T>>({ data: [], loading: false, error: false });
+  const [state, setState] = useState<Loaded<T>>({ data: [], loading: false, error: false, loaded: false });
   useEffect(() => {
     if (!load) {
-      setState({ data: [], loading: false, error: false });
+      setState({ data: [], loading: false, error: false, loaded: false });
       return;
     }
     let live = true;
-    setState((s) => ({ ...s, loading: true, error: false }));
+    setState((s) => ({ ...s, loading: true, error: false, loaded: false }));
     load(api).then(
-      (data) => live && setState({ data, loading: false, error: false }),
-      () => live && setState({ data: [], loading: false, error: true }),
+      (data) => live && setState({ data, loading: false, error: false, loaded: true }),
+      () => live && setState({ data: [], loading: false, error: true, loaded: false }),
     );
     return () => {
       live = false;

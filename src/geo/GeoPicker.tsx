@@ -3,7 +3,7 @@
  * Lists are native selects (they work with a keyboard, a screen reader and on a 360 px phone); the polling-unit list
  * has a filter box and a "find by code" box. "My place isn't listed" keeps the old free-text fields as a fallback.
  */
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { ApiError } from "../auth/api";
 import { useApi } from "../auth/session";
 import { Button, Checkbox, Select, TextField } from "../components/ui";
@@ -53,6 +53,12 @@ export function GeoPicker({ state, value, onChange, depth = "polling_unit", requ
   }, [filter, units.data]);
 
   const set = (patch: Partial<GeoValue>) => onChange({ ...value, ...patch });
+  // INEC's list for this state isn't loaded yet: the only way to answer is to type it (an officer links it later).
+  const noList = lgas.loaded && lgas.data.length === 0;
+  useEffect(() => {
+    if (noList && !value.not_listed) onChange({ ...value, not_listed: true, lga_id: null, ward_id: null, polling_unit_id: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noList]);
   const nameOf = <T extends { id: number; name: string }>(list: T[], v: number | null) => list.find((x) => x.id === v)?.name ?? "";
 
   const findCode = async () => {
@@ -94,7 +100,7 @@ export function GeoPicker({ state, value, onChange, depth = "polling_unit", requ
             onChange={(e) => set({ ward: e.target.value })} />}
           {wantUnit && <TextField label="Polling unit" value={value.polling_unit} required={isReq("polling_unit")} maxLength={160}
             error={pickErr(errors, "polling_unit")} onChange={(e) => set({ polling_unit: e.target.value })} />}
-          <p className="news-meta">An officer will check this against INEC’s list.</p>
+          <p className="news-meta">{noList ? `INEC’s list for this state isn’t on NDCConnect yet, so type your ${word.toLowerCase()}${wantWard ? " and ward" : ""}. An officer will check it.` : "An officer will check this against INEC’s list."}</p>
         </div>
       ) : (
         <>
@@ -139,7 +145,7 @@ export function GeoPicker({ state, value, onChange, depth = "polling_unit", requ
           )}
         </>
       )}
-      {allowNotListed && (
+      {allowNotListed && !noList && (
         <Checkbox label="My place isn’t listed" checked={value.not_listed}
           hint={value.not_listed ? undefined : "Type it instead; an officer links it later."}
           onChange={(e) => set({ not_listed: e.target.checked })} />

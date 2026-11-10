@@ -100,8 +100,11 @@ export default function PollingUnitsPage() {
       <section className="search-section geo-card" aria-labelledby="pu-browse">
         <h2 id="pu-browse">By place</h2>
         <Select label="State" value={state} placeholder="Choose a state" options={STATES} onChange={(e) => pick({ state: e.target.value, lga: "", ward: "" })} />
-        {state && (
+        {state && lgas.loaded && lgas.data.length === 0 ? (
+          <p className="news-meta">This state’s polling units aren’t on NDCConnect yet. <CheckWithInec url={inec} /></p>
+        ) : state && (
           <Select label={lgaWord(state)} value={lga ? String(lga) : ""} placeholder={lgas.loading ? "Loading…" : `Choose the ${lgaWord(state)}`}
+            error={lgas.error ? "Couldn’t load the list." : undefined}
             options={lgas.data.map((l) => ({ value: String(l.id), label: `${l.name} · ${l.code}` }))} onChange={(e) => pick({ lga: e.target.value, ward: "" })} />
         )}
         {lga && (

@@ -110,6 +110,22 @@ describe("GeoPicker", () => {
     expect(await screen.findByLabelText(/^Area council/)).toBeTruthy();
     expect(screen.queryByLabelText(/^Ward/)).toBeNull();
   });
+
+  it("switches to typing when INEC's list for the state isn't loaded yet (no error)", async () => {
+    routes({ "/geo/states/fct/lgas/": { results: [] } });
+    let last = EMPTY_GEO;
+    function FctHarness() {
+      const [v, setV] = useState<GeoValue>({ ...EMPTY_GEO, lga: "kuje" });
+      return <GeoPicker state="fct" value={v} depth="ward" onChange={(x) => { setV(x); last = x; }} required={["lga"]} />;
+    }
+    render(<ToastProvider><FctHarness /></ToastProvider>);
+    expect(await screen.findByText(/isn’t on NDCConnect yet, so type your area council and ward/)).toBeTruthy();
+    expect(screen.queryByText("Couldn’t load the list.")).toBeNull();
+    expect(screen.queryByRole("checkbox", { name: /isn’t listed/ })).toBeNull();
+    expect((screen.getByLabelText(/^Area council/) as HTMLInputElement).value).toBe("kuje");
+    fireEvent.change(screen.getByLabelText(/^Ward/), { target: { value: "Rubochi" } });
+    expect(geoBody(last)).toEqual({ geo_not_listed: true, lga: "kuje", ward: "Rubochi", polling_unit: "" });
+  });
 });
 
 describe("public pages", () => {
