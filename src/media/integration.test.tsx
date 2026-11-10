@@ -157,7 +157,7 @@ describe("new notification kinds", () => {
 const OVERVIEW = {
   generated_at: "2026-11-04T13:05:00Z",
   services: [
-    { key: "clerk", name: "Clerk", purpose: "Sign-in", settings: ["CLERK_SECRET_KEY"], timeouts: "connect 3 s, read 5 s", data_sent: "IDs",
+    { key: "clerk", name: "Clerk", purpose: "Sign-in", settings: ["CLERK_JWT_KEY"], timeouts: "connect 3 s, read 5 s", data_sent: "IDs",
       in_use: true, configured: true, state: "ok", last_success: new Date(Date.now() - 120_000).toISOString(), last_failure: null, last_reason: "", circuit_open: false },
     { key: "paystack", name: "Paystack", purpose: "Payments", settings: ["PAYSTACK_SECRET_KEY"], timeouts: "connect 3 s, read 10 s", data_sent: "Email",
       in_use: true, configured: true, state: "unavailable", last_success: null, last_failure: "2026-11-04T13:05:00Z", last_reason: "TimeoutError", circuit_open: true },
