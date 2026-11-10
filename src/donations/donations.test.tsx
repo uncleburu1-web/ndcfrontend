@@ -285,6 +285,31 @@ describe("/finance", () => {
     await waitFor(() => expect(screen.getByTestId("where").textContent).toBe("/finance?designation=party"));
     await waitFor(() => expect(h.api).toHaveBeenCalledWith("/finance/donations/?designation=party", expect.anything()));
   });
+
+  it("labels demo data: banner, a separate demo total, DEMO on each demo row; the real total stays real", async () => {
+    const demoRows = [{ ...rows[0], public_label: "Chidi O.", is_demo: true }, { ...rows[1], is_demo: false }];
+    const withDemo = { ...summary, overall: { total_kobo: 100000, count: 1 },
+      demo: { overall: { total_kobo: 55700000000, count: 1500 }, filtered: { total_kobo: 55700000000, count: 1500 }, candidates: [] } };
+    h.api.mockImplementation(async (path: string) => (path.startsWith("/finance/summary") ? withDemo : { count: 2, next: null, previous: null, results: demoRows }));
+    renderAt("/finance");
+    expect(await screen.findByText("DEMO DATA — not real donations")).toBeTruthy();
+    expect(screen.getByText("Total raised").parentElement!.textContent).toContain("₦1,000"); // real only
+    expect(screen.getByText("Demo donations (not real)")).toBeTruthy();
+    expect(screen.getAllByText("₦557,000,000").length).toBeGreaterThan(0);
+    const table = screen.getByRole("table");
+    const demoRow = within(table).getByText("Chidi O.").closest("tr")!;
+    expect(within(demoRow).getByText("DEMO")).toBeTruthy();
+    const realRow = within(table).getByText("Anonymous Donor").closest("tr")!;
+    expect(within(realRow).queryByText("DEMO")).toBeNull();
+  });
+
+  it("shows no demo label when there is no demo data", async () => {
+    h.api.mockImplementation(async (path: string) => (path.startsWith("/finance/summary") ? { ...summary, demo: null } : { count: 3, next: null, previous: null, results: rows }));
+    renderAt("/finance");
+    expect(await screen.findByText("₦8,000")).toBeTruthy();
+    expect(screen.queryByText(/DEMO DATA/)).toBeNull();
+    expect(screen.queryByText("DEMO")).toBeNull();
+  });
 });
 
 // ---------------------------------------------------------------------- admin

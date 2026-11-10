@@ -1,4 +1,5 @@
 /** /admin/donations/:id — full record, history and provider re-check (spec 05 §4.6). No manual "successful". */
+import { DemoBadge } from "../../../donations/DemoBadge";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ApiError } from "../../../auth/api";
@@ -53,10 +54,15 @@ export default function AdminDonationDetailPage() {
       <header className="adm-page__head">
         <div>
           <h1>{formatKobo(d.amount_kobo)} · {d.reference}</h1>
-          <div className="adm-status"><StatusBadge set="donation" status={d.status} /></div>
+          <div className="adm-status"><StatusBadge set="donation" status={d.status} />{d.is_demo && <DemoBadge />}</div>
         </div>
-        <Button variant="secondary" onClick={() => void recheck()} loading={busy} loadingLabel="Checking…">Re-check with provider</Button>
+        {!d.is_demo && <Button variant="secondary" onClick={() => void recheck()} loading={busy} loadingLabel="Checking…">Re-check with provider</Button>}
       </header>
+      {d.is_demo && (
+        <Banner tone="warning" title="DEMO DATA — not a real donation">
+          Simulated for a local preview by seed_demo_donations. No money was paid, and it isn’t counted in any total or export.
+        </Banner>
+      )}
       {d.status === "review" && <Banner tone="warning" title="Under review">{REASONS[d.review_reason] ?? d.review_reason}</Banner>}
       <p className="ds-field__hint">Only the payment provider’s answer can change a donation’s status. Refunds are made in the provider’s dashboard.</p>
 

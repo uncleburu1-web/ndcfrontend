@@ -34,6 +34,8 @@ export interface DonationReceipt {
   channel: string;
   created_at: string;
   paid_at: string | null;
+  /** Simulated data for a local preview (seed_demo_donations). Never a real contribution. */
+  is_demo: boolean;
 }
 
 export type MyDonation = Pick<DonationReceipt, "reference" | "status" | "status_label" | "amount_kobo" | "refunded_kobo" | "net_kobo"
@@ -45,6 +47,7 @@ export interface PublicDonation {
   designation: Designation;
   candidate: DonationCandidate | null;
   paid_on: string;
+  is_demo: boolean;
 }
 
 export interface Total {
@@ -57,6 +60,8 @@ export interface FinanceSummary {
   filtered: Total;
   party: Total;
   candidates: (Total & { slug: string; full_name: string })[];
+  /** Only when simulated demo rows exist (local previews). Never part of the real totals above. */
+  demo: { overall: Total; filtered: Total; candidates: (Total & { slug: string; full_name: string })[] } | null;
 }
 
 export interface AdminDonation extends DonationReceipt {
@@ -86,5 +91,5 @@ export interface AdminDonation extends DonationReceipt {
 }
 
 export interface AdminDonationPage extends Paginated<AdminDonation> {
-  totals: { successful: Total; review: number };
+  totals: { successful: Total; review: number; demo: Total };
 }

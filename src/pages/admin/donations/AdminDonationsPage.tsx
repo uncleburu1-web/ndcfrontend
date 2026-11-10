@@ -1,4 +1,5 @@
 /** /admin/donations — system admins and finance officers (spec 05 §4.6). */
+import { DemoBadge } from "../../../donations/DemoBadge";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useApi } from "../../../auth/session";
@@ -106,6 +107,9 @@ export default function AdminDonationsPage() {
         <>
           <p className="adm-donation-totals">
             Successful in this view: <strong>{formatKobo(res.data.totals.successful.total_kobo)}</strong> from {res.data.totals.successful.count} donations
+            {res.data.totals.demo?.count > 0 && (
+              <> · <DemoBadge /> plus {res.data.totals.demo.count.toLocaleString("en-NG")} demo donations ({formatKobo(res.data.totals.demo.total_kobo)}), not counted and never exported</>
+            )}
           </p>
           <div className="adm-table-wrap"><table className="adm-table">
             <thead><tr><th>Date</th><th>Reference</th><th>Donor</th><th>Amount</th><th>Given to</th><th>Status</th></tr></thead>
@@ -113,7 +117,7 @@ export default function AdminDonationsPage() {
               {res.data.results.map((d) => (
                 <tr key={d.id}>
                   <td>{formatDate(d.created_at)}</td>
-                  <td><Link to={`/admin/donations/${d.id}`}>{d.reference}</Link></td>
+                  <td><Link to={`/admin/donations/${d.id}`}>{d.reference}</Link>{d.is_demo && <> <DemoBadge /></>}</td>
                   <td>{d.donor_name}<br /><span className="ds-field__hint">{d.donor_email}</span></td>
                   <td>{formatKobo(d.amount_kobo)}</td>
                   <td>{designationText(d)}</td>

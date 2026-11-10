@@ -8,6 +8,7 @@ import { useApi } from "../../auth/session";
 import type { Paginated } from "../../candidates/types";
 import { useRequest } from "../../candidates/useRequest";
 import { Banner, Button, EmptyState, Pagination, Select, Skeleton } from "../../components/ui";
+import { DemoBadge } from "../../donations/DemoBadge";
 import { useDonationConfig } from "../../donations/DonationConfigProvider";
 import { formatKobo } from "../../donations/money";
 import type { FinanceSummary, PublicDonation } from "../../donations/types";
@@ -36,7 +37,8 @@ export default function FinancePage() {
 
   const list = useRequest(`finance:${qs}`, (signal) => api<Paginated<PublicDonation>>(`/finance/donations/${qs ? `?${qs}` : ""}`, { anonymous: true, signal }));
   const summary = useRequest(`finance-summary:${filterQs}`, (signal) => api<FinanceSummary>(`/finance/summary/${filterQs ? `?${filterQs}` : ""}`, { anonymous: true, signal }));
-  const candidateName = summary.data?.candidates.find((c) => c.slug === candidate)?.full_name;
+  const demo = summary.data?.demo ?? null;
+  const candidateName = [...(summary.data?.candidates ?? []), ...(demo?.candidates ?? [])].find((c) => c.slug === candidate)?.full_name;
 
   useEffect(() => {
     document.title = "Finance | NDCConnect";
@@ -60,6 +62,12 @@ export default function FinancePage() {
       </header>
 
       {!configLoading && !config.open && <Banner tone="info">Donations aren’t open yet.</Banner>}
+      {demo && demo.overall.count > 0 && (
+        <Banner tone="warning" title="DEMO DATA — not real donations">
+          This page includes {demo.overall.count.toLocaleString("en-NG")} simulated donations ({formatKobo(demo.overall.total_kobo)}) for a
+          preview. They are marked DEMO, were never paid, and are not counted in Total raised.
+        </Banner>
+      )}
 
       <section className="finance-totals" aria-label="Totals">
         <div className="finance-total">
@@ -67,6 +75,13 @@ export default function FinancePage() {
           <p className="finance-total__value">{summary.data ? formatKobo(summary.data.overall.total_kobo) : "…"}</p>
           <p className="finance-total__sub">{summary.data ? `${summary.data.overall.count.toLocaleString("en-NG")} donations` : ""}</p>
         </div>
+        {demo && demo.overall.count > 0 && (
+          <div className="finance-total finance-total--demo">
+            <p className="finance-total__label"><DemoBadge /> Demo donations (not real)</p>
+            <p className="finance-total__value">{formatKobo((designation || candidate ? demo.filtered : demo.overall).total_kobo)}</p>
+            <p className="finance-total__sub">{(designation || candidate ? demo.filtered : demo.overall).count.toLocaleString("en-NG")} simulated donations{designation || candidate ? " in this view" : ""}</p>
+          </div>
+        )}
         {(designation || candidate) && summary.data && (
           <div className="finance-total">
             <p className="finance-total__label">{candidateName ?? (designation === "party" ? "NDC general fund" : designation === "candidate" ? "All candidates" : "Filtered")}</p>
@@ -102,8 +117,8 @@ export default function FinancePage() {
             </thead>
             <tbody>
               {list.data.results.map((d, i) => (
-                <tr key={`${page}-${i}`}>
-                  <td data-label="Donor">{d.public_label}</td>
+                <tr key={`${page}-${i}`} className={d.is_demo ? "finance-table__demo" : undefined}>
+                  <td data-label="Donor">{d.is_demo && <><DemoBadge />{" "}</>}{d.public_label}</td>
                   <td data-label="Amount" className="finance-table__amount">{formatKobo(d.amount_kobo)}</td>
                   <td data-label="Given to"><Recipient d={d} /></td>
                   <td data-label="Date">{formatDate(d.paid_on)}</td>

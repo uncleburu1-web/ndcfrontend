@@ -41,6 +41,16 @@
   font-size: var(--text-sm);
   color: var(--text-muted);
 }
+/* Simulated demo totals: set apart from the real figures (never counted in them). */
+.finance-total--demo {
+  border-left-color: var(--tone-warning-fg);
+  background: var(--tone-warning-bg);
+}
+.finance-total--demo .finance-total__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
 .finance-filters {
   display: flex;
   flex-wrap: wrap;

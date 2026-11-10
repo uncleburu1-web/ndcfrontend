@@ -46,6 +46,9 @@ export default function ReceiptPage() {
         <h1>{confirmed ? "Donation receipt" : "Donation (awaiting confirmation)"}</h1>
         <StatusBadge set="donation" status={d.status} />
       </header>
+      {d.is_demo && (
+        <Banner tone="warning" title="DEMO DATA — not a receipt">This is a simulated donation for a preview. No money was paid.</Banner>
+      )}
       {!confirmed && (
         <Banner tone={d.status === "failed" || d.status === "abandoned" ? "error" : "warning"}>
           {d.status === "failed" || d.status === "abandoned"
