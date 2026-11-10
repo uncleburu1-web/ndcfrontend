@@ -76,6 +76,7 @@ export function HeaderSearch() {
 
   const items = [
     ...(data?.candidates ?? []).map((c) => ({ key: `c-${c.slug}`, url: `/candidates/${c.slug}`, kind: "candidate" as const, c })),
+    ...(data?.places ?? []).map((t, i) => ({ key: `p-${i}`, url: t.url, kind: "place" as const, t: { title: t.title, candidate: "" } })),  // spec 19 §9
     ...(data?.titles ?? []).map((t, i) => ({ key: `t-${i}`, url: t.url, kind: t.type, t })),
   ];
   const showList = expanded && q.trim().length >= Q_MIN && items.length > 0;
@@ -151,8 +152,8 @@ export function HeaderSearch() {
                     </>
                   ) : (
                     <>
-                      <Icon name={it.kind === "news" ? "inbox" : "bell"} size={16} />
-                      <span>{it.t.title}<span className="hs__meta">{it.kind === "news" ? "News" : `Post by ${it.t.candidate}`}</span></span>
+                      <Icon name={it.kind === "news" ? "inbox" : it.kind === "place" ? "mapPin" : "bell"} size={16} />
+                      <span>{it.t.title}<span className="hs__meta">{it.kind === "news" ? "News" : it.kind === "place" ? "Place" : `Post by ${it.t.candidate}`}</span></span>
                     </>
                   )}
                 </li>

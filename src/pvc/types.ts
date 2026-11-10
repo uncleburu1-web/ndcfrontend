@@ -12,6 +12,10 @@ export interface MyPvc {
   reviewed_at?: string | null;
   created_at?: string;
   show_badge?: boolean;
+  /** Spec 19: how the location links were set; the chosen place, and a choice waiting for an officer. */
+  geo_source?: "" | "matched" | "chosen" | "officer" | "review";
+  place?: import("../geo/types").GeoPlace;
+  pending_place?: import("../geo/types").GeoPlace | null;
 }
 
 export interface PvcEvent {
@@ -28,6 +32,8 @@ export interface AdminPvc extends MyPvc {
   reviewed_by_email: string | null;
   is_own: boolean;
   events: PvcEvent[];
+  /** Spec 19 §8.2: pre-fills the officer's picker. */
+  suggestion?: import("../geo/types").GeoSuggestion | null;
 }
 
 export interface AdminPvcPage {

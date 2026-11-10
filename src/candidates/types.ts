@@ -62,6 +62,10 @@ export interface AdminCandidate {
   area_name: string;
   ward_name: string;
   area_display: string;
+  /** Spec 19 §5.2: the chosen constituency, LGA and ward. */
+  constituency?: { id: number; code: string; name: string; kind: string } | null;
+  lga_id?: number | null;
+  ward_id?: number | null;
   biography: string;
   campaign_summary: string;
   priorities: string[];

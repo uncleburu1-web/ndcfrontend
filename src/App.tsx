@@ -68,6 +68,9 @@ import AdminLegalPage from "./pages/admin/moderation/AdminLegalPage";
 import AdminLegalNoticePage from "./pages/admin/moderation/AdminLegalNoticePage";
 import AdminCompliancePage from "./pages/admin/moderation/AdminCompliancePage";
 import StatePage from "./pages/states/StatePage";
+import LgaPage from "./pages/geo/LgaPage";
+import PollingUnitsPage from "./pages/geo/PollingUnitsPage";
+import AdminGeographyPage from "./pages/admin/geography/AdminGeographyPage";
 import CommunitiesPage from "./pages/communities/CommunitiesPage";
 import CommunityPage from "./pages/communities/CommunityPage";
 import AccountCommunitiesPage from "./pages/communities/AccountCommunitiesPage";
@@ -153,6 +156,8 @@ export default function App() {
         <Route path="search" element={<SearchPage />} />
         <Route path="states" element={<StatesPage />} />
         <Route path="states/:state" element={<StatePage />} />
+        <Route path="states/:state/:lga" element={<LgaPage />} />
+        <Route path="polling-units" element={<PollingUnitsPage />} />
         {/* Spec 17: guests see names and counts; posts need sign-in (the backend decides) */}
         <Route path="communities" element={<CommunitiesPage />} />
         <Route path="communities/*" element={<CommunityPage />} />
@@ -221,6 +226,8 @@ export default function App() {
           {/* Membership officer or system admin (spec 06 §7.2) */}
           {/* PVC officer, membership officer or system admin (spec 08 §5.3) */}
           <Route element={<RequirePvcOfficer />}>
+            {/* Spec 19 §15.1: system admins see every tab; PVC and membership officers the review queue */}
+            <Route path="admin/geography" element={<AdminGeographyPage />} />
             <Route path="admin/pvc" element={<AdminPvcPage />} />
             <Route path="admin/pvc/settings" element={<AdminPvcSettingsPage />} />
           </Route>

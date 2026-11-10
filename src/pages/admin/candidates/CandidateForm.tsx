@@ -6,6 +6,9 @@ import { useState, type FormEvent } from "react";
 import type { ApiError } from "../../../auth/api";
 import type { AdminCandidate, CandidateLink } from "../../../candidates/types";
 import { Banner, Button, Select, TextArea, TextField } from "../../../components/ui";
+import { ConstituencyPicker, POSITION_KIND, useConstituencies } from "../../../geo/ConstituencyPicker";
+import { GeoPicker } from "../../../geo/GeoPicker";
+import { EMPTY_GEO, type GeoValue } from "../../../geo/types";
 import { NOT_IN_FCT, POSITIONS, STATES, positionInfo, type PositionValue } from "../../../lib/nigeria";
 
 export interface CandidateFormValues {
@@ -15,13 +18,17 @@ export interface CandidateFormValues {
   state: string;
   area_name: string;
   ward_name: string;
+  /** Spec 19 §5.2 */
+  constituency_id: number | null;
+  geo: GeoValue;
   campaign_summary: string;
   biography: string;
   priorities: string[];
   links: CandidateLink[];
 }
 
-export const IDENTITY_FIELDS: (keyof CandidateFormValues)[] = ["full_name", "position", "election_year", "state", "area_name", "ward_name"];
+export const IDENTITY_FIELDS: (keyof CandidateFormValues)[] = ["full_name", "position", "election_year", "state", "area_name", "ward_name",
+  "constituency_id"];
 
 export function toFormValues(c?: AdminCandidate | null): CandidateFormValues {
   return {
@@ -31,6 +38,9 @@ export function toFormValues(c?: AdminCandidate | null): CandidateFormValues {
     state: c?.state ?? "",
     area_name: c?.area_name ?? "",
     ward_name: c?.ward_name ?? "",
+    constituency_id: c?.constituency?.id ?? null,
+    geo: { ...EMPTY_GEO, lga_id: c?.lga_id ?? null, ward_id: c?.ward_id ?? null, lga: c?.area_name ?? "", ward: c?.ward_name ?? "",
+      not_listed: !!c && !c.lga_id && !!c.area_name },
     campaign_summary: c?.campaign_summary ?? "",
     biography: c?.biography ?? "",
     priorities: c?.priorities ?? [],
@@ -41,13 +51,19 @@ export function toFormValues(c?: AdminCandidate | null): CandidateFormValues {
 /** API payload: drop area fields the position doesn't use so stale values never get saved. */
 export function toPayload(v: CandidateFormValues) {
   const info = positionInfo(v.position);
+  const local = v.position === "lga_chairman" || v.position === "councillor";
+  const picked = local && !v.geo.not_listed && v.geo.lga_id;
+  const area = local ? (picked ? "" : v.geo.lga) : v.area_name;
+  const ward = local ? (picked ? "" : v.geo.ward) : v.ward_name;
   return {
     full_name: v.full_name,
     position: v.position,
     election_year: Number(v.election_year) || v.election_year,
     state: info?.state ? v.state : "",
-    area_name: info?.area ? v.area_name : "",
-    ward_name: info?.ward ? v.ward_name : "",
+    area_name: info?.area ? (picked ? v.geo.lga : area) : "",
+    ward_name: info?.ward ? (picked ? v.geo.ward : ward) : "",
+    ...(POSITION_KIND[v.position] ? { constituency_id: v.constituency_id } : {}),
+    ...(local ? { lga_id: picked ? v.geo.lga_id : null, ward_id: picked && v.position === "councillor" ? v.geo.ward_id : null } : {}),
     campaign_summary: v.campaign_summary,
     biography: v.biography,
     priorities: v.priorities.map((p) => p.trim()).filter(Boolean),
@@ -68,6 +84,9 @@ export function CandidateForm({ initial, submitLabel, busy, error, onSubmit }: P
   const set = <K extends keyof CandidateFormValues>(k: K, value: CandidateFormValues[K]) => setV((s) => ({ ...s, [k]: value }));
   const info = positionInfo(v.position);
   const fe = (name: string) => error?.fields?.[name]?.[0];
+  const cons = useConstituencies(info?.state ? v.state : "", v.position);
+  const local = v.position === "lga_chairman" || v.position === "councillor";
+  const conChosen = !!POSITION_KIND[v.position] && !!v.constituency_id;
   const stateOptions = STATES.filter((s) => !(s.value === "fct" && NOT_IN_FCT.includes(v.position as PositionValue)));
 
   const submit = (e: FormEvent) => {
@@ -112,13 +131,22 @@ export function CandidateForm({ initial, submitLabel, busy, error, onSubmit }: P
             required
             value={v.state}
             placeholder="Choose a state"
-            onChange={(e) => set("state", e.target.value)}
+            onChange={(e) => setV((x) => ({ ...x, state: e.target.value, constituency_id: null, geo: EMPTY_GEO }))}
             options={stateOptions}
             error={fe("state")}
             hint={NOT_IN_FCT.includes(v.position as PositionValue) ? "The FCT has no office of this kind." : undefined}
           />
         )}
-        {info?.area && (
+        {POSITION_KIND[v.position] && cons.data.length > 0 && (
+          <ConstituencyPicker state={v.state} position={v.position} value={v.constituency_id} list={cons} error={fe("constituency_id")}
+            onChange={(id, name) => setV((x) => ({ ...x, constituency_id: id, area_name: id ? name : x.area_name }))} />
+        )}
+        {local && v.state && (
+          <GeoPicker state={v.state} value={v.geo} onChange={(g) => set("geo", g)} depth={v.position === "councillor" ? "ward" : "lga"}
+            required={v.position === "councillor" ? ["lga", "ward"] : ["lga"]}
+            errors={{ lga: fe("lga_id") ?? fe("area_name"), ward: fe("ward_id") ?? fe("ward_name") }} />
+        )}
+        {info?.area && !local && !conChosen && (
           <TextField
             label={info.areaLabel ?? "Area"}
             name="area_name"
@@ -129,7 +157,7 @@ export function CandidateForm({ initial, submitLabel, busy, error, onSubmit }: P
             hint={info.value === "senator" ? "For example: Kano Central Senatorial District" : undefined}
           />
         )}
-        {info?.ward && (
+        {info?.ward && !local && (
           <TextField label="Ward" name="ward_name" required value={v.ward_name} onChange={(e) => set("ward_name", e.target.value)} error={fe("ward_name")} />
         )}
         {info && !info.state && <p className="adm-form__note">A {info.label} candidate represents the whole country, so no area is needed.</p>}

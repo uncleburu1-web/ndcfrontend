@@ -12,6 +12,7 @@ import { articlePath } from "../../news/types";
 import { formatDate } from "../../lib/format";
 import { CandidateGrid } from "../../search/CandidateGrid";
 import type { StateDetail } from "../../search/types";
+import { AboutData, LgaList } from "../../geo/GeoSections";
 import "../../news/news.css";
 import "../../search/search.css";
 
@@ -57,7 +58,10 @@ export default function StatePage() {
     <div className="states-page">
       <p className="article-back"><Link to="/states">← All states</Link></p>
       <header className="state-head">
-        <h1>{d.label} on NDCConnect</h1>
+        <div>
+          <h1>{d.label} on NDCConnect</h1>
+          {d.capital && <p className="news-meta">Capital: {d.capital}</p>}
+        </div>
         <span className="article-badges">
           <Button variant="secondary" href={`/search?state=${d.state}`}>Search this state</Button>
           <Button variant="secondary" href={`/communities/${d.state.replace(/_/g, "-")}`}>
@@ -80,6 +84,8 @@ export default function StatePage() {
           </div>
         ))}
       </section>
+
+      {d.lgas && <LgaList state={d.state} label={d.label} lgas={d.lgas} areaCouncils={!!d.area_councils} constituencies={d.constituencies ?? []} />}
 
       <UpcomingStrip query={`state=${d.state}`} title={`Upcoming events in ${d.label}`} limit={5} more={`/events?state=${d.state}`} />
       <section className="search-section" aria-labelledby="st-n">
@@ -106,6 +112,7 @@ export default function StatePage() {
           <ul className="news-list">{d.posts.map((p) => <CandidatePostItem key={p.id} post={p} candidate={p.candidate} />)}</ul>
         )}
       </section>
+      <AboutData about={d.about ?? null} />
     </div>
   );
 }

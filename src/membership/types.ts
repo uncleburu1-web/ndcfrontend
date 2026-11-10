@@ -32,6 +32,9 @@ export interface MyMembership {
   lga?: string;
   ward?: string;
   polling_unit?: string;
+  /** Spec 19: how the location links were set, and the chosen places (the member's own view). */
+  geo_source?: "" | "matched" | "chosen" | "review";
+  place?: import("../geo/types").GeoPlace;
   nin_masked?: string;
   has_photo?: boolean;
   declarations?: Record<string, boolean | string>;

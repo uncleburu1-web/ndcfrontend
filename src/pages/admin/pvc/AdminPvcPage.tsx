@@ -8,6 +8,8 @@ import { ApiError } from "../../../auth/api";
 import { useApi } from "../../../auth/session";
 import { useRequest } from "../../../candidates/useRequest";
 import { Banner, Button, EmptyState, MaskedValue, Modal, Pagination, Select, Skeleton, StatusBadge, TextArea, useToast } from "../../../components/ui";
+import { GeoPicker } from "../../../geo/GeoPicker";
+import { geoBody, geoFrom, type GeoValue } from "../../../geo/types";
 import { formatDate, workingDaysSince } from "../../../lib/format";
 import { STATES } from "../../../lib/nigeria";
 import type { AdminPvc, AdminPvcPage } from "../../../pvc/types";
@@ -66,10 +68,19 @@ export default function AdminPvcPage() {
     document.title = "PVC checks | NDCConnect admin";
   }, []);
 
+  // Spec 19 §8.2: the officer confirms the polling unit INEC's checker shows; pre-filled with the link or the best match
+  const [geo, setGeo] = useState<Record<string, GeoValue>>({});
+  const geoFor = (r: AdminPvc): GeoValue => geo[r.id] ?? (() => {
+    const base = geoFrom(r.place, { lga: r.lga, polling_unit: r.polling_unit });
+    const s = r.suggestion;
+    return base.polling_unit_id || !s ? base
+      : { ...base, lga_id: s.lga?.id ?? null, ward_id: s.ward?.id ?? null, polling_unit_id: s.polling_unit?.id ?? null };
+  })();
   const verify = async (r: AdminPvc) => {
     setBusy(r.id);
+    const g = geoFor(r);
     try {
-      await api(`/admin/pvc/${r.id}/verify/`, { method: "POST" });
+      await api(`/admin/pvc/${r.id}/verify/`, { method: "POST", body: g.polling_unit_id ? geoBody(g, false) : {} });
       toast.show({ tone: "success", message: `${r.user_name}’s PVC marked verified.` });
       res.retry();
     } catch (err) {
@@ -161,6 +172,13 @@ export default function AdminPvcPage() {
                   </details>
                 )}
                 {r.status === "pending" && r.is_own && <Banner tone="info">This is your own check. Another officer has to decide it.</Banner>}
+                {r.status === "pending" && !r.is_own && (
+                  <details className="adm-pvc__history" open>
+                    <summary>Polling unit from INEC’s checker</summary>
+                    <GeoPicker state={r.state ?? ""} value={geoFor(r)} onChange={(v) => setGeo((m) => ({ ...m, [r.id]: v }))} allowNotListed={false}
+                      hint="Choose the polling unit the checker shows. Communities use this link." />
+                  </details>
+                )}
                 {r.status === "pending" && !r.is_own && (
                   <div className="adm-actions">
                     <Button size="sm" onClick={() => void verify(r)} loading={busy === r.id} loadingLabel="Saving…">Mark verified</Button>

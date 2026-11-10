@@ -132,6 +132,7 @@ describe("/pvc", () => {
 describe("badge elsewhere", () => {
   it("account page shows the voter status from /me", () => {
     clerkState.isSignedIn = true;
+    routes({ "/me/geo-confirm/": { results: [] } });
     h.me = { ...ME, pvc_status: "successful" };
     renderAt("/account");
     expect(screen.getByRole("heading", { name: "Voter status" })).toBeTruthy();

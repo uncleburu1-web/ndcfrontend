@@ -8,6 +8,7 @@ import { ApiError } from "../auth/api";
 import { useApi } from "../auth/session";
 import { Banner, Button, Checkbox, Modal, RadioGroup, Select, Switch, TextArea, TextField, useToast } from "../components/ui";
 import { formatDate } from "../lib/format";
+import { LgaPicker } from "../geo/GeoPicker";
 import { STATES } from "../lib/nigeria";
 import { UploadProgress } from "../media/UploadProgress";
 import { checkImage, useImageUpload } from "../media/useImageUpload";
@@ -39,6 +40,7 @@ export function EventEditor({ base, party = false, editing = null, onSaved, onCa
     starts_at: toLocalInput(editing?.starts_at), ends_at: toLocalInput(editing?.ends_at), venue_name: editing?.venue_name ?? "",
     venue_address: editing?.venue_address_value ?? "", venue_type: editing?.venue_type && editing.venue_type !== "online" ? editing.venue_type : "",
     address_visibility: editing?.address_visibility ?? "public", state: editing?.state ?? "", lga_text: editing?.lga ?? "",
+    geo_lga: editing?.geo_lga ? Number(editing.geo_lga) : null as number | null,
     online_url: editing?.online_url_value ?? "", accessibility_notes: editing?.accessibility_notes ?? "",
     capacity: editing?.capacity ? String(editing.capacity) : "", registration: editing?.registration ?? "open",
     members_only: editing?.members_only ?? false,
@@ -48,7 +50,7 @@ export function EventEditor({ base, party = false, editing = null, onSaved, onCa
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [banner, setBanner] = useState("");
   const [busy, setBusy] = useState(false);
-  const set = (k: keyof typeof f, v: string | boolean) => setF({ ...f, [k]: v });
+  const set = (k: keyof typeof f, v: string | boolean | number | null) => setF({ ...f, [k]: v });
 
   const save = async (ev: FormEvent) => {
     ev.preventDefault();
@@ -107,9 +109,11 @@ export function EventEditor({ base, party = false, editing = null, onSaved, onCa
       <fieldset>
         <legend>Where</legend>
         <div className="ev-row">
-          <Select label="State" required={inPerson} value={f.state} onChange={(e) => set("state", e.target.value)}
+          <Select label="State" required={inPerson} value={f.state} onChange={(e) => setF({ ...f, state: e.target.value, geo_lga: null, lga_text: "" })}
             options={[{ value: "", label: inPerson ? "Choose a state" : "Nationwide" }, ...STATES]} error={errors.state} />
-          <TextField label="LGA (optional)" maxLength={100} value={f.lga_text} onChange={(e) => set("lga_text", e.target.value)} />
+          {/* Spec 19 §7.2: the LGA comes from INEC's list; the text is written from it */}
+          <LgaPicker state={f.state} value={f.geo_lga} error={errors.geo_lga} label="LGA (optional)"
+            onChange={(id, name) => setF({ ...f, geo_lga: id, lga_text: id ? name : "" })} />
         </div>
         {inPerson && (
           <>

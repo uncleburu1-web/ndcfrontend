@@ -328,7 +328,7 @@ describe("/candidates/:slug/volunteer", () => {
     expect(send.disabled).toBe(false);
     fireEvent.click(send);
     await waitFor(() => expect(screen.getByTestId("where").textContent).toBe("/account/volunteering"));
-    expect(body).toEqual({ roles: ["canvassing"], state: "kano", lga_text: "", availability: ["weekends"], note: "", share_phone: false });
+    expect(body).toEqual({ roles: ["canvassing"], state: "kano", geo_lga: null, availability: ["weekends"], note: "", share_phone: false });
   });
 });
 

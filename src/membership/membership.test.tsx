@@ -123,20 +123,24 @@ describe("/pvc", () => {
       "/membership/config/": CONFIG,
       "GET /me/pvc/": { status: "unverified" },
       "PUT /me/pvc/": { status: "pending", vin_masked: "•••• 2345", surname: "Obi", state: "lagos", state_label: "Lagos", lga: "Ikeja" },
+      "/geo/states/lagos/lgas/": { results: [{ id: 7, code: "07", name: "Ikeja", slug: "ikeja", active: true }] },
+      "/geo/lgas/7/wards/": { results: [] },
     });
     renderAt("/pvc");
     fireEvent.change(await screen.findByLabelText(/^VIN/), { target: { value: "90F5B0F8E0295612345" } });
     fireEvent.change(screen.getByLabelText(/^Surname/), { target: { value: "Obi" } });
     fireEvent.change(screen.getByLabelText(/^State of registration/), { target: { value: "lagos" } });
-    fireEvent.change(screen.getByLabelText(/^LGA/), { target: { value: "Ikeja" } });
-    fireEvent.click(screen.getByRole("checkbox"));
+    // Spec 19 §7.2: the LGA is chosen from INEC's list and sent as an ID
+    await screen.findByRole("option", { name: "Ikeja" });
+    fireEvent.change(screen.getByLabelText(/^LGA/), { target: { value: "7" } });
+    fireEvent.click(screen.getByRole("checkbox", { name: /INEC’s voter register/ }));
     fireEvent.click(screen.getByRole("button", { name: "Send for checking" }));
     expect(await screen.findByText(/We’re checking your details/)).toBeTruthy();
     expect(screen.getByText("•••• 2345")).toBeTruthy();
     expect(screen.queryByText("90F5B0F8E0295612345")).toBeNull();
     expect(screen.getByText("These details are private and encrypted.")).toBeTruthy();
     const [, opts] = h.api.mock.calls.find(([p, o]) => p === "/me/pvc/" && o?.method === "PUT")!;
-    expect(opts.body).toMatchObject({ vin: "90F5B0F8E0295612345", surname: "Obi", state: "lagos", lga: "Ikeja", consent: true });
+    expect(opts.body).toMatchObject({ vin: "90F5B0F8E0295612345", surname: "Obi", state: "lagos", lga_id: 7, consent: true });
   });
 
   it("shows inline API errors on the form", async () => {
@@ -382,7 +386,7 @@ describe("admin", () => {
     fireEvent.click(screen.getByRole("button", { name: "Reveal VIN" }));
     expect(await screen.findByText("90F5B0F8E0295612345")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Mark verified" }));
-    await waitFor(() => expect(h.api).toHaveBeenCalledWith("/admin/pvc/p1/verify/", { method: "POST" }));
+    await waitFor(() => expect(h.api).toHaveBeenCalledWith("/admin/pvc/p1/verify/", { method: "POST", body: {} }));
     fireEvent.click(screen.getByRole("button", { name: "Reject" }));
     const dialog = screen.getByRole("dialog");
     fireEvent.change(within(dialog).getByLabelText(/^More detail/), { target: { value: "Surname differs." } });

@@ -17,6 +17,7 @@ import { Q_MIN, type AllResults, type ArticleHit, type PostHit, type SearchType,
 import { useHomeState } from "../../search/useHomeState";
 import "../../news/news.css";
 import "../../search/search.css";
+import "../../geo/geo.css";
 
 const TABS: [SearchType, string][] = [["all", "All"], ["candidates", "Candidates"], ["news", "News"], ["posts", "Candidate posts"]];
 const SINCE = [{ value: "", label: "Any time" }, { value: "week", label: "Past week" }, { value: "month", label: "Past month" }, { value: "year", label: "Past year" }];
@@ -82,7 +83,7 @@ export default function SearchPage() {
   const all = type === "all" ? (res.data as AllResults | null) : null;
   const one = type !== "all" ? (res.data as TypeResults<CandidateSummary | ArticleHit | PostHit> | null) : null;
   const counts = all ? { candidates: all.candidates.count, news: all.news.count, posts: all.posts.count } : null;
-  const total = all ? all.candidates.count + all.news.count + all.posts.count : one?.count ?? 0;
+  const total = all ? all.candidates.count + all.news.count + all.posts.count + (all.places?.count ?? 0) : one?.count ?? 0;
   const err = res.error as ApiError | null;
   const years = useRequest<{ election_years: number[] } | null>(`search-years:${type}`, (signal) =>
     type === "candidates" ? api("/candidates/positions/", { anonymous: true, signal }) : Promise.resolve(null));
@@ -138,6 +139,12 @@ export default function SearchPage() {
         <NoResults q={q} dym={(all ?? one)?.did_you_mean ?? null} onTry={(v) => set({ q: v })} />
       ) : all ? (
         <>
+          {(all.places?.results.length ?? 0) > 0 && (
+            <section className="search-section" aria-labelledby="s-pl">
+              <h2 id="s-pl">Places</h2>
+              <ul className="geo-list">{all.places!.results.map((p) => <li key={p.url}><Link to={p.url}>{p.title}</Link></li>)}</ul>
+            </section>
+          )}
           {all.candidates.count > 0 && (
             <section className="search-section" aria-labelledby="s-c">
               <div className="search-section__head"><h2 id="s-c">Candidates</h2>

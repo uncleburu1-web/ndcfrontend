@@ -115,6 +115,13 @@ function describeEvent(n: NotificationItem): Described | null {
   if (n.kind === "volunteer_update" && n.candidate) {
     return { text: `Update from ${n.candidate.full_name}’s campaign: ${n.volunteer_update?.text ?? ""}`, href: "/account/volunteering", icon: null };
   }
+  // Spec 19 §10: which record and what happened; never the unit's name
+  if ((n.kind === "geo_confirm" || n.kind === "geo_unit_changed") && n.geo) {
+    const what = n.geo.record === "pvc" ? "PVC check" : "membership";
+    const text = n.kind === "geo_confirm" ? `Confirm where you vote on your ${what}`
+      : `INEC ${n.geo.change === "moved" ? "moved" : "retired"} the polling unit on your ${what}. Please choose the current one`;
+    return { text, href: "/account", icon: "info" };
+  }
   return null;
 }
 

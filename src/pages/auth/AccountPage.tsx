@@ -7,6 +7,7 @@ import { useApi, useMe } from "../../auth/session";
 import { Select, StatusBadge, useToast } from "../../components/ui";
 import { STATES, stateLabel } from "../../lib/nigeria";
 import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
+import { GeoConfirmCard } from "../../geo/GeoConfirmCard";
 import "./auth.css";
 
 /**
@@ -66,6 +67,7 @@ export default function AccountPage() {
           <p className="auth-page__lead">Only you and platform administrators can see these.</p>
           <ProfileForm submitLabel="Save changes" busyLabel="Saving…" successMessage="Changes saved." />
           <VoterStatus />
+          <GeoConfirmCard />
           <HomeState />
           <div className="account-voter">
             <h2>Events and volunteering</h2>

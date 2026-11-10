@@ -3870,10 +3870,341 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/geo/states/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The 36 states and the FCT, with capitals (spec 19 §13.1) */
+        get: operations["geo_states_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/geo/states/{state}/lgas/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A state's LGAs (area councils in the FCT), active only */
+        get: operations["geo_state_lgas_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/geo/lgas/{id}/wards/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** An LGA's wards (INEC registration areas), with how many polling units each has */
+        get: operations["geo_lga_wards_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/geo/wards/{id}/polling-units/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A ward's polling units (INEC's names and codes) */
+        get: operations["geo_ward_units_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/geo/polling-units/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Polling units whose code starts with what was typed (the finder, §6.4); at least the state and LGA parts */
+        get: operations["geo_unit_finder_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/geo/polling-units/{code}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One polling unit by INEC code (e.g. 24-07-05-004), with its ward, LGA and state */
+        get: operations["geo_unit_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/geo/constituencies/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Constituencies with the LGAs and wards they cover */
+        get: operations["geo_constituencies_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/geo/about/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Which INEC files are loaded: source, publication date and counts */
+        get: operations["geo_about_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/states/{state}/lgas/{lga}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The LGA page: candidates standing here, upcoming events, community, wards */
+        get: operations["lga_page_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/geo-confirm/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your membership and PVC records that need you to confirm where you vote, with suggestions */
+        get: operations["me_geo_confirm_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/geo-confirm/{kind}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm or choose where you vote for one record (membership or pvc) */
+        post: operations["me_geo_confirm_kind_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/geography/datasets/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Geography files: previewed and applied, newest first */
+        get: operations["admin_geo_datasets_get"];
+        put?: never;
+        /** Upload a geography file (CSV, ≤ 50 MB, private storage) and preview it */
+        post: operations["admin_geo_datasets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/geography/datasets/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One geography file with its preview report */
+        get: operations["admin_geo_dataset_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/geography/datasets/{id}/apply/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply a previewed file in one transaction; the 95% rule needs a second admin (`confirm_second`) */
+        post: operations["admin_geo_dataset_apply_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/geography/datasets/{id}/changes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What applying a file changed (100 a page) */
+        get: operations["admin_geo_dataset_changes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/geography/review/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Records with free text but no link, "not listed", a retired unit, or a person's choice waiting */
+        get: operations["admin_geo_review_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/geography/review/{kind}/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Link a record to a place, accept a person's choice (PVC), or ask the person (§8.1 notice) */
+        post: operations["admin_geo_review_action_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/geography/aliases/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Other names for places (renames and admin-added), used by type-ahead and suggestions only */
+        get: operations["admin_geo_aliases_get"];
+        put?: never;
+        /** Add another name for an LGA, ward or polling unit */
+        post: operations["admin_geo_aliases_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/geography/aliases/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove an alias */
+        delete: operations["admin_geo_alias_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AboutSchema: {
+            datasets: components["schemas"]["DatasetPublicSchema"][];
+            inec_url: string;
+        };
+        /** @enum {string} */
+        ActionEnum: "link" | "accept" | "ask";
         /** @enum {string} */
         AddressVisibilityEnum: "public" | "registered";
         AdminCommunitySchema: {
@@ -3906,6 +4237,26 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        AliasCreateRequest: {
+            level: components["schemas"]["GeoPlaceLevelEnum"];
+            target_id: number;
+            name: string;
+        };
+        AliasSchema: {
+            id: number;
+            level: components["schemas"]["GeoPlaceLevelEnum"];
+            target_id: number;
+            target_name: string;
+            target_code: string;
+            name: string;
+            source: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        ApplyRequestRequest: {
+            /** @description The second system admin confirms (the 95% rule) */
+            confirm_second?: boolean;
+        };
         AuthorSchema: {
             /** @description First name and last initial, or 'Former member' */
             name: string;
@@ -3923,8 +4274,36 @@ export interface components {
             message: string;
             until?: string;
         };
+        CandidateGroupSchema: {
+            /** @description An office (lga_chairman, councillor) or a constituency's slug */
+            key: string;
+            label: string;
+            position: string;
+            /** @description Constituency code when the group is a constituency */
+            constituency: string | null;
+            total: number;
+            results: {
+                [key: string]: unknown;
+            }[];
+            /** @description Path to /candidates filtered to this group */
+            see_all: string;
+        };
         CaseHideRequestRequest: {
             note?: string;
+        };
+        /** @enum {string} */
+        ChangeEnum: "retired" | "moved";
+        ChangePage: {
+            count: number;
+            next: number | null;
+            results: components["schemas"]["ChangeSchema"][];
+        };
+        ChangeSchema: {
+            level: string;
+            action: string;
+            code: string;
+            old_value: string;
+            new_value: string;
         };
         CheckinRequestRequest: {
             code: string;
@@ -4013,6 +4392,37 @@ export interface components {
             post_count: number;
             has_children: boolean;
         };
+        ConfirmItemSchema: {
+            kind: components["schemas"]["GeoRecordKindEnum"];
+            state: string;
+            typed: components["schemas"]["TypedSchema"];
+            current: components["schemas"]["PlaceSchema"];
+            retired: boolean;
+            suggestion: components["schemas"]["SuggestionSchema"];
+        };
+        ConfirmRequestRequest: {
+            lga_id?: number | null;
+            ward_id?: number | null;
+            polling_unit_id?: number | null;
+            geo_not_listed?: boolean;
+        };
+        ConfirmResult: {
+            kind: string;
+            geo_source: string;
+            /** @description A verified PVC check: an officer accepts the change before communities use it */
+            waits_for_officer: boolean;
+            place: components["schemas"]["PlaceSchema"];
+        };
+        ConstituencySchema: {
+            id: number;
+            kind: components["schemas"]["GeoConstituencyKindEnum"];
+            code: string;
+            name: string;
+            slug: string;
+            state: string;
+            lga_ids: number[];
+            ward_ids: number[];
+        };
         CountsSchema: {
             registered: number;
             waitlisted: number;
@@ -4021,6 +4431,81 @@ export interface components {
         };
         /** @enum {string} */
         DatabaseEnum: "ok" | "unavailable";
+        DatasetAdminSchema: {
+            id: number;
+            kind: components["schemas"]["GeoDatasetKindEnum"];
+            status: components["schemas"]["GeoDatasetStatusEnum"];
+            source: string;
+            /** Format: date */
+            published_on: string | null;
+            notes: string;
+            checksum: string;
+            /** Format: date-time */
+            loaded_at: string;
+            /** Format: date-time */
+            applied_at: string | null;
+            applied_by: string | null;
+            first_approval_by: string | null;
+            states: number;
+            lgas: number;
+            wards: number;
+            polling_units: number;
+            constituencies: number;
+            deactivated: number;
+            changes: number;
+            error_count: number;
+            needs_second_admin: boolean;
+        };
+        DatasetDetailSchema: {
+            id: number;
+            kind: components["schemas"]["GeoDatasetKindEnum"];
+            status: components["schemas"]["GeoDatasetStatusEnum"];
+            source: string;
+            /** Format: date */
+            published_on: string | null;
+            notes: string;
+            checksum: string;
+            /** Format: date-time */
+            loaded_at: string;
+            /** Format: date-time */
+            applied_at: string | null;
+            applied_by: string | null;
+            first_approval_by: string | null;
+            states: number;
+            lgas: number;
+            wards: number;
+            polling_units: number;
+            constituencies: number;
+            deactivated: number;
+            changes: number;
+            error_count: number;
+            needs_second_admin: boolean;
+            /** @description The §4.3 report: counts, lists (first 500 of each), errors with line numbers, affected counts */
+            preview: unknown;
+        };
+        DatasetPublicSchema: {
+            kind: components["schemas"]["GeoDatasetKindEnum"];
+            source: string;
+            /** Format: date */
+            published_on: string | null;
+            /** Format: date-time */
+            applied_at: string;
+            states: number;
+            lgas: number;
+            wards: number;
+            polling_units: number;
+            constituencies: number;
+        };
+        DatasetUploadRequest: {
+            /** Format: binary */
+            file: string;
+            /** @default polling_units */
+            kind: components["schemas"]["GeoDatasetKindEnum"];
+            source?: string;
+            /** Format: date */
+            published_on?: string | null;
+            notes?: string;
+        };
         EventActionRequestRequest: {
             declarations?: {
                 [key: string]: unknown;
@@ -4150,8 +4635,8 @@ export interface components {
             address_visibility?: components["schemas"]["AddressVisibilityEnum"];
             state?: string;
             lga_text?: string;
-            /** Format: uuid */
-            geo_lga?: string | null;
+            /** @description The LGA picker's choice (spec 19 §7.2); lga_text is written from it */
+            geo_lga?: number | null;
             online_url?: string;
             accessibility_notes?: string;
             capacity?: number | null;
@@ -4165,6 +4650,43 @@ export interface components {
             results: components["schemas"]["PostSchema"][];
             next: string | null;
             previous: string | null;
+        };
+        GeoAliasList: {
+            results: components["schemas"]["AliasSchema"][];
+        };
+        GeoConfirmList: {
+            results: components["schemas"]["ConfirmItemSchema"][];
+        };
+        /** @enum {string} */
+        GeoConstituencyKindEnum: "senatorial_district" | "federal_constituency" | "state_constituency";
+        GeoConstituencyList: {
+            results: components["schemas"]["ConstituencySchema"][];
+        };
+        /** @enum {string} */
+        GeoDatasetKindEnum: "polling_units" | "senatorial_districts" | "federal_constituencies" | "state_constituencies";
+        GeoDatasetList: {
+            results: components["schemas"]["DatasetAdminSchema"][];
+        };
+        /** @enum {string} */
+        GeoDatasetStatusEnum: "previewed" | "applied";
+        GeoLgaList: {
+            results: components["schemas"]["LgaSchema"][];
+        };
+        /** @enum {string} */
+        GeoPlaceLevelEnum: "lga" | "ward" | "polling_unit";
+        GeoPollingUnitFound: {
+            results: components["schemas"]["PollingUnitDetailSchema"][];
+        };
+        GeoPollingUnitList: {
+            results: components["schemas"]["PollingUnitSchema"][];
+        };
+        /** @enum {string} */
+        GeoRecordKindEnum: "membership" | "pvc";
+        GeoStateList: {
+            results: components["schemas"]["StateSchema"][];
+        };
+        GeoWardList: {
+            results: components["schemas"]["WardSchema"][];
         };
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
@@ -4203,6 +4725,36 @@ export interface components {
         };
         /** @enum {string} */
         LevelEnum: "national" | "state" | "lga" | "ward" | "polling_unit";
+        LgaCommunitySchema: {
+            /** Format: uuid */
+            id: string;
+            path: string;
+            name: string;
+            /** @description Banded (spec 17 §4.4) */
+            members: string;
+        };
+        LgaPageSchema: {
+            state: string;
+            state_label: string;
+            lga: components["schemas"]["LgaSchema"];
+            /** @description FCT: say "Area council" */
+            area_council: boolean;
+            election_year: number | null;
+            groups: components["schemas"]["CandidateGroupSchema"][];
+            events: {
+                [key: string]: unknown;
+            }[];
+            community: components["schemas"]["LgaCommunitySchema"] | null;
+            wards: components["schemas"]["WardSchema"][];
+            about: components["schemas"]["DatasetPublicSchema"] | null;
+        };
+        LgaSchema: {
+            id: number;
+            code: string;
+            name: string;
+            slug: string;
+            active: boolean;
+        };
         MarkedRead: {
             updated: number;
         };
@@ -4293,6 +4845,7 @@ export interface components {
             community?: components["schemas"]["NotificationCommunity"];
             event?: components["schemas"]["NotificationEvent"];
             volunteer_update?: components["schemas"]["NotificationVolunteerUpdate"];
+            geo?: components["schemas"]["NotificationGeo"];
         };
         NotificationAppeal: {
             /** Format: uuid */
@@ -4346,8 +4899,12 @@ export interface components {
             status: string;
             organiser: string;
         };
+        NotificationGeo: {
+            record: components["schemas"]["GeoRecordKindEnum"];
+            change: components["schemas"]["ChangeEnum"] | components["schemas"]["BlankEnum"];
+        };
         /** @enum {string} */
-        NotificationKindEnum: "announcement" | "news_decision" | "pvc_decision" | "candidate_post" | "report_outcome" | "content_removed" | "account_warning" | "submissions_paused" | "appeal_decision" | "security_notice" | "privacy_request_update" | "membership_decision" | "donation_receipt" | "community_reply" | "community_post" | "community_placed" | "event_update" | "event_reminder" | "event_waitlist" | "candidate_event" | "volunteer_decision" | "volunteer_update";
+        NotificationKindEnum: "announcement" | "news_decision" | "pvc_decision" | "candidate_post" | "report_outcome" | "content_removed" | "account_warning" | "submissions_paused" | "appeal_decision" | "security_notice" | "privacy_request_update" | "membership_decision" | "donation_receipt" | "community_reply" | "community_post" | "community_placed" | "event_update" | "event_reminder" | "event_waitlist" | "candidate_event" | "volunteer_decision" | "volunteer_update" | "geo_confirm" | "geo_unit_changed";
         NotificationMembership: {
             status: string;
         };
@@ -4451,7 +5008,7 @@ export interface components {
             };
             checkin_open: boolean;
             blackout_flagged: boolean;
-            /** Format: uuid */
+            /** @description The linked LGA's ID as text (18 published it as a string; spec 19 keeps that) */
             geo_lga: string | null;
             online_url_value: string;
             venue_address_value: string;
@@ -4540,8 +5097,8 @@ export interface components {
             address_visibility?: components["schemas"]["AddressVisibilityEnum"];
             state?: string;
             lga_text?: string;
-            /** Format: uuid */
-            geo_lga?: string | null;
+            /** @description The LGA picker's choice (spec 19 §7.2); lga_text is written from it */
+            geo_lga?: number | null;
             online_url?: string;
             accessibility_notes?: string;
             capacity?: number | null;
@@ -4575,6 +5132,32 @@ export interface components {
             /** Format: date-time */
             published_at: string;
             audience: components["schemas"]["CommunityBriefSchema"];
+        };
+        PlaceSchema: {
+            lga: components["schemas"]["_PlaceItem"] | null;
+            ward: components["schemas"]["_PlaceItem"] | null;
+            polling_unit: components["schemas"]["_PlaceItem"] | null;
+        };
+        PollingUnitDetailSchema: {
+            id: number;
+            code: string;
+            /** @description INEC's code: state-LGA-ward-unit, e.g. 24-07-05-004 */
+            delimitation: string;
+            name: string;
+            /** @description False: no longer in INEC's current list */
+            active: boolean;
+            ward: components["schemas"]["_Ref"];
+            lga: components["schemas"]["_LgaRef"];
+            state: components["schemas"]["_StateRef"];
+            /** @description INEC's polling-unit locator: the official answer */
+            inec_url: string;
+        };
+        PollingUnitSchema: {
+            id: number;
+            code: string;
+            /** @description INEC's code: state-LGA-ward-unit, e.g. 24-07-05-004 */
+            delimitation: string;
+            name: string;
         };
         /** @enum {string} */
         PositionEnum: "president" | "governor" | "senator" | "house_of_reps" | "state_assembly" | "lga_chairman" | "councillor";
@@ -4667,10 +5250,66 @@ export interface components {
             /** Format: email */
             contact_email?: string;
         };
+        ReviewActionRequest: {
+            action: components["schemas"]["ActionEnum"];
+            lga_id?: number | null;
+            ward_id?: number | null;
+            polling_unit_id?: number | null;
+        };
+        ReviewGroupSchema: {
+            state: string;
+            lga: string;
+            count: number;
+        };
+        ReviewItemSchema: {
+            kind: components["schemas"]["GeoRecordKindEnum"];
+            /** Format: uuid */
+            id: string;
+            state: string;
+            typed: components["schemas"]["TypedSchema"];
+            why: components["schemas"]["WhyEnum"];
+            current: components["schemas"]["PlaceSchema"];
+            pending: components["schemas"]["PlaceSchema"] | null;
+            suggestion: components["schemas"]["SuggestionSchema"];
+            /** @description The record's own admin page (names are shown only there) */
+            record_url: string;
+        };
+        ReviewPage: {
+            kinds: string[];
+            count: number;
+            next: number | null;
+            groups: components["schemas"]["ReviewGroupSchema"][];
+            results: components["schemas"]["ReviewItemSchema"][];
+        };
         /** @enum {string} */
         RolesEnum: "canvassing" | "events" | "social_media" | "logistics" | "data_and_tech" | "outreach_youth" | "outreach_women" | "outreach_disability" | "other";
+        StateSchema: {
+            slug: string;
+            code: string;
+            name: string;
+            capital: string;
+            /** @description Active LGAs (area councils in the FCT) in the loaded list */
+            lgas: number;
+        };
+        SuggestItem: {
+            id: number;
+            name: string;
+            code: string;
+            /** Format: double */
+            score: number;
+        };
+        SuggestionSchema: {
+            lga: components["schemas"]["SuggestItem"] | null;
+            ward: components["schemas"]["SuggestItem"] | null;
+            polling_unit: components["schemas"]["SuggestItem"] | null;
+        };
         /** @enum {string} */
         TypeEnum: "rally" | "canvass" | "town_hall" | "meeting" | "training" | "other";
+        TypedSchema: {
+            lga: string;
+            ward: string;
+            polling_unit: string;
+        };
         UnreadCount: {
             unread: number;
         };
@@ -4749,8 +5388,7 @@ export interface components {
             roles: components["schemas"]["RolesEnum"][];
             state: string;
             lga_text?: string;
-            /** Format: uuid */
-            geo_lga?: string | null;
+            geo_lga?: number | null;
             availability?: components["schemas"]["AvailabilityEnum"][];
             note?: string;
             share_phone?: boolean;
@@ -4796,6 +5434,12 @@ export interface components {
             }[];
             left_this_week: number;
         };
+        WardSchema: {
+            id: number;
+            code: string;
+            name: string;
+            polling_units: number;
+        };
         WebhookCounts: {
             provider: string;
             processed: number;
@@ -4826,10 +5470,35 @@ export interface components {
         };
         /** @enum {string} */
         WebhookReceiptStatusEnum: "processed" | "ignored" | "failed";
+        /** @enum {string} */
+        WhyEnum: "unlinked" | "not_listed" | "retired" | "person_choice";
         WritePostSchemaRequest: {
             body: string;
             /** Format: uuid */
             campaign_candidate?: string | null;
+        };
+        _LgaRef: {
+            id: number;
+            code: string;
+            name: string;
+            slug: string;
+            active: boolean;
+        };
+        _PlaceItem: {
+            id: number;
+            name: string;
+            code: string;
+            active: boolean;
+        };
+        _Ref: {
+            id: number;
+            code: string;
+            name: string;
+        };
+        _StateRef: {
+            slug: string;
+            code: string;
+            name: string;
         };
         Error: {
             error: {
@@ -11304,6 +11973,484 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["VolunteerContact"];
                 };
+            };
+        };
+    };
+    geo_states_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeoStateList"];
+                };
+            };
+        };
+    };
+    geo_state_lgas_get: {
+        parameters: {
+            query?: {
+                /** @description Type-ahead over names and aliases (20 results) */
+                q?: string;
+            };
+            header?: never;
+            path: {
+                state: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeoLgaList"];
+                };
+            };
+        };
+    };
+    geo_lga_wards_get: {
+        parameters: {
+            query?: {
+                /** @description Type-ahead over names and aliases (20 results) */
+                q?: string;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeoWardList"];
+                };
+            };
+        };
+    };
+    geo_ward_units_get: {
+        parameters: {
+            query?: {
+                /** @description Type-ahead over names and aliases (20 results) */
+                q?: string;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeoPollingUnitList"];
+                };
+            };
+        };
+    };
+    geo_unit_finder_get: {
+        parameters: {
+            query: {
+                code: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeoPollingUnitFound"];
+                };
+            };
+        };
+    };
+    geo_unit_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PollingUnitDetailSchema"];
+                };
+            };
+        };
+    };
+    geo_constituencies_get: {
+        parameters: {
+            query?: {
+                kind?: "federal_constituency" | "senatorial_district" | "state_constituency";
+                state?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeoConstituencyList"];
+                };
+            };
+        };
+    };
+    geo_about_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AboutSchema"];
+                };
+            };
+        };
+    };
+    lga_page_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lga: string;
+                state: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LgaPageSchema"];
+                };
+            };
+        };
+    };
+    me_geo_confirm_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeoConfirmList"];
+                };
+            };
+        };
+    };
+    me_geo_confirm_kind_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ConfirmRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ConfirmRequestRequest"];
+                "multipart/form-data": components["schemas"]["ConfirmRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfirmResult"];
+                };
+            };
+        };
+    };
+    admin_geo_datasets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeoDatasetList"];
+                };
+            };
+        };
+    };
+    admin_geo_datasets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["DatasetUploadRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["DatasetUploadRequest"];
+                "application/json": components["schemas"]["DatasetUploadRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetDetailSchema"];
+                };
+            };
+        };
+    };
+    admin_geo_dataset_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetDetailSchema"];
+                };
+            };
+        };
+    };
+    admin_geo_dataset_apply_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ApplyRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ApplyRequestRequest"];
+                "multipart/form-data": components["schemas"]["ApplyRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetDetailSchema"];
+                };
+            };
+        };
+    };
+    admin_geo_dataset_changes_get: {
+        parameters: {
+            query?: {
+                action?: string;
+                level?: string;
+                page?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangePage"];
+                };
+            };
+        };
+    };
+    admin_geo_review_get: {
+        parameters: {
+            query?: {
+                kind?: "membership" | "pvc";
+                page?: number;
+                state?: string;
+                why?: "not_listed" | "person_choice" | "retired" | "unlinked";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewPage"];
+                };
+            };
+        };
+    };
+    admin_geo_review_action_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewActionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReviewActionRequest"];
+                "multipart/form-data": components["schemas"]["ReviewActionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewItemSchema"];
+                };
+            };
+        };
+    };
+    admin_geo_aliases_get: {
+        parameters: {
+            query?: {
+                q?: string;
+                state?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeoAliasList"];
+                };
+            };
+        };
+    };
+    admin_geo_aliases_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AliasCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AliasCreateRequest"];
+                "multipart/form-data": components["schemas"]["AliasCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AliasSchema"];
+                };
+            };
+        };
+    };
+    admin_geo_alias_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Response (untyped; see docs/api.md) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

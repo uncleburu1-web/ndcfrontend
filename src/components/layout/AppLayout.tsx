@@ -116,6 +116,7 @@ function Chrome() {
       </main>
       <footer className="site-footer">
         <ul>
+          <li><Link to="/polling-units">Find a polling unit</Link></li>
           <li><Link to="/rules">Community rules</Link></li>
           <li><Link to="/reports/status">Check a report</Link></li>
           <li><Link to="/report/copyright">Copyright notice</Link></li>

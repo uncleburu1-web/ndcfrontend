@@ -12,6 +12,8 @@ import { Banner, Button, Checkbox, Modal, RadioGroup, Select, Skeleton, TextArea
 import { formatKobo } from "../../donations/money";
 import { redirectTo } from "../../donations/navigation";
 import { formatDate } from "../../lib/format";
+import { GeoPicker } from "../../geo/GeoPicker";
+import { EMPTY_GEO, geoBody, geoFrom, type GeoValue } from "../../geo/types";
 import { STATES } from "../../lib/nigeria";
 import { useAuthedImage } from "../../membership/useAuthedImage";
 import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
@@ -63,8 +65,12 @@ function DetailsForm({ m, onSaved }: { m: MyMembership | null; onSaved: (m: MyMe
   const toast = useToast();
   const [f, setF] = useState({
     full_name: m?.full_name ?? "", sex: m?.sex ?? "", date_of_birth: m?.date_of_birth ?? "", address: m?.address ?? "",
-    state: m?.state ?? "", lga: m?.lga ?? "", ward: m?.ward ?? "", polling_unit: m?.polling_unit ?? "", nin: "",
+    state: m?.state ?? "", nin: "",
   });
+  // Spec 19 §7.2: the location comes from INEC's list (IDs); "not listed" keeps the typed text for an officer
+  const [geo, setGeo] = useState<GeoValue>(() => ({
+    ...geoFrom(m?.place, { lga: m?.lga, ward: m?.ward, polling_unit: m?.polling_unit }), not_listed: m?.geo_source === "review",
+  }));
   const [decl, setDecl] = useState<Record<string, boolean>>(
     Object.fromEntries(DECLARATIONS.map(([k]) => [k, m?.declarations?.[k] === true])));
   const [errors, setErrors] = useState<Errors>({});
@@ -79,7 +85,7 @@ function DetailsForm({ m, onSaved }: { m: MyMembership | null; onSaved: (m: MyMe
     setBusy(true);
     setErrors({});
     try {
-      const body: Record<string, unknown> = { ...f, date_of_birth: f.date_of_birth || null, declarations: decl };
+      const body: Record<string, unknown> = { ...f, ...geoBody(geo), date_of_birth: f.date_of_birth || null, declarations: decl };
       if (!f.nin) delete body.nin;
       const saved = await api<MyMembership>("/me/membership/", { method: "PUT", body });
       setF((x) => ({ ...x, nin: "" }));
@@ -89,6 +95,7 @@ function DetailsForm({ m, onSaved }: { m: MyMembership | null; onSaved: (m: MyMe
       const e2 = err instanceof ApiError ? err : new ApiError({});
       const flat = flatten(e2.fields);
       if (e2.code === "under_18") flat.date_of_birth = e2.message;
+      if (e2.code === "geo_mismatch" || e2.code === "geo_inactive") flat[String(e2.extra.field ?? "lga").replace(/_id$/, "")] = e2.message;
       if (!Object.keys(flat).length && e2.status === 400) flat.nin = e2.message;
       setErrors(Object.keys(flat).length ? flat : { _form: e2.message });
     } finally {
@@ -127,11 +134,10 @@ function DetailsForm({ m, onSaved }: { m: MyMembership | null; onSaved: (m: MyMe
         {errors.date_of_birth && <span className="ds-field__error" role="alert">{errors.date_of_birth}</span>}
       </label>
       <TextArea label="Residential address" required rows={2} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} error={errors.address} />
-      <Select label="State" required value={f.state} onChange={(e) => setF({ ...f, state: e.target.value })} error={errors.state}
+      <Select label="State" required value={f.state} onChange={(e) => { setF({ ...f, state: e.target.value }); setGeo(EMPTY_GEO); }} error={errors.state}
         options={[{ value: "", label: "Choose your state" }, ...STATES]} />
-      <TextField label="LGA" required value={f.lga} onChange={(e) => setF({ ...f, lga: e.target.value })} error={errors.lga} />
-      <TextField label="Ward" required value={f.ward} onChange={(e) => setF({ ...f, ward: e.target.value })} error={errors.ward} />
-      <TextField label="Polling unit" required value={f.polling_unit} onChange={(e) => setF({ ...f, polling_unit: e.target.value })} error={errors.polling_unit} />
+      <GeoPicker state={f.state} value={geo} onChange={setGeo} errors={errors} required={["lga", "ward", "polling_unit"]}
+        hint="Where you registered to vote, from INEC’s list." />
       <TextField label="NIN" required inputMode="numeric" autoComplete="off" value={f.nin} onChange={(e) => setF({ ...f, nin: e.target.value })}
         hint={m?.nin_masked ? `Saved: ${m.nin_masked}. Enter it again only to change it.` : "Your 11-digit National Identification Number. Stored encrypted."}
         error={errors.nin} />

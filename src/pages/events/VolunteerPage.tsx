@@ -3,9 +3,10 @@ import { useAuth } from "@clerk/react";
 import { type FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ApiError } from "../../auth/api";
+import { LgaPicker } from "../../geo/GeoPicker";
 import { useApi } from "../../auth/session";
 import { useRequest } from "../../candidates/useRequest";
-import { Banner, Button, Checkbox, EmptyState, Select, Skeleton, Switch, TextArea, TextField, useToast } from "../../components/ui";
+import { Banner, Button, Checkbox, EmptyState, Select, Skeleton, Switch, TextArea, useToast } from "../../components/ui";
 import { STATES } from "../../lib/nigeria";
 import type { VolunteerOpening } from "../../events/types";
 import "../../events/events.css";
@@ -19,7 +20,7 @@ export default function VolunteerPage() {
   const res = useRequest(`volunteering:${slug}`, (signal) => api<VolunteerOpening>(`/candidates/${slug}/volunteering/`, { signal }));
   const [roles, setRoles] = useState<string[]>([]);
   const [state, setState] = useState("");
-  const [lga, setLga] = useState("");
+  const [lga, setLga] = useState<number | null>(null);
   const [availability, setAvailability] = useState<string[]>([]);
   const [note, setNote] = useState("");
   const [sharePhone, setSharePhone] = useState(false);
@@ -34,7 +35,7 @@ export default function VolunteerPage() {
     setErrors({});
     try {
       await api(`/candidates/${slug}/volunteering/apply/`, { method: "POST",
-        body: { roles, state, lga_text: lga, availability, note, share_phone: sharePhone } });
+        body: { roles, state, geo_lga: lga, availability, note, share_phone: sharePhone } });
       toast.show({ tone: "success", message: "Thanks. The campaign will look at your application." });
       navigate("/account/volunteering");
     } catch (err) {
@@ -69,9 +70,9 @@ export default function VolunteerPage() {
             {errors.roles && <Banner tone="error">{errors.roles[0]}</Banner>}
           </fieldset>
           <div className="ev-row">
-            <Select label="State" required value={state} onChange={(e) => setState(e.target.value)} placeholder="Choose a state" options={states}
+            <Select label="State" required value={state} onChange={(e) => { setState(e.target.value); setLga(null); }} placeholder="Choose a state" options={states}
               error={errors.state?.[0]} />
-            <TextField label="LGA (optional)" value={lga} maxLength={100} onChange={(e) => setLga(e.target.value)} />
+            <LgaPicker state={state} value={lga} label="LGA (optional)" error={errors.geo_lga?.[0]} onChange={(id) => setLga(id)} />
           </div>
           <fieldset>
             <legend>When you’re free (optional)</legend>

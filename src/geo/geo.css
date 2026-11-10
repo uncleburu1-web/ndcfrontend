@@ -1,0 +1,115 @@
+/* Spec 19: the location picker, state/LGA pages, the polling-unit finder and the confirm card. */
+.geo-picker {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.geo-picker__typed {
+  display: grid;
+  gap: var(--space-3);
+}
+.geo-picker__code {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2);
+  align-items: end;
+}
+.geo-picker__code > :first-child {
+  min-width: 0;
+}
+.geo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: var(--space-2);
+}
+.geo-list li {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--surface);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.geo-list .news-meta {
+  margin: var(--space-1) 0 0;
+}
+.geo-about {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  margin-top: var(--space-6);
+}
+.geo-card {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  background: var(--surface);
+  display: grid;
+  gap: var(--space-3);
+}
+.geo-card h2,
+.geo-card h3 {
+  margin: 0;
+}
+.geo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.geo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+.geo-table th,
+.geo-table td {
+  text-align: left;
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.geo-scroll {
+  overflow-x: auto;
+}
+.geo-errors {
+  margin: 0;
+  padding-left: var(--space-6);
+  color: var(--tone-error-fg);
+}
+.geo-details summary {
+  cursor: pointer;
+  font-weight: var(--weight-label);
+  min-height: var(--control-height-md);
+  display: flex;
+  align-items: center;
+}
+.geo-stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.geo-stack dl,
+.geo-card dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+}
+.geo-card dd {
+  margin: 0;
+}
+.geo-card input[type="file"] {
+  max-width: 100%;
+}

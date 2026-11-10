@@ -50,6 +50,11 @@ Without `VITE_CLERK_PUBLISHABLE_KEY` the app shows a "Sign-in isn't configured" 
 - Code in `src/events/` (types from the OpenAPI schema, `EventCardItem`, `EventEditor`/`EventDashboard` with `refusal()`, `OrganiserEvents`, `CampaignVolunteers`, `UpcomingStrip`, `events.css` using tokens only); pages in `src/pages/events/`. Registering and applying rely on the shared consent dialog (purposes `event_registration` and `volunteering`).
 - Times are always shown in Lagos time (`whenWords`); the editor sends `+01:00` (`fromLocalInput`). Nobody's registration is shown to anyone else; counts come banded from the API.
 
+## States and geography (spec 19)
+
+- `/states/:state` adds capital, LGAs (area councils in the FCT) with counts, constituencies and "About this data"; `/states/:state/:lga` (candidates standing there, events, community, wards); `/polling-units` (by code or by place, INEC's names and codes, "Check with INEC" on every result, never a VIN); Account "Confirm where you vote"; `/admin/geography` (system admins: Files, Review, Other names; PVC and membership officers: Review). Footer link "Find a polling unit"; search shows Places.
+- Code in `src/geo/` (`GeoPicker`, `LgaPicker`, `ConstituencyPicker`, `GeoConfirmCard`, shared sections, cached anonymous lookups in `useGeo`, `geoBody()` for request fields); pages in `src/pages/geo/` and `src/pages/admin/geography/`. The membership, PVC, candidate, event and volunteer forms send IDs from the pickers; "My place isn't listed" sends the typed text for an officer to check.
+
 ## Security and privacy (spec 14)
 
 - `/privacy` (the notice, from the API's data register), `/security` (vulnerability disclosure), `/account/privacy` (Your data: download, consents, requests, delete), `/account-deleted`.

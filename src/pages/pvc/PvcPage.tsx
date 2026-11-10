@@ -10,6 +10,8 @@ import { useApi, useMe } from "../../auth/session";
 import { useRequest } from "../../candidates/useRequest";
 import { Banner, Button, Checkbox, Select, Skeleton, StatusBadge, Switch, TextField, useToast } from "../../components/ui";
 import { STATES } from "../../lib/nigeria";
+import { GeoPicker } from "../../geo/GeoPicker";
+import { EMPTY_GEO, geoBody, geoFrom, type GeoValue } from "../../geo/types";
 import { formatDate } from "../../lib/format";
 import type { MyPvc, PvcConfig } from "../../pvc/types";
 import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
@@ -25,8 +27,11 @@ function flatten(fields: Record<string, unknown>): Errors {
 
 function VerifyForm({ initial, onDone }: { initial?: MyPvc; onDone: (p: MyPvc) => void }) {
   const api = useApi();
-  const [form, setForm] = useState({ vin: "", surname: initial?.surname ?? "", state: initial?.state ?? "", lga: initial?.lga ?? "",
-    polling_unit: initial?.polling_unit ?? "", consent: false });
+  const [form, setForm] = useState({ vin: "", surname: initial?.surname ?? "", state: initial?.state ?? "", consent: false });
+  // Spec 19 §7.2: state and LGA required; ward and polling unit optional
+  const [geo, setGeo] = useState<GeoValue>(() => ({
+    ...geoFrom(initial?.place, { lga: initial?.lga, polling_unit: initial?.polling_unit }), not_listed: initial?.geo_source === "review",
+  }));
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -37,11 +42,12 @@ function VerifyForm({ initial, onDone }: { initial?: MyPvc; onDone: (p: MyPvc) =
     setErrors({});
     setFormError("");
     try {
-      onDone(await api<MyPvc>("/me/pvc/", { method: "PUT", body: form }));
+      onDone(await api<MyPvc>("/me/pvc/", { method: "PUT", body: { ...form, ...geoBody(geo) } }));
     } catch (err) {
       const e2 = err instanceof ApiError ? err : new ApiError({});
       const f = flatten(e2.fields);
-      if (Object.keys(f).length) setErrors(f);
+      if (e2.code === "geo_mismatch" || e2.code === "geo_inactive") setErrors({ [String(e2.extra.field ?? "lga").replace(/_id$/, "")]: e2.message });
+      else if (Object.keys(f).length) setErrors(f);
       else if (e2.status === 400) setErrors({ vin: e2.message });
       else setFormError(e2.message);
     } finally {
@@ -56,10 +62,10 @@ function VerifyForm({ initial, onDone }: { initial?: MyPvc; onDone: (p: MyPvc) =
         hint="19 letters and numbers as printed on your card, or the last 10." error={errors.vin} autoComplete="off" />
       <TextField label="Surname as printed on the card" required value={form.surname} onChange={(e) => setForm({ ...form, surname: e.target.value })}
         error={errors.surname} />
-      <Select label="State of registration" required value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })}
+      <Select label="State of registration" required value={form.state} onChange={(e) => { setForm({ ...form, state: e.target.value }); setGeo(EMPTY_GEO); }}
         error={errors.state} options={[{ value: "", label: "Choose a state" }, ...STATES]} />
-      <TextField label="LGA of registration" required value={form.lga} onChange={(e) => setForm({ ...form, lga: e.target.value })} error={errors.lga} />
-      <TextField label="Polling unit (optional)" value={form.polling_unit} onChange={(e) => setForm({ ...form, polling_unit: e.target.value })} />
+      <GeoPicker state={form.state} value={geo} onChange={setGeo} errors={errors} required={["lga"]}
+        hint="Your LGA of registration. Ward and polling unit are optional; the officer confirms them from INEC’s checker." />
       <Checkbox required checked={form.consent} onChange={(e) => setForm({ ...form, consent: e.target.checked })} error={errors.consent}
         label="NDCConnect may check these details on INEC’s voter register to confirm my registration." />
       <Button type="submit" loading={busy} loadingLabel="Sending…">Send for checking</Button>
@@ -181,7 +187,10 @@ export default function PvcPage() {
                 <div><dt>VIN</dt><dd>{pvc.vin_masked}</dd></div>
                 <div><dt>Surname</dt><dd>{pvc.surname}</dd></div>
                 <div><dt>Registered in</dt><dd>{pvc.lga}, {pvc.state_label}</dd></div>
+                {pvc.place?.polling_unit && <div><dt>Polling unit</dt><dd>{pvc.place.polling_unit.name} · {pvc.place.polling_unit.code}</dd></div>}
               </dl>
+              {pvc.pending_place?.lga && <p className="pvc-private">Your change to {pvc.pending_place.polling_unit?.name ?? pvc.pending_place.lga.name} waits
+                for a PVC officer. Your communities stay as they are until then.</p>}
               <p className="pvc-private">These details are private and encrypted.</p>
               {pvc.status === "successful" && (
                 <Switch label="Show my Verified voter badge publicly" checked={Boolean(pvc.show_badge)} onChange={(v) => void toggleBadge(v)}

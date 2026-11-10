@@ -76,7 +76,9 @@ describe("CandidateForm", () => {
     expect(screen.getByLabelText(/Senatorial district/)).toBeTruthy();
     expect(screen.queryByLabelText(/^Ward/)).toBeNull();
     fireEvent.change(office, { target: { value: "councillor" } });
-    expect(screen.getByLabelText(/Local government area/)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText(/^State/), { target: { value: "lagos" } });
+    // Spec 19 §5.2: LGA and ward come from INEC's list
+    expect(screen.getByLabelText(/^LGA/)).toBeTruthy();
     expect(screen.getByLabelText(/^Ward/)).toBeTruthy();
   });
 
@@ -91,8 +93,6 @@ describe("CandidateForm", () => {
     h.api.mockRejectedValue(new ApiError({ status: 400, code: "validation_error", message: "x", fields: { area_name: ["Enter the senatorial district."] } }));
     renderAt("/admin/candidates/new");
     fireEvent.change(screen.getByLabelText(/Full name/), { target: { value: "Amina Bello" } });
-    fireEvent.change(screen.getByLabelText(/Office sought/), { target: { value: "councillor" } });
-    fireEvent.change(screen.getByLabelText(/^Ward/), { target: { value: "Ward 05" } });
     fireEvent.change(screen.getByLabelText(/Office sought/), { target: { value: "senator" } });
     fireEvent.change(screen.getByLabelText(/Election year/), { target: { value: "2027" } });
     fireEvent.click(screen.getByRole("button", { name: "Save as draft" }));
