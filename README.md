@@ -41,7 +41,7 @@ Without `VITE_CLERK_PUBLISHABLE_KEY` the app shows a "Sign-in isn't configured" 
 ## Hosting on Cloudflare (ahead of spec 20)
 
 - `wrangler.jsonc` serves `dist/` as Workers static assets in single-page-app mode (every app route gets `index.html`); Vite's `dist/_headers` sets the security headers. Pages projects ignore the file and work the same way.
-- **Build** variables (Settings → Build → Variables and secrets, not the runtime ones): `VITE_API_BASE_URL`, `VITE_CLERK_PUBLISHABLE_KEY`, `VITE_SECURITY_CONTACT`, `NODE_VERSION=22`; later `VITE_MEDIA_ORIGIN=https://res.cloudinary.com` with Cloudinary. Build command `npm run build`; deploy command `npx wrangler deploy`.
+- **Build** variables (Settings → Build → Variables and secrets, not the runtime ones): `VITE_API_BASE_URL`, `VITE_CLERK_PUBLISHABLE_KEY`, `VITE_SECURITY_CONTACT`, `NODE_VERSION=22`. `VITE_MEDIA_ORIGIN=https://res.cloudinary.com` is committed in `.env.production` (not secret), so the CSP lets the browser upload to and show images from Cloudinary. Build command `npm run build`; deploy command `npx wrangler deploy`.
 - The site's address goes into the backend's `CLERK_AUTHORIZED_PARTIES` and `CORS_ALLOWED_ORIGINS`.
 
 ## Events and volunteering (spec 18)
