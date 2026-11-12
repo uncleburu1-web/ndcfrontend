@@ -41,7 +41,7 @@ export default function PrivacyPage() {
             {notice.controller} is responsible for your data on NDCConnect (the data controller under the Nigeria Data Protection Act 2023).
             Questions or requests go to the Data Protection Officer
             {notice.contact ? <> at <a href={`mailto:${notice.contact}`}>{notice.contact}</a></> : null}, or use{" "}
-            <Link to="/account/privacy">Your data</Link> when you’re signed in.
+            <Link to="/settings/privacy/data">Your data</Link> when you’re signed in.
           </p>
 
           <h2 id="sensitive">Political opinions</h2>

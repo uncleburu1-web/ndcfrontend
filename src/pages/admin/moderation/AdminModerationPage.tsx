@@ -101,7 +101,7 @@ export default function AdminModerationPage({ forcedTab }: { forcedTab?: "appeal
           <div className="mod-filters">
             <Select label="Type" value={params.get("type") ?? ""} onChange={(e) => setFilter("type", e.target.value)} options={[
               { value: "", label: "All types" }, { value: "news", label: "News" }, { value: "posts", label: "Candidate posts" },
-              { value: "communities", label: "Communities" }, { value: "events", label: "Events" },
+              { value: "communities", label: "Communities" }, { value: "events", label: "Events" }, { value: "people", label: "Public profiles" },
               ...(res.data?.is_system_admin ? [{ value: "profiles", label: "Candidate profiles" }] : []),
             ]} />
             <Select label="Reason" value={params.get("reason") ?? ""} onChange={(e) => setFilter("reason", e.target.value)}

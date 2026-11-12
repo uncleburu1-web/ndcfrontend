@@ -6,6 +6,7 @@ import { useAuth } from "@clerk/react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ApiError } from "../../auth/api";
+import { usePreferences } from "../../settings/PreferencesProvider";
 import { useApi, useMe } from "../../auth/session";
 import type { CandidateProfile, CandidateSummary, Paginated } from "../../candidates/types";
 import { AmountPicker, Banner, Button, Checkbox, EmptyState, RadioGroup, Select, Skeleton, TextArea, TextField } from "../../components/ui";
@@ -52,6 +53,8 @@ export default function DonatePage() {
   const [results, setResults] = useState<CandidateSummary[]>([]);
   const [donor, setDonor] = useState({ name: "", email: "", phone: "", state: "", address: "" });
   const [display, setDisplay] = useState<"name" | "anonymous">("name");
+  const [displayTouched, setDisplayTouched] = useState(false);
+  const { settings, loadSettings, signedIn } = usePreferences();
   const [declared, setDeclared] = useState({ own_funds: false, nigerian_source: false, voluntary: false });
   const [errors, setErrors] = useState<Fields>({});
   const [formError, setFormError] = useState("");
@@ -71,6 +74,15 @@ export default function DonatePage() {
       phone: d.phone || me.phone_number.replace(/^\+234/, "0"),
     }));
   }, [me]);
+
+  // Spec 20 §8: the person's default only pre-selects the choice; they still choose on each donation.
+  useEffect(() => {
+    if (signedIn && !settings) void loadSettings();
+  }, [signedIn, settings, loadSettings]);
+  const defaultName = settings?.privacy.donation_name_default;
+  useEffect(() => {
+    if (defaultName && !displayTouched) setDisplay(defaultName);
+  }, [defaultName, displayTouched]);
 
   // ?candidate=<slug> preselects; unknown/unpublished falls back to the NDC fund with a notice.
   useEffect(() => {
@@ -241,7 +253,7 @@ export default function DonatePage() {
                 legend="How should your donation appear?"
                 name="display"
                 value={display}
-                onChange={(v) => setDisplay(v as "name" | "anonymous")}
+                onChange={(v) => { setDisplay(v as "name" | "anonymous"); setDisplayTouched(true); }}
                 hint="Successful donations are listed publicly on the Finance page with the amount and who it went to."
                 options={[
                   { value: "name", label: `Show my name${donor.name ? ` (“${donor.name}”)` : ""}` },

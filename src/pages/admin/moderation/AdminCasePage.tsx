@@ -38,6 +38,7 @@ export default function AdminCasePage() {
   const [note, setNote] = useState("");
   const [internal, setInternal] = useState("");
   const [warn, setWarn] = useState(false);
+  const [parts, setParts] = useState<string[]>(["bio", "photo"]);  // spec 20 §5.1: what to remove from a public profile
   const [days, setDays] = useState("7");
   const [pauseScope, setPauseScope] = useState("community");
   const [busy, setBusy] = useState("");
@@ -174,7 +175,13 @@ export default function AdminCasePage() {
               <p className="mod-meta">
                 {item.author?.label ?? (item.author ? `${item.author.name || "—"} (${item.author.email || "deleted account"})` : item.official ? "Official announcement" : "")}
               </p>
-              <div className="mod-body">{item.body}</div>
+              {item.profile && (
+                <p className="mod-meta">
+                  {item.profile.photo_url ? <><img src={item.profile.photo_url} alt="Profile photo" width={96} height={96} className="mod-photo" />{" "}</> : "No photo shown. "}
+                  {item.profile.photo_removed_at ? "Photo removed. " : ""}{item.profile.bio_removed_at ? "Bio removed." : ""}
+                </p>
+              )}
+              <div className="mod-body">{item.body || (item.profile ? "(No bio)" : "")}</div>
               <p className="mod-row-actions">
                 {item.public && <Link to={item.public_url}>Public page</Link>}
                 {item.admin_url && <Link to={item.admin_url}>Admin page</Link>}
@@ -245,11 +252,22 @@ export default function AdminCasePage() {
 
       <Modal open={modal === "remove"} onClose={() => setModal(null)} title={`Remove this ${item?.kind_words ?? "item"}?`}
         footer={<><Button variant="secondary" onClick={() => setModal(null)}>Go back</Button>
-          <Button variant="danger" disabled={!rule} loading={busy === "remove"}
-            onClick={() => void post("remove", { rule, note_to_author: note, internal_note: internal, warn }, "Removed. The author is told and can appeal.")}>
+          <Button variant="danger" disabled={!rule || (c.target_kind === "profile" && parts.length === 0)} loading={busy === "remove"}
+            onClick={() => void post("remove", { rule, note_to_author: note, internal_note: internal, warn, ...(c.target_kind === "profile" ? { parts } : {}) },
+              "Removed. The author is told and can appeal.")}>
             {warn ? "Remove and warn" : "Remove"}
           </Button></>}>
         <p>It’s hidden from the public, and its page shows “Removed by NDCConnect” with the rule. The author is notified with a way to appeal, and so are reporters.</p>
+        {c.target_kind === "profile" && (
+          <fieldset className="ds-fieldset">
+            <legend className="ds-field__label">What to remove</legend>
+            <p className="ds-field__hint">It’s hidden from the public profile, not edited. Restore puts it back.</p>
+            {["bio", "photo"].map((x) => (
+              <Checkbox key={x} label={x === "bio" ? "The bio" : "The photo"} checked={parts.includes(x)}
+                onChange={(e) => setParts((p) => (e.target.checked ? [...p, x] : p.filter((y) => y !== x)))} />
+            ))}
+          </fieldset>
+        )}
         <RuleSelect value={rule} onChange={setRule} />
         <TextArea label="Note to the author (optional)" hint="They see this." rows={3} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
         <TextArea label="Internal note (optional)" hint="Only moderators see this." rows={2} maxLength={1000} value={internal} onChange={(e) => setInternal(e.target.value)} />

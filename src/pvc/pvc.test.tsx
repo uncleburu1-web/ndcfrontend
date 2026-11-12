@@ -17,7 +17,7 @@ import { ApiError } from "../auth/api";
 import { RequirePvcOfficer } from "../auth/guards";
 import AdminPvcPage, { waitText, workingDaysSince } from "../pages/admin/pvc/AdminPvcPage";
 import AdminPvcSettingsPage from "../pages/admin/pvc/AdminPvcSettingsPage";
-import AccountPage from "../pages/auth/AccountPage";
+import AccountSection from "../settings/sections/AccountSection";
 import JoinPage from "../pages/join/JoinPage";
 import ArticlePage from "../pages/news/ArticlePage";
 import NotificationsPage from "../pages/news/NotificationsPage";
@@ -33,7 +33,7 @@ function renderAt(path: string) {
         <Routes>
           <Route path="/pvc" element={<PvcPage />} />
           <Route path="/join" element={<JoinPage />} />
-          <Route path="/account" element={<AccountPage />} />
+          <Route path="/settings/account" element={<AccountSection />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/news/community/:id" element={<ArticlePage source="community" />} />
           <Route element={<RequirePvcOfficer />}>
@@ -130,17 +130,18 @@ describe("/pvc", () => {
 });
 
 describe("badge elsewhere", () => {
-  it("account page shows the voter status from /me", () => {
+  it("My account shows the voter status from /me (spec 20 §4.1: Your records)", () => {
     clerkState.isSignedIn = true;
     routes({ "/me/geo-confirm/": { results: [] } });
     h.me = { ...ME, pvc_status: "successful" };
-    renderAt("/account");
-    expect(screen.getByRole("heading", { name: "Voter status" })).toBeTruthy();
+    renderAt("/settings/account");
+    expect(screen.getByRole("heading", { name: "Your records" })).toBeTruthy();
     expect(screen.getByText("Verified voter")).toBeTruthy();
     cleanup();
     h.me = { ...ME, pvc_status: "pending" };
-    renderAt("/account");
-    expect(screen.getByRole("link", { name: "See status" }).getAttribute("href")).toBe("/pvc");
+    renderAt("/settings/account");
+    expect(screen.getByRole("link", { name: "PVC" }).getAttribute("href")).toBe("/pvc");
+    expect(screen.getByText("Pending")).toBeTruthy();
   });
 
   it("/join step 1 uses me.pvc_status and never calls /me/pvc/", async () => {

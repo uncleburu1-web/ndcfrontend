@@ -10,7 +10,7 @@ import { useApi, useMe } from "../auth/session";
 import { Banner, Button, useToast } from "../components/ui";
 
 const AGE_KEY = "ndc_age_prompted";
-const FREE_PATHS = ["/setup-profile", "/account/privacy", "/account-deleted", "/privacy", "/security", "/sign-in", "/sign-up"];
+const FREE_PATHS = ["/setup-profile", "/account/privacy", "/settings/privacy/data", "/settings/manage", "/account-deleted", "/privacy", "/security", "/sign-in", "/sign-up"];
 
 function AgeRedirect() {
   const { me } = useMe();

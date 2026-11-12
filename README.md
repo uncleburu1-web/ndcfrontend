@@ -21,7 +21,9 @@ Without `VITE_CLERK_PUBLISHABLE_KEY` the app shows a "Sign-in isn't configured" 
 - `src/components/ui/` — design-system components
 - `src/components/layout/AppLayout.tsx` — header with Sign in / user menu, session banners
 - `src/auth/` — `useApi()` (attaches the Clerk token, one retry on 401, handles 403/503), `useMe()`, route guards, profile form, Clerk appearance from tokens, `profile:completed` event
-- `src/pages/auth/` — sign-in, sign-up, setup-profile, account, account-deactivated
+- `src/pages/auth/` — sign-in, sign-up, setup-profile, account-deactivated
+- `src/settings/` — `/settings` (spec 20): `SettingsLayout`, the ten sections, `PreferencesProvider`, `prefsStore`, the paused screen, the footer language switch
+- `public/prefs.js` — applies theme, text size, contrast and motion from `localStorage` before the app paints
 - `src/lib/format.ts` — `formatNaira`, `formatDate`
 
 ## Routes
@@ -29,7 +31,10 @@ Without `VITE_CLERK_PUBLISHABLE_KEY` the app shows a "Sign-in isn't configured" 
 | Route | Access |
 |---|---|
 | `/sign-in/*`, `/sign-up/*` | signed out (sign-up lands on `/setup-profile`) |
-| `/setup-profile`, `/account/*` | signed in |
+| `/setup-profile`, `/settings/privacy/data`, `/account/events`, `/account/communities`, `/account/volunteering` | signed in |
+| `/settings/*` | anyone (guests: Language, Accessibility, About) |
+| `/account` → `/settings/account`, `/account/privacy` → `/settings/privacy/data` | redirects |
+| `/people/:handle` | public profile (only when turned on) |
 | everything else | public |
 
 ## Communities (spec 17)
@@ -55,6 +60,13 @@ Without `VITE_CLERK_PUBLISHABLE_KEY` the app shows a "Sign-in isn't configured" 
 - `/states/:state` adds capital, LGAs (area councils in the FCT) with counts, constituencies and "About this data"; `/states/:state/:lga` (candidates standing there, events, community, wards); `/polling-units` (by code or by place, INEC's names and codes, "Check with INEC" on every result, never a VIN); Account "Confirm where you vote"; `/admin/geography` (system admins: Files, Review, Other names; PVC and membership officers: Review). Footer link "Find a polling unit"; search shows Places.
 - Code in `src/geo/` (`GeoPicker`, `LgaPicker`, `ConstituencyPicker`, `GeoConfirmCard`, shared sections, cached anonymous lookups in `useGeo`, `geoBody()` for request fields); pages in `src/pages/geo/` and `src/pages/admin/geography/`. The membership, PVC, candidate, event and volunteer forms send IDs from the pickers; "My place isn't listed" sends the typed text for an officer to check.
 - `/admin/candidates/:id` shows "Research notes to check before verifying" for an unverified draft that has notes (for example the imported NDC 2027 candidates); verifying replaces them with the admin's own note.
+
+## Settings (spec 20)
+
+- `/settings` with My account, Profile, Language, Notifications, Privacy, Security (Clerk's `<UserProfile path="/settings/security">`), Accessibility, Connected accounts, Account management and About. Desktop: list and section side by side; 360 px: the list, then each section with "‹ Settings".
+- Display preferences: `<html data-theme data-text-size data-contrast data-motion>` plus the resolved `data-scheme` and `data-contrast-level`; palettes in `src/styles/tokens.css`; `npm run check:contrast` checks every text/background pair in light, dark, and both with more contrast (WCAG AA). Guests keep them on the device; signed-in people's follow them everywhere (refetch on focus and every 5 minutes), with a one-time copy of a guest's choices at the first sign-in.
+- A paused account sees only "Your account is paused" (Reactivate, Download, Delete). `/people/:handle` shows a public profile only when the person turned it on, with `noindex`.
+- `/admin/settings/defaults` (system admins): enabled languages and defaults for new accounts.
 
 ## Security and privacy (spec 14)
 

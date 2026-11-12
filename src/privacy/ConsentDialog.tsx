@@ -50,7 +50,7 @@ export function ConsentDialog({ ask, onAgree, onDecline }: Props) {
     >
       <p className="consent-dialog__text">{ask?.text}</p>
       <p className="consent-dialog__meta">
-        Consent version {ask?.version}. You can withdraw it at any time from <Link to="/account/privacy" onClick={onDecline}>Your data</Link>.
+        Consent version {ask?.version}. You can withdraw it at any time from <Link to="/settings/privacy/data" onClick={onDecline}>Your data</Link>.
         {" "}
         <Link to={`/privacy#${ANCHOR[ask?.purpose ?? ""] ?? ""}`} onClick={onDecline}>How we use this</Link>
       </p>

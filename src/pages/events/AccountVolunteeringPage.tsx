@@ -32,7 +32,7 @@ export default function AccountVolunteeringPage() {
   return (
     <div className="ev-page ev-narrow">
       <header>
-        <p className="article-back"><Link to="/account">← Account</Link></p>
+        <p className="article-back"><Link to="/settings/account">← My account</Link></p>
         <h1>Volunteering</h1>
         <p>Only you and the campaign you applied to can see this.</p>
       </header>

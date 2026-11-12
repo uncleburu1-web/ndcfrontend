@@ -13,7 +13,8 @@
     "headers": "node scripts/security-headers.mjs",
     "api:sync": "node scripts/api-sync.mjs",
     "api:types": "openapi-typescript api/openapi.json -o src/api/schema.d.ts && node scripts/api-header.mjs",
-    "check:secrets": "node scripts/check-secrets.mjs"
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "check:contrast": "node scripts/check-contrast.mjs"
   },
   "dependencies": {
     "@clerk/react": "^6.18.4",

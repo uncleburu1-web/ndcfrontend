@@ -21,7 +21,7 @@ export function AdminMfaGate({ children }: { children?: ReactNode }) {
           Admin accounts need a second step when signing in (an authenticator app or a passkey). Turn it on in your account’s security
           settings, then sign in again.
           <div className="privacy-gate-actions">
-            <Button href="/account/security">Open account security</Button>
+            <Button href="/settings/security">Open account security</Button>
           </div>
         </EmptyState>
       </div>

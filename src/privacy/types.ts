@@ -1,6 +1,7 @@
 /** Spec 14 — privacy and security shapes, as the API returns them. */
 export type Purpose = "political_following" | "membership" | "pvc_check" | "verified_badge" | "community_membership"
-  | "event_registration" | "volunteering";  // spec 18
+  | "event_registration" | "volunteering"  // spec 18
+  | "public_profile";  // spec 20
 
 export interface ConsentPurpose {
   key: Purpose;

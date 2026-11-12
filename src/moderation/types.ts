@@ -1,5 +1,5 @@
 /** Reporting and moderation (spec 13). Shapes mirror ndcbackend/apps/moderation. */
-export type TargetKind = "article" | "post" | "candidate" | "community_post" | "community_comment" | "event";
+export type TargetKind = "article" | "post" | "candidate" | "community_post" | "community_comment" | "event" | "profile";
 export type Priority = "legal" | "urgent" | "high" | "normal" | "low";
 export type CaseStatus = "open" | "escalated" | "closed";
 export type Decision = "" | "kept" | "removed" | "restored" | "author_removed";
@@ -89,6 +89,8 @@ export interface CaseDetail extends CaseRow {
     hidden_at?: string | null;
     /** Spec 18 §8: the event as readers see it; never who registered */
     event?: { type_label: string; starts_at: string; venue: string; venue_type_label: string; registered: number };
+    /** Spec 20 §5.1: a public profile's bio (the body) and photo; moderators remove them, never edit them */
+    profile?: { handle: string | null; photo_url: string | null; bio_removed_at: string | null; photo_removed_at: string | null };
     author: { email?: string; name?: string; label?: string } | null;
   } | null;
   reports: CaseReport[];

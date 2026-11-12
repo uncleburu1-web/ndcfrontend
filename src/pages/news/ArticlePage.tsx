@@ -44,7 +44,7 @@ export default function ArticlePage({ source }: { source: ArticleSource }) {
       <SourceBadges a={{ ...a, pinned: false }} />
       <h1>{a.title}</h1>
       <p className="news-meta">
-        {a.source === "community" && <>by {a.byline ?? "a member"}{a.byline_verified && <> <VerifiedVoterBadge size="sm" /></>} · </>}
+        {a.source === "community" && <>by {a.byline && a.byline_profile ? <Link to={`/people/${a.byline_profile}`}>{a.byline}</Link> : a.byline ?? "a member"}{a.byline_verified && <> <VerifiedVoterBadge size="sm" /></>} · </>}
         {a.published_at ? formatDate(a.published_at) : ""}
         {a.edited_at ? ` · Updated ${formatDate(a.edited_at)}` : ""}
         {a.state_label ? ` · ${a.state_label}` : ""}

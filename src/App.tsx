@@ -3,7 +3,7 @@
  * The /design-system review page stays dev-only and doesn't need Clerk.
  */
 import { lazy, Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import {
   RequireFinanceViewer,
   RequireMembershipOfficer,
@@ -89,7 +89,6 @@ import NotificationsPage from "./pages/news/NotificationsPage";
 import SubmitNewsPage from "./pages/news/SubmitNewsPage";
 import { EmptyState } from "./components/ui";
 import AccountDeactivatedPage from "./pages/auth/AccountDeactivatedPage";
-import AccountPage from "./pages/auth/AccountPage";
 import SetupProfilePage from "./pages/auth/SetupProfilePage";
 import SignInPage from "./pages/auth/SignInPage";
 import SignUpPage from "./pages/auth/SignUpPage";
@@ -105,6 +104,17 @@ import AdminRegisterPage from "./pages/admin/privacy/AdminRegisterPage";
 import AdminAccessReviewPage from "./pages/admin/team/AdminAccessReviewPage";
 import { AdminMfaGate } from "./privacy/AdminMfaGate";
 import HomePage from "./pages/HomePage";
+import PublicProfilePage from "./pages/people/PublicProfilePage";
+import AdminSettingsDefaultsPage from "./pages/admin/settings/AdminSettingsDefaultsPage";
+import SettingsLayout from "./settings/SettingsLayout";
+import AccountSection from "./settings/sections/AccountSection";
+import ProfileSection from "./settings/sections/ProfileSection";
+import { AccessibilitySection, LanguageSection } from "./settings/sections/DisplaySections";
+import NotificationsSection from "./settings/sections/NotificationsSection";
+import PrivacySection from "./settings/sections/PrivacySection";
+import { ConnectedSection, SecuritySection } from "./settings/sections/SecuritySection";
+import ManageSection from "./settings/sections/ManageSection";
+import AboutSection from "./settings/sections/AboutSection";
 
 function NotFound() {
   return (
@@ -123,11 +133,14 @@ export default function App() {
         <Route path="sign-up/*" element={<SignedOutOnly><SignUpPage /></SignedOutOnly>} />
         <Route element={<RequireSignedIn />}>
           <Route path="setup-profile" element={<SetupProfilePage />} />
-          <Route path="account/privacy" element={<YourDataPage />} />
+          {/* Spec 20 §4: /account moved into Settings; the records pages stay where they are */}
+          <Route path="settings/privacy/data" element={<YourDataPage />} />
+          <Route path="account/privacy" element={<Navigate to="/settings/privacy/data" replace />} />
+          <Route path="account/security/*" element={<Navigate to="/settings/security" replace />} />
           <Route path="account/communities" element={<AccountCommunitiesPage />} />
           <Route path="account/events" element={<MyEventsPage />} />
           <Route path="account/volunteering" element={<AccountVolunteeringPage />} />
-          <Route path="account/*" element={<AccountPage />} />
+          <Route path="account/*" element={<Navigate to="/settings/account" replace />} />
           {/* Sign-in only — never profile completion or PVC (spec 04 §4.4). */}
           <Route path="following" element={<FollowingPage />} />
           <Route path="my-donations" element={<MyDonationsPage />} />
@@ -147,6 +160,22 @@ export default function App() {
             <Route path="news/mine/:id" element={<SubmitNewsPage />} />
           </Route>
         </Route>
+        {/* Settings (spec 20 §4): guests see Language, Accessibility and About; each signed-in section asks them to sign in */}
+        <Route path="settings" element={<SettingsLayout />}>
+          <Route path="account" element={<AccountSection />} />
+          <Route path="profile" element={<ProfileSection />} />
+          <Route path="language" element={<LanguageSection />} />
+          <Route path="notifications" element={<NotificationsSection />} />
+          <Route path="privacy" element={<PrivacySection />} />
+          <Route path="security/*" element={<SecuritySection />} />
+          <Route path="accessibility" element={<AccessibilitySection />} />
+          <Route path="connected" element={<ConnectedSection />} />
+          <Route path="manage" element={<ManageSection />} />
+          <Route path="about" element={<AboutSection />} />
+          <Route path="*" element={<Navigate to="/settings" replace />} />
+        </Route>
+        {/* Public profiles (spec 20 §5.1): only when the person turned theirs on; noindex */}
+        <Route path="people/:handle" element={<PublicProfilePage />} />
         {/* Public — no account, profile or PVC needed (spec 03 §3.4) */}
         <Route path="candidates" element={<CandidatesPage />} />
         <Route path="candidates/:slug" element={<CandidateProfilePage />} />
@@ -217,6 +246,7 @@ export default function App() {
             <Route path="admin/posts/:id" element={<AdminPostDetailPage />} />
             <Route path="admin/communities" element={<AdminCommunitiesPage />} />
             <Route path="admin/events" element={<AdminEventsPage />} />
+            <Route path="admin/settings/defaults" element={<AdminSettingsDefaultsPage />} />
           </Route>
           {/* System admin or finance officer (spec 05 §7.2) */}
           <Route element={<RequireFinanceViewer />}>

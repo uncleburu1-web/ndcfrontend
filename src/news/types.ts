@@ -33,6 +33,8 @@ export interface ArticleSummary {
   byline: string | null;
   /** Spec 08: true only when the byline shows the author's name and they opted in to the public badge. */
   byline_verified?: boolean;
+  /** Spec 20 §5.1: the author's public profile handle, only beside a name they chose to show (links to /people/<handle>). */
+  byline_profile?: string | null;
   pinned: boolean;
   /** Spec 17 §9: an announcement aimed at a community ("For: Ikeja LGA community"). */
   audience?: { id: string; name: string; path: string } | null;

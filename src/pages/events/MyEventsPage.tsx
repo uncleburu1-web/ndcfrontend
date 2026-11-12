@@ -39,9 +39,9 @@ export default function MyEventsPage() {
   return (
     <div className="ev-page ev-narrow">
       <header>
-        <p className="article-back"><Link to="/account">← Account</Link></p>
+        <p className="article-back"><Link to="/settings/account">← My account</Link></p>
         <h1>My events</h1>
-        <p>Only you can see which events you registered for. To stop registering for events, withdraw that consent in <Link to="/account/privacy">Your data</Link>.</p>
+        <p>Only you can see which events you registered for. To stop registering for events, withdraw that consent in <Link to="/settings/privacy/data">Your data</Link>.</p>
       </header>
       <Tabs label="When" value={tab} onChange={setTab}
         tabs={[{ id: "upcoming", label: "Upcoming", content: <Rows when="upcoming" /> }, { id: "past", label: "Past", content: <Rows when="past" /> }]} />

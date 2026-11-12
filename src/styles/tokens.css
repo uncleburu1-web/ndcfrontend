@@ -139,3 +139,107 @@
   --control-height-md: 44px; /* minimum touch target */
   --control-height-sm: 36px; /* desktop-dense tables only */
 }
+
+/* ==========================================================================
+   Spec 20 §10: display preferences. /prefs.js (and src/settings/prefsStore.ts) set on <html>:
+   - data-theme, data-contrast, data-text-size, data-motion: the person's choice ("system" follows the device);
+   - data-scheme ("light" | "dark") and data-contrast-level ("standard" | "more"): the choice resolved against
+     prefers-color-scheme and prefers-contrast, so each palette below is written once.
+   Only token values change; components keep using the same semantic tokens. `npm run check:contrast` checks every
+   text/background pair in all four combinations against WCAG AA.
+   ========================================================================== */
+
+/* ---- Text size: scales rem, so type and rem-based layout grow together; browser zoom still works on top */
+:root[data-text-size="large"] {
+  font-size: 112.5%;
+}
+:root[data-text-size="larger"] {
+  font-size: 125%;
+}
+
+/* ---- Light, more contrast --------------------------------------------------- */
+:root[data-scheme="light"][data-contrast-level="more"] {
+  --text-muted: #3d3935; /* 11.4:1 on white */
+  --border: #8a847e; /* cards and dividers become visible edges */
+  --border-control: #5c5753; /* 7.1:1 */
+  --text-link: #221f5e;
+  --text-brand: #221f5e;
+  --brand-fg-muted: #ffffff;
+  --tone-success-fg: #145234;
+  --tone-warning-fg: #6b3f00;
+  --tone-error-fg: #8a1c16;
+  --tone-info-fg: #154a85;
+  --tone-neutral-fg: #3d3935;
+  --tone-neutral-bg: #e4e0db;
+  --action-secondary-border: #1c1b1a;
+}
+
+/* ---- Dark ------------------------------------------------------------------- */
+:root[data-scheme="dark"] {
+  color-scheme: dark;
+  --color-shadow: rgba(0, 0, 0, 0.55);
+  --color-overlay: rgba(0, 0, 0, 0.7);
+  --surface: #1f1d1b;
+  --surface-page: #161514;
+  --surface-brand-tint: #26244a;
+  --surface-accent-tint: #3a1a20;
+  --text: #f2efeb;
+  --text-muted: #bdb6ae;
+  --text-link: #b4b1f5;
+  --text-brand: #b4b1f5;
+  --text-action: #ff8f99;
+  --text-on-brand: #ffffff;
+  --border: #3a3632;
+  --border-control: #8f877f;
+  --focus-ring: #f2efeb;
+  --highlight-bg: #5c4f00;
+  --highlight-fg: #fff8d6;
+  --action-primary-bg: #c8102e;
+  --action-primary-bg-hover: #a00d25;
+  --action-primary-fg: #ffffff;
+  --action-secondary-bg: #1f1d1b;
+  --action-secondary-bg-hover: #2b2826;
+  --action-secondary-fg: #f2efeb;
+  --action-secondary-border: #8f877f;
+  --action-danger-bg: #b3261e;
+  --action-danger-fg: #ffffff;
+  --brand-bg: #2e2b7d;
+  --brand-bg-hover: #221f5e;
+  --brand-fg: #ffffff;
+  --brand-fg-muted: #c9c7e6;
+  --focus-ring-on-brand: #ffffff;
+  --action-border-on-brand: #ffffff;
+  --tone-success-fg: #7bd8a8;
+  --tone-success-bg: #14301f;
+  --tone-warning-fg: #f2bc6b;
+  --tone-warning-bg: #33250c;
+  --tone-error-fg: #ff958b;
+  --tone-error-bg: #3a1714;
+  --tone-info-fg: #95c2ff;
+  --tone-info-bg: #13263d;
+  --tone-neutral-fg: #cfc8c0;
+  --tone-neutral-bg: #3a3632;
+}
+
+/* ---- Dark, more contrast ---------------------------------------------------- */
+:root[data-scheme="dark"][data-contrast-level="more"] {
+  --surface: #0f0e0d;
+  --surface-page: #000000;
+  --text: #ffffff;
+  --text-muted: #e3ddd6;
+  --text-link: #d2d0ff;
+  --text-brand: #d2d0ff;
+  --text-action: #ffb3ba;
+  --border: #8f877f;
+  --border-control: #c9c1b8;
+  --focus-ring: #ffffff;
+  --action-secondary-bg: #0f0e0d;
+  --action-secondary-fg: #ffffff;
+  --action-secondary-border: #ffffff;
+  --brand-fg-muted: #ffffff;
+  --tone-success-fg: #a6ecc6;
+  --tone-warning-fg: #ffd699;
+  --tone-error-fg: #ffbdb6;
+  --tone-info-fg: #c2dcff;
+  --tone-neutral-fg: #f2efeb;
+}

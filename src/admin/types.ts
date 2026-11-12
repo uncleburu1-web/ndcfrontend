@@ -86,6 +86,8 @@ export interface UserSummary {
   profile_complete: boolean;
   is_active: boolean;
   deleted: boolean;
+  /** Spec 20 §12: "" active · "self" paused by the person · "admin" deactivated by an admin · "deleted". */
+  deactivation_kind?: string;
   roles: { role: string; scope_type: string }[];
 }
 export interface UserDetail extends UserSummary {

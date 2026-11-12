@@ -15,6 +15,8 @@ import "../../privacy/privacy.css";
 import { HeaderSearch } from "../../search/HeaderSearch";
 import "../../moderation/moderation.css";
 import { Banner, Button, Icon, SiteHeader } from "../ui";
+import AccountPausedPage from "../../settings/AccountPausedPage";
+import { LanguageSwitch } from "../../settings/LanguageSwitch";
 
 export const NAV = [
   { label: "Candidates", href: "/candidates" },
@@ -40,8 +42,10 @@ function AccountArea() {
       </Show>
       <Show when="signed-in">
         <NotificationBell />
-        <UserButton userProfileUrl="/account">
+        <UserButton userProfileUrl="/settings/security">
           <UserButton.MenuItems>
+            <UserButton.Link label="Settings" labelIcon={<Icon name="user" size={16} />} href="/settings" />
+            <UserButton.Link label="Notifications" labelIcon={<Icon name="bell" size={16} />} href="/notifications" />
             <UserButton.Link label="Following" labelIcon={<Icon name="heart" size={16} />} href="/following" />
             <UserButton.Link label="My donations" labelIcon={<Icon name="inbox" size={16} />} href="/my-donations" />
             <UserButton.Link label="My membership" labelIcon={<Icon name="user" size={16} />} href="/join" />
@@ -50,7 +54,7 @@ function AccountArea() {
             {isCampaignAccount(me) && <UserButton.Link label="My campaign" labelIcon={<Icon name="bell" size={16} />} href="/campaign" />}
             {me?.home_state && <UserButton.Link label="Your state" labelIcon={<Icon name="mapPin" size={16} />} href={`/states/${me.home_state}`} />}
             <UserButton.Link label={verified ? "Verified voter" : "Verify your PVC"} labelIcon={<Icon name={verified ? "verified" : "shield"} size={16} />} href="/pvc" />
-            <UserButton.Link label="Your data" labelIcon={<Icon name="lock" size={16} />} href="/account/privacy" />
+            <UserButton.Link label="Your data" labelIcon={<Icon name="lock" size={16} />} href="/settings/privacy/data" />
           </UserButton.MenuItems>
         </UserButton>
       </Show>
@@ -112,7 +116,8 @@ function Chrome() {
       <RulesUpdatedBanner />
       <PrivacyChrome />
       <main id="main">
-        <Outlet />
+        {/* Spec 20 §12: a paused account sees only the paused screen until it reactivates */}
+        {me?.account_status === "paused" ? <AccountPausedPage /> : <Outlet />}
       </main>
       <footer className="site-footer">
         <ul>
@@ -122,6 +127,8 @@ function Chrome() {
           <li><Link to="/report/copyright">Copyright notice</Link></li>
           <li><Link to="/privacy">Privacy</Link></li>
           <li><Link to="/security">Security</Link></li>
+          <li><Link to="/settings">Settings</Link></li>
+          <li><LanguageSwitch /></li>
         </ul>
       </footer>
     </>

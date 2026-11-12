@@ -11,8 +11,8 @@ import { TeamSubnav } from "../team/TeamSubnav";
 import "../candidates/admin.css";
 import "../../../admin/admin-home.css";
 
-export function accountStatus(u: { deleted: boolean; is_active: boolean }) {
-  return u.deleted ? "deleted" : u.is_active ? "active" : "deactivated";
+export function accountStatus(u: { deleted: boolean; is_active: boolean; deactivation_kind?: string }) {
+  return u.deleted ? "deleted" : u.is_active ? "active" : u.deactivation_kind === "self" ? "paused" : "deactivated";
 }
 
 export default function AdminUsersPage() {

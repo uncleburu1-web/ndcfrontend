@@ -50,11 +50,11 @@ const PRIVACY_WORDS: Record<string, string> = {
 
 function describePrivacy(n: NotificationItem): Described | null {
   if (n.kind === "security_notice") {
-    return { text: `Security notice: ${n.security_notice?.text ?? "see Your data"}`, href: "/account/privacy", icon: "shield" };
+    return { text: `Security notice: ${n.security_notice?.text ?? "see Your data"}`, href: "/settings/security", icon: "shield" };
   }
   if (n.kind === "privacy_request_update") {
     const ref = n.privacy_request?.reference ? ` (${n.privacy_request.reference})` : "";
-    return { text: `${PRIVACY_WORDS[n.decision] ?? "Update on your privacy request"}${ref}.`, href: "/account/privacy#hist-h", icon: "info" };
+    return { text: `${PRIVACY_WORDS[n.decision] ?? "Update on your privacy request"}${ref}.`, href: "/settings/privacy/data#hist-h", icon: "info" };
   }
   return null;
 }
@@ -120,7 +120,7 @@ function describeEvent(n: NotificationItem): Described | null {
     const what = n.geo.record === "pvc" ? "PVC check" : "membership";
     const text = n.kind === "geo_confirm" ? `Confirm where you vote on your ${what}`
       : `INEC ${n.geo.change === "moved" ? "moved" : "retired"} the polling unit on your ${what}. Please choose the current one`;
-    return { text, href: "/account", icon: "info" };
+    return { text, href: "/settings/account", icon: "info" };
   }
   return null;
 }

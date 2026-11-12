@@ -5,7 +5,7 @@ import "./fields.css";
 interface RadioGroupProps {
   legend: ReactNode;
   name: string;
-  options: { value: string; label: ReactNode; hint?: ReactNode }[];
+  options: { value: string; label: ReactNode; hint?: ReactNode; disabled?: boolean }[];
   value: string;
   onChange: (value: string) => void;
   hint?: ReactNode;
@@ -43,6 +43,7 @@ export function RadioGroup({ legend, name, options, value, onChange, hint, error
               value={o.value}
               checked={value === o.value}
               onChange={() => onChange(o.value)}
+              disabled={o.disabled}
               className="ds-check__input ds-check__input--radio"
               required={required}
             />

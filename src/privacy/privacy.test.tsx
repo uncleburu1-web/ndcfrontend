@@ -202,8 +202,8 @@ const MINE: MyPrivacy = {
   privacy_version: 1,
 };
 
-describe("/account/privacy", () => {
-  const renderMine = () => renderAt("/account/privacy", <><Route path="/account/privacy" element={<YourDataPage />} /><Route path="/account-deleted" element={<p>Gone</p>} /></>);
+describe("/settings/privacy/data (was /account/privacy)", () => {
+  const renderMine = () => renderAt("/settings/privacy/data", <><Route path="/settings/privacy/data" element={<YourDataPage />} /><Route path="/account-deleted" element={<p>Gone</p>} /></>);
 
   it("downloads through the API (reverification is the client's job)", async () => {
     const blob = new Blob(["zip"]);
@@ -274,7 +274,7 @@ describe("Admin two-step verification gate", () => {
     gate();
     expect(screen.getByText("Turn on two-step verification to use the admin")).toBeTruthy();
     expect(screen.queryByText("Admin home")).toBeNull();
-    expect(screen.getByRole("link", { name: "Open account security" }).getAttribute("href")).toBe("/account/security");
+    expect(screen.getByRole("link", { name: "Open account security" }).getAttribute("href")).toBe("/settings/security");
   });
   it("blocks after the server says mfa_required, and lets verified admins in", () => {
     h.mfaBlocked = true;
@@ -392,7 +392,7 @@ describe("Notifications", () => {
   it("describes security notices and privacy request updates", () => {
     const base = { id: "n", created_at: "", read_at: null, article: null } as unknown as NotificationItem;
     const s = describeNotification({ ...base, kind: "security_notice", decision: "", security_notice: { reference: "INC-1", text: "We fixed it." } });
-    expect(s).toMatchObject({ href: "/account/privacy", icon: "shield" });
+    expect(s).toMatchObject({ href: "/settings/security", icon: "shield" });
     expect(s.text).toContain("We fixed it.");
     const p = describeNotification({ ...base, kind: "privacy_request_update", decision: "done", privacy_request: { id: "r", reference: "PRV-1", status: "done", status_label: "Done" } });
     expect(p.text).toBe("Your privacy request is done (PRV-1).");

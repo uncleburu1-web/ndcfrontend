@@ -35,6 +35,18 @@ export interface Me {
   privacy_version?: number;
   /** Spec 14 §4.6: whether the server refuses admin requests without two-step verification. */
   admin_mfa_required?: boolean;
+  /** Spec 20 §12: "paused" when the person paused their own account (only the paused screen shows). */
+  account_status?: "active" | "paused";
+  /** Spec 20 §13: the account's language and display settings (`saved_at` empty = never chosen on purpose). */
+  preferences?: {
+    language: string;
+    theme: "system" | "light" | "dark";
+    text_size: "standard" | "large" | "larger";
+    contrast: "system" | "standard" | "more";
+    motion: "system" | "reduce";
+    saved_at: string | null;
+    updated_at: string | null;
+  };
 }
 
 type MeStatus = "idle" | "loading" | "ready" | "error";
@@ -80,6 +92,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const reverifyRef = useRef(reverify);
   reverifyRef.current = reverify;
   // Spec 14 §4.2: one consent dialog for every feature; the client waits for the answer and retries.
+  const refreshRef = useRef<(() => Promise<void>) | null>(null);
   const [consentAsk, setConsentAsk] = useState<(ConsentAsk & { resolve: (ok: boolean) => void }) | null>(null);
 
   const api = useMemo(
@@ -96,6 +109,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             const x = err.extra as { purpose?: string; version?: number; label?: string; text?: string };
             setConsentAsk({ purpose: x.purpose ?? "", version: x.version ?? 1, label: x.label ?? "Your consent", text: x.text ?? err.message, resolve });
           }),
+        onPaused: () => void refreshRef.current?.(),
         onDeactivated: () => {
           setMe(null);
           void signOutRef.current({ redirectUrl: "/account-deactivated" });
@@ -127,6 +141,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setMeStatus("error");
     }
   }, [api]);
+
+  refreshRef.current = refreshMe;
 
   useEffect(() => {
     if (!isLoaded) return;

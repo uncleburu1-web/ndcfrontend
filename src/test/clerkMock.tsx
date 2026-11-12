@@ -21,6 +21,7 @@ function useReverificationMock<A extends unknown[], R>(fetcher: (...args: A) => 
 export const clerkMockModule = {
   useAuth: () => ({ ...clerkState, getToken: async () => "test-token" }),
   useClerk: () => ({ signOut: async () => {} }),
+  useUser: () => ({ isLoaded: true, user: clerkState.isSignedIn ? { hasImage: false, imageUrl: "", externalAccounts: [] } : null }),
   useReverification: useReverificationMock,
   Show: ({ when, children }: { when: string; children: ReactNode }) =>
     (when === "signed-in") === clerkState.isSignedIn ? <>{children}</> : null,

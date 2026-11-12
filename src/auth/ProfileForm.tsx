@@ -103,7 +103,7 @@ export function ProfileForm({ submitLabel, busyLabel, onSaved, successMessage }:
       {under18 && (
         <Banner tone="info" title="NDCConnect is for voters">
           You need to be 18 or older to use NDCConnect, because it’s for people who can register to vote. You can{" "}
-          <Link to="/account/privacy#delete">delete your account</Link> now; nothing else is kept about you.
+          <Link to="/settings/manage#delete">delete your account</Link> now; nothing else is kept about you.
         </Banner>
       )}
       <Button type="submit" loading={busy} loadingLabel={busyLabel} fullWidth>

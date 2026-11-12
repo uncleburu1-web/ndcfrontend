@@ -52,8 +52,8 @@
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px var(--color-shadow);
-  --focus-ring: var(--color-ink); /* the panel is white: use the normal ink ring, not the header's white one */
+  box-shadow: var(--shadow-overlay);
+  --focus-ring: var(--text); /* the panel is a surface: use the normal text-coloured ring, not the header's white one */
 }
 .hs__field {
   position: relative;

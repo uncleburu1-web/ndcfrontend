@@ -1,5 +1,5 @@
 /**
- * /account/privacy — Your data (spec 14 §4.4, §8.1): download, consents, corrections, other requests, history, delete.
+ * /settings/privacy/data (was /account/privacy) — Your data (spec 14 §4.4, §8.1): download, consents, corrections, other requests, history, delete.
  * Download and delete go through reverification (the API client opens Clerk's prompt and retries).
  */
 import { useClerk } from "@clerk/react";
@@ -13,7 +13,7 @@ import type { ConsentState, MyPrivacy, PrivacyRequest } from "../../privacy/type
 import { RequestStatusBadge } from "../../privacy/badges";
 import "../../privacy/privacy.css";
 
-function saveBlob(blob: Blob, name: string) {
+export function saveBlob(blob: Blob, name: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -24,7 +24,7 @@ function saveBlob(blob: Blob, name: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function DownloadSection({ onDone }: { onDone: () => void }) {
+export function DownloadSection({ onDone }: { onDone: () => void }) {
   const api = useApi();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
@@ -55,7 +55,7 @@ function DownloadSection({ onDone }: { onDone: () => void }) {
   );
 }
 
-function ConsentsSection({ consents, onChanged }: { consents: ConsentState[]; onChanged: () => void }) {
+export function ConsentsSection({ consents, onChanged }: { consents: ConsentState[]; onChanged: () => void }) {
   const api = useApi();
   const toast = useToast();
   const [confirm, setConfirm] = useState<ConsentState | null>(null);
@@ -245,7 +245,7 @@ function HistorySection({ data, onChanged }: { data: MyPrivacy; onChanged: () =>
   );
 }
 
-function DeleteSection({ data }: { data: MyPrivacy }) {
+export function DeleteSection({ data }: { data: MyPrivacy | null }) {
   const api = useApi();
   const { signOut } = useClerk();
   const navigate = useNavigate();
@@ -271,16 +271,20 @@ function DeleteSection({ data }: { data: MyPrivacy }) {
   return (
     <section className="privacy-card privacy-card--danger" id="delete" aria-labelledby="del-h" tabIndex={-1}>
       <h2 id="del-h">Delete my account</h2>
-      <div className="privacy-two">
-        <div>
-          <h3>What goes</h3>
-          <ul className="privacy-list">{data.delete.goes.map((g) => <li key={g}>{g}</li>)}</ul>
+      {data ? (
+        <div className="privacy-two">
+          <div>
+            <h3>What goes</h3>
+            <ul className="privacy-list">{data.delete.goes.map((g) => <li key={g}>{g}</li>)}</ul>
+          </div>
+          <div>
+            <h3>What we keep, and why</h3>
+            <ul className="privacy-list">{data.delete.stays.map((g) => <li key={g}>{g}</li>)}</ul>
+          </div>
         </div>
-        <div>
-          <h3>What we keep, and why</h3>
-          <ul className="privacy-list">{data.delete.stays.map((g) => <li key={g}>{g}</li>)}</ul>
-        </div>
-      </div>
+      ) : (
+        <p>Your account and personal details are deleted. Records the law requires us to keep stay, without your name. The <Link to="/privacy">privacy notice</Link> lists them.</p>
+      )}
       <Button variant="danger" onClick={() => setOpen(true)}>Delete my account</Button>
       <Modal
         open={open}
@@ -344,7 +348,7 @@ export default function YourDataPage() {
           <section className="privacy-card" aria-labelledby="fix-h">
             <h2 id="fix-h">Correct your details</h2>
             <ul className="privacy-list">
-              <li><Link to="/account">Name and phone number</Link></li>
+              <li><Link to="/settings/account">Name and phone number</Link></li>
               <li><Link to="/join">Membership details</Link> (before approval)</li>
               <li><Link to="/pvc">PVC details</Link></li>
             </ul>

@@ -41,9 +41,9 @@ export default function AccountCommunitiesPage() {
   return (
     <div className="comm-page">
       <header className="comm-head">
-        <p className="article-back"><Link to="/account">← Account</Link></p>
+        <p className="article-back"><Link to="/settings/account">← My account</Link></p>
         <h1>Your communities</h1>
-        <p>Nobody can see which communities you’re in. To stop taking part altogether, withdraw your consent in <Link to="/account/privacy">Your data</Link>.</p>
+        <p>Nobody can see which communities you’re in. To stop taking part altogether, withdraw your consent in <Link to="/settings/privacy/data">Your data</Link>.</p>
       </header>
       {!me.consented ? (
         <EmptyState title="You haven’t joined communities" action={<Button href="/communities">Go to Communities</Button>} />

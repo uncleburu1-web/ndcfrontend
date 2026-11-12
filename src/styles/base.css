@@ -133,6 +133,7 @@ textarea {
 }
 
 /* ---- Reduced motion (§4.4, §7): no transitions or animations run --------- */
+/* Spec 20 §10: "Reduce motion" in Settings applies the same rule whatever the device says. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -142,4 +143,12 @@ textarea {
     transition-duration: 0s !important;
     scroll-behavior: auto !important;
   }
+}
+:root[data-motion="reduce"] *,
+:root[data-motion="reduce"] *::before,
+:root[data-motion="reduce"] *::after {
+  animation-duration: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0s !important;
+  scroll-behavior: auto !important;
 }

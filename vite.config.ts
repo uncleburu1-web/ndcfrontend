@@ -1,4 +1,5 @@
 /// <reference types="vitest" />
+import { execSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { defineConfig, loadEnv, type Plugin } from "vite";
@@ -27,8 +28,23 @@ function securityFiles(mode: string): Plugin {
   };
 }
 
+/** Spec 20 §15: the build's commit for Settings → About (Cloudflare Pages sets CF_PAGES_COMMIT_SHA; locally, git). */
+function commit(): string {
+  const env = process.env.CF_PAGES_COMMIT_SHA || process.env.GIT_COMMIT || "";
+  if (env) return env.slice(0, 7);
+  try {
+    return execSync("git rev-parse --short=7 HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim();
+  } catch {
+    return "";
+  }
+}
+
 export default defineConfig(({ mode }) => ({
   plugins: [react(), securityFiles(mode)],
+  define: {
+    __APP_COMMIT__: JSON.stringify(commit()),
+    __APP_BUILT_AT__: JSON.stringify(new Date().toISOString()),
+  },
   server: { port: 5173 },
   test: {
     environment: "jsdom",

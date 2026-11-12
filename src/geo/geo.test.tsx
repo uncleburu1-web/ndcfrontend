@@ -209,7 +209,7 @@ describe("notices", () => {
     const base = { id: "n", created_at: "2026-11-01T00:00:00Z", read_at: null, decision: "", reason: "" };
     const a = describeNotice({ ...base, kind: "geo_unit_changed", geo: { record: "pvc", change: "moved" } } as never);
     expect(a?.text).toBe("INEC moved the polling unit on your PVC check. Please choose the current one");
-    expect(a?.href).toBe("/account");
+    expect(a?.href).toBe("/settings/account");
     expect(describeNotice({ ...base, kind: "geo_confirm", geo: { record: "membership", change: "" } } as never)?.text).toBe("Confirm where you vote on your membership");
   });
 });

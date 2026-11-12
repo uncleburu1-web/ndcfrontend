@@ -57,6 +57,247 @@ export interface paths {
         patch: operations["me_patch"];
         trace?: never;
     };
+    "/api/v1/me/settings/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** All your settings (spec 20) */
+        get: operations["my_settings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/settings/profile/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Name style, bio, location and photo choice for your public name and profile */
+        patch: operations["my_settings_profile_patch"];
+        trace?: never;
+    };
+    "/api/v1/me/settings/public-profile/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Turn your public profile on (needs consent) */
+        post: operations["my_settings_public_profile_post"];
+        /** Turn your public profile off */
+        delete: operations["my_settings_public_profile_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/settings/language/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Your interface language */
+        patch: operations["my_settings_language_patch"];
+        trace?: never;
+    };
+    "/api/v1/me/settings/accessibility/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Theme, text size, contrast and motion */
+        patch: operations["my_settings_accessibility_patch"];
+        trace?: never;
+    };
+    "/api/v1/me/settings/notifications/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Notification categories (essential ones are locked on) */
+        get: operations["my_settings_notifications_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Turn switchable notification categories on or off, or pause all candidate bells */
+        patch: operations["my_settings_notifications_patch"];
+        trace?: never;
+    };
+    "/api/v1/me/settings/privacy/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Default name on your donations */
+        patch: operations["my_settings_privacy_patch"];
+        trace?: never;
+    };
+    "/api/v1/me/settings/security/sign-out-others/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign out of all other devices (needs a recent second check) */
+        post: operations["my_settings_sign_out_others_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/settings/import-device/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Copy this device's language and display settings to an account that has none yet (once) */
+        post: operations["my_settings_import_device_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/pause/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pause your account (needs a recent second check and the word 'pause') */
+        post: operations["my_pause_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/reactivate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reactivate an account you paused */
+        post: operations["my_reactivate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/people/{handle}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A person's public profile (only when they turned it on) */
+        get: operations["public_profile_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/people/{handle}/report/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report a public profile's bio or photo (spec 13's reasons) */
+        post: operations["public_profile_report_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/settings/defaults/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Defaults for new accounts and enabled languages */
+        get: operations["admin_settings_defaults_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change defaults for new accounts or enabled languages (audited) */
+        patch: operations["admin_settings_defaults_patch"];
+        trace?: never;
+    };
     "/api/v1/webhooks/clerk/": {
         parameters: {
             query?: never;
@@ -1517,7 +1758,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Turn announcement, community-reply, event-reminder or new-event notifications on or off */
+        /** Turn notification categories on or off (alias of /me/settings/notifications/) */
         patch: operations["my_notifications_preferences_patch"];
         trace?: never;
     };
@@ -4423,6 +4664,8 @@ export interface components {
             lga_ids: number[];
             ward_ids: number[];
         };
+        /** @enum {string} */
+        ContrastEnum: "system" | "standard" | "more";
         CountsSchema: {
             registered: number;
             waitlisted: number;
@@ -4506,6 +4749,15 @@ export interface components {
             published_on?: string | null;
             notes?: string;
         };
+        DeviceSettingsRequest: {
+            language?: string;
+            theme?: string;
+            text_size?: string;
+            contrast?: string;
+            motion?: string;
+        };
+        /** @enum {string} */
+        DonationNameDefaultEnum: "anonymous" | "name";
         EventActionRequestRequest: {
             declarations?: {
                 [key: string]: unknown;
@@ -4691,6 +4943,8 @@ export interface components {
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
             database: components["schemas"]["DatabaseEnum"];
+            api_version: string;
+            commit: string;
         };
         /** @enum {string} */
         HealthStatusEnum: "ok" | "degraded";
@@ -4722,6 +4976,18 @@ export interface components {
             services: components["schemas"]["IntegrationService"][];
             webhooks: components["schemas"]["WebhookCounts"][];
             outbox: components["schemas"]["OutboxStats"];
+        };
+        LanguageOption: {
+            code: string;
+            label: string;
+            native: string;
+            enabled: boolean;
+        };
+        LanguageOptionRequest: {
+            code: string;
+            label: string;
+            native: string;
+            enabled: boolean;
         };
         /** @enum {string} */
         LevelEnum: "national" | "state" | "lga" | "ward" | "polling_unit";
@@ -4773,6 +5039,8 @@ export interface components {
             joined_at: string;
             notify_new_posts: boolean;
         };
+        /** @enum {string} */
+        MotionEnum: "system" | "reduce";
         MyCommunitiesSchema: {
             consented: boolean;
             verified: boolean;
@@ -4813,6 +5081,16 @@ export interface components {
                 [key: string]: unknown;
             }[];
         };
+        NameExamples: {
+            first_initial: string;
+            full: string;
+        };
+        NameExamplesRequest: {
+            first_initial: string;
+            full: string;
+        };
+        /** @enum {string} */
+        NameStyleEnum: "first_initial" | "full";
         /** @enum {string} */
         NigerianStateEnum: "abia" | "adamawa" | "akwa_ibom" | "anambra" | "bauchi" | "bayelsa" | "benue" | "borno" | "cross_river" | "delta" | "ebonyi" | "edo" | "ekiti" | "enugu" | "gombe" | "imo" | "jigawa" | "kaduna" | "kano" | "katsina" | "kebbi" | "kogi" | "kwara" | "lagos" | "nasarawa" | "niger" | "ogun" | "ondo" | "osun" | "oyo" | "plateau" | "rivers" | "sokoto" | "taraba" | "yobe" | "zamfara" | "fct";
         NoticeSchema: {
@@ -4876,6 +5154,15 @@ export interface components {
             rule: string;
             rule_title: string;
         };
+        NotificationCategory: {
+            key: string;
+            label: string;
+            kinds: string[];
+            help: string;
+            on: boolean;
+            locked: boolean;
+            reason: string;
+        };
         NotificationCommunity: {
             /** Format: uuid */
             id: string;
@@ -4926,6 +5213,9 @@ export interface components {
             community_replies: boolean;
             event_reminders: boolean;
             candidate_events: boolean;
+            community_posts: boolean;
+            volunteer_updates: boolean;
+            candidate_bells_paused: boolean;
         };
         NotificationPrivacyRequest: {
             id: string;
@@ -5107,11 +5397,63 @@ export interface components {
             registration_closes_at?: string | null;
             members_only?: boolean;
         };
+        PatchedLanguageChoiceRequest: {
+            language?: string;
+        };
         PatchedNotificationPreferencesRequest: {
             announcements?: boolean;
             community_replies?: boolean;
             event_reminders?: boolean;
             candidate_events?: boolean;
+            community_posts?: boolean;
+            volunteer_updates?: boolean;
+            candidate_bells_paused?: boolean;
+        };
+        PatchedNotificationSwitchesRequest: {
+            candidate_events?: boolean;
+            announcements?: boolean;
+            community_replies?: boolean;
+            community_posts?: boolean;
+            event_reminders?: boolean;
+            volunteer_updates?: boolean;
+            candidate_bells_paused?: boolean;
+        };
+        PatchedPrivacyChoiceRequest: {
+            donation_name_default?: components["schemas"]["DonationNameDefaultEnum"];
+        };
+        PatchedSettingsAccessibilityRequest: {
+            theme?: components["schemas"]["ThemeEnum"];
+            text_size?: components["schemas"]["TextSizeEnum"];
+            contrast?: components["schemas"]["ContrastEnum"];
+            motion?: components["schemas"]["MotionEnum"];
+        };
+        PatchedSettingsDefaultsRequest: {
+            enabled_languages?: string[];
+            languages?: components["schemas"]["LanguageOptionRequest"][];
+            translations_complete?: string[];
+            notifications?: {
+                [key: string]: boolean;
+            };
+            notification_labels?: {
+                [key: string]: string;
+            };
+            default_theme?: string;
+            default_text_size?: string;
+            /** Format: date-time */
+            updated_at?: string | null;
+        };
+        PatchedSettingsProfileRequest: {
+            consent?: components["schemas"]["SettingsConsentRequest"];
+            public_profile?: boolean;
+            handle?: string | null;
+            name_style?: components["schemas"]["NameStyleEnum"];
+            name_examples?: components["schemas"]["NameExamplesRequest"];
+            bio?: string;
+            bio_removed?: boolean;
+            photo_removed?: boolean;
+            profile_location?: components["schemas"]["ProfileLocationEnum"];
+            profile_lga?: components["schemas"]["SettingsLgaRequest"] | null;
+            profile_photo?: boolean;
         };
         PatchedVolunteerOpeningWriteRequest: {
             open?: boolean;
@@ -5123,6 +5465,14 @@ export interface components {
             body?: string;
             /** Format: uuid */
             campaign_candidate?: string | null;
+        };
+        PauseConfirmRequest: {
+            confirm: string;
+        };
+        Paused: {
+            paused: boolean;
+            registrations_cancelled: number;
+            applications_withdrawn: number;
         };
         PinnedSchema: {
             /** Format: uuid */
@@ -5179,6 +5529,18 @@ export interface components {
             reaction_count: number;
             liked: boolean;
         };
+        /** @enum {string} */
+        ProfileLocationEnum: "none" | "state" | "lga";
+        ProfileReportRequest: {
+            reason: string;
+            details?: string;
+            /** Format: email */
+            contact_email?: string;
+        };
+        ProfileReportResponse: {
+            reference?: string;
+            route?: string;
+        };
         /** @description §7.1 — public fields ONLY. Never notes, verifier, linked accounts, creator, status history. */
         PublicCandidate: {
             readonly slug: string;
@@ -5215,11 +5577,40 @@ export interface components {
             } | null;
             readonly verified: boolean;
         };
+        PublicProfile: {
+            handle: string;
+            name: string;
+            bio: string;
+            location: components["schemas"]["PublicProfileLocation"] | null;
+            verified_voter: boolean;
+            photo_url: string | null;
+            member_since: string;
+            news: components["schemas"]["PublicProfileNews"][];
+        };
+        PublicProfileLocation: {
+            state: string;
+            state_label: string;
+            lga: string | null;
+        };
+        PublicProfileNews: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** Format: date-time */
+            published_at: string;
+        };
+        PublicProfileOnRequest: {
+            consent: boolean;
+            version: number;
+        };
         /** @enum {string} */
         PurposeEnum: "candidate_photo" | "post_image" | "news_image" | "announcement_image" | "event_image";
         ReactionSchema: {
             liked: boolean;
             reaction_count: number;
+        };
+        Reactivated: {
+            active: boolean;
         };
         /** @enum {string} */
         ReadScopeEnum: "signed_in" | "members";
@@ -5283,6 +5674,120 @@ export interface components {
         };
         /** @enum {string} */
         RolesEnum: "canvassing" | "events" | "social_media" | "logistics" | "data_and_tech" | "outreach_youth" | "outreach_women" | "outreach_disability" | "other";
+        Settings: {
+            language: components["schemas"]["SettingsLanguage"];
+            accessibility: components["schemas"]["SettingsAccessibility"];
+            notifications: components["schemas"]["SettingsNotifications"];
+            profile: components["schemas"]["SettingsProfile"];
+            privacy: components["schemas"]["SettingsPrivacy"];
+            account: components["schemas"]["SettingsAccount"];
+            manage: components["schemas"]["SettingsManage"];
+            connected: components["schemas"]["SettingsConnected"];
+            /** Format: date-time */
+            saved_at: string | null;
+            /** Format: date-time */
+            updated_at: string | null;
+        };
+        SettingsAccessibility: {
+            theme: components["schemas"]["ThemeEnum"];
+            text_size: components["schemas"]["TextSizeEnum"];
+            contrast: components["schemas"]["ContrastEnum"];
+            motion: components["schemas"]["MotionEnum"];
+        };
+        SettingsAccount: {
+            full_name: string;
+            phone_number: string;
+            email: string;
+            /** Format: date-time */
+            created_at: string;
+            status: string;
+            home_state: string;
+            membership_status: string | null;
+            pvc_status: string;
+            staff: boolean;
+            mfa_enabled: boolean | null;
+        };
+        SettingsCampaign: {
+            name: string;
+            slug: string;
+        };
+        SettingsConnected: {
+            campaigns: components["schemas"]["SettingsCampaign"][];
+        };
+        SettingsConsent: {
+            version: number;
+            text: string;
+            label: string;
+        };
+        SettingsConsentRequest: {
+            version: number;
+            text: string;
+            label: string;
+        };
+        SettingsDefaults: {
+            enabled_languages: string[];
+            languages: components["schemas"]["LanguageOption"][];
+            translations_complete: string[];
+            notifications: {
+                [key: string]: boolean;
+            };
+            notification_labels: {
+                [key: string]: string;
+            };
+            default_theme: string;
+            default_text_size: string;
+            /** Format: date-time */
+            updated_at: string | null;
+        };
+        SettingsDeviceImport: {
+            language: components["schemas"]["SettingsLanguage"];
+            accessibility: components["schemas"]["SettingsAccessibility"];
+            /** Format: date-time */
+            saved_at: string;
+        };
+        SettingsLanguage: {
+            language: string;
+            options: components["schemas"]["LanguageOption"][];
+        };
+        SettingsLga: {
+            id: number;
+            name: string;
+        };
+        SettingsLgaRequest: {
+            id: number;
+            name: string;
+        };
+        SettingsManage: {
+            upcoming_registrations: number;
+            pending_volunteer_applications: number;
+        };
+        SettingsNotifications: {
+            categories: components["schemas"]["NotificationCategory"][];
+            candidate_bells_paused: boolean;
+        };
+        SettingsPrivacy: {
+            donation_name_default: components["schemas"]["DonationNameDefaultEnum"];
+            verified_badge: boolean;
+            named_news: number;
+            public_profile: boolean;
+            name_style: string;
+        };
+        SettingsProfile: {
+            consent: components["schemas"]["SettingsConsent"];
+            public_profile: boolean;
+            handle: string | null;
+            name_style: components["schemas"]["NameStyleEnum"];
+            name_examples: components["schemas"]["NameExamples"];
+            bio: string;
+            bio_removed: boolean;
+            photo_removed: boolean;
+            profile_location: components["schemas"]["ProfileLocationEnum"];
+            profile_lga: components["schemas"]["SettingsLga"] | null;
+            profile_photo: boolean;
+        };
+        SignedOut: {
+            signed_out: number;
+        };
         StateSchema: {
             slug: string;
             code: string;
@@ -5303,6 +5808,10 @@ export interface components {
             ward: components["schemas"]["SuggestItem"] | null;
             polling_unit: components["schemas"]["SuggestItem"] | null;
         };
+        /** @enum {string} */
+        TextSizeEnum: "standard" | "large" | "larger";
+        /** @enum {string} */
+        ThemeEnum: "system" | "light" | "dark";
         /** @enum {string} */
         TypeEnum: "rally" | "canvass" | "town_hall" | "meeting" | "training" | "other";
         TypedSchema: {
@@ -5615,6 +6124,392 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+        };
+    };
+    my_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Settings"];
+                };
+            };
+        };
+    };
+    my_settings_profile_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedSettingsProfileRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedSettingsProfileRequest"];
+                "multipart/form-data": components["schemas"]["PatchedSettingsProfileRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsProfile"];
+                };
+            };
+        };
+    };
+    my_settings_public_profile_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublicProfileOnRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PublicProfileOnRequest"];
+                "multipart/form-data": components["schemas"]["PublicProfileOnRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsProfile"];
+                };
+            };
+        };
+    };
+    my_settings_public_profile_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    my_settings_language_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedLanguageChoiceRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedLanguageChoiceRequest"];
+                "multipart/form-data": components["schemas"]["PatchedLanguageChoiceRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsLanguage"];
+                };
+            };
+        };
+    };
+    my_settings_accessibility_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedSettingsAccessibilityRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedSettingsAccessibilityRequest"];
+                "multipart/form-data": components["schemas"]["PatchedSettingsAccessibilityRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsAccessibility"];
+                };
+            };
+        };
+    };
+    my_settings_notifications_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsNotifications"];
+                };
+            };
+        };
+    };
+    my_settings_notifications_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedNotificationSwitchesRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedNotificationSwitchesRequest"];
+                "multipart/form-data": components["schemas"]["PatchedNotificationSwitchesRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsNotifications"];
+                };
+            };
+        };
+    };
+    my_settings_privacy_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedPrivacyChoiceRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedPrivacyChoiceRequest"];
+                "multipart/form-data": components["schemas"]["PatchedPrivacyChoiceRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsPrivacy"];
+                };
+            };
+        };
+    };
+    my_settings_sign_out_others_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignedOut"];
+                };
+            };
+        };
+    };
+    my_settings_import_device_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["DeviceSettingsRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["DeviceSettingsRequest"];
+                "multipart/form-data": components["schemas"]["DeviceSettingsRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsDeviceImport"];
+                };
+            };
+        };
+    };
+    my_pause_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PauseConfirmRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PauseConfirmRequest"];
+                "multipart/form-data": components["schemas"]["PauseConfirmRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Paused"];
+                };
+            };
+        };
+    };
+    my_reactivate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Reactivated"];
+                };
+            };
+        };
+    };
+    public_profile_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                handle: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicProfile"];
+                };
+            };
+        };
+    };
+    public_profile_report_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                handle: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileReportRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ProfileReportRequest"];
+                "multipart/form-data": components["schemas"]["ProfileReportRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileReportResponse"];
+                };
+            };
+        };
+    };
+    admin_settings_defaults_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsDefaults"];
+                };
+            };
+        };
+    };
+    admin_settings_defaults_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedSettingsDefaultsRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedSettingsDefaultsRequest"];
+                "multipart/form-data": components["schemas"]["PatchedSettingsDefaultsRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsDefaults"];
                 };
             };
         };

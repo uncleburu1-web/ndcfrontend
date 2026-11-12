@@ -195,3 +195,11 @@
 .mod-file {
   max-width: 100%;
 }
+
+/* Spec 20 §5.1: a reported public profile's photo, shown to the moderator */
+.mod-photo {
+  display: inline-block;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  vertical-align: middle;
+}

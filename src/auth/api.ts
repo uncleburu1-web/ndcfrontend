@@ -4,6 +4,7 @@
  * - Every request gets `Authorization: Bearer <Clerk session token>`.
  * - 401 → fetch a FRESH token once and retry. Still 401 → onSessionEnded (banner). No loop.
  * - 403 account_deactivated → onDeactivated (sign out + explanation page).
+ * - 403 account_paused (spec 20 §12) → onPaused: the person paused their own account; the app shows the paused screen.
  * - 503 auth_unavailable → onAuthUnavailable (banner); public content keeps working.
  * - 403 reverification_required (spec 14 §4.6) → `withReverification` (Clerk's useReverification prompt), then retry
  *   with a fresh token. Cancelled → ApiError "reverification_cancelled"; nothing was done.
@@ -93,6 +94,8 @@ export interface ApiClientOptions {
   getToken: GetToken;
   onSessionEnded?: () => void;
   onDeactivated?: () => void;
+  /** 403 account_paused (spec 20 §12). */
+  onPaused?: () => void;
   onAuthUnavailable?: () => void;
   /** 403 mfa_required on an admin endpoint (spec 14 §4.6): the admin pages show the two-step gate. */
   onMfaRequired?: () => void;
@@ -232,6 +235,7 @@ export function createApiClient(opts: ApiClientOptions) {
     if (!res.ok) {
       const err = await readError(res, requestId);
       if (err.status === 403 && err.code === "account_deactivated") opts.onDeactivated?.();
+      if (err.status === 403 && err.code === "account_paused") opts.onPaused?.();
       if (err.status === 503 && err.code === "auth_unavailable" && !path.startsWith("/me/delete/")) opts.onAuthUnavailable?.();
       if (err.status === 403 && err.code === "mfa_required") opts.onMfaRequired?.();
       throw err;

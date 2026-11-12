@@ -94,6 +94,6 @@ describe("ProfileForm 18+ (spec 14 §4.3)", () => {
   it("explains the age limit and offers deletion to under-18s", () => {
     fireEvent.click(screen.getByRole("button", { name: "I’m under 18" }));
     expect(screen.getByText("NDCConnect is for voters")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "delete your account" }).getAttribute("href")).toBe("/account/privacy#delete");
+    expect(screen.getByRole("link", { name: "delete your account" }).getAttribute("href")).toBe("/settings/manage#delete");
   });
 });

@@ -63,7 +63,8 @@ const STATUS_SETS = {
   },
   account: {
     active: ["Active", "success"],
-    deactivated: ["Deactivated", "error"],
+    deactivated: ["Deactivated by an admin", "error"],
+    paused: ["Paused by the person", "warning"],  // spec 20 §12
     deleted: ["Deleted in Clerk", "neutral"],
   },
   /** Spec 13: moderation priorities, in words as well as colour. */
