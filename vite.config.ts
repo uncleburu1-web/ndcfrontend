@@ -19,6 +19,9 @@ function securityFiles(mode: string): Plugin {
     closeBundle() {
       const env = { ...process.env, ...loadEnv(mode, process.cwd(), "VITE_") };
       writeFileSync(join(outDir, "_headers"), headersFile(buildHeaders(env)));
+      // Checked by scripts/check-dist.mjs before every `wrangler deploy`: which commit this is, and whether it can sign in.
+      writeFileSync(join(outDir, "build-info.json"), JSON.stringify({ commit: commit(), built_at: new Date().toISOString(),
+        clerk_key: Boolean(env.VITE_CLERK_PUBLISHABLE_KEY), api_base: Boolean(env.VITE_API_BASE_URL) }));
       const txt = securityTxt(env);
       if (txt) {
         mkdirSync(join(outDir, ".well-known"), { recursive: true });
@@ -30,7 +33,7 @@ function securityFiles(mode: string): Plugin {
 
 /** Spec 20 §15: the build's commit for Settings → About (Cloudflare Pages sets CF_PAGES_COMMIT_SHA; locally, git). */
 function commit(): string {
-  const env = process.env.CF_PAGES_COMMIT_SHA || process.env.GIT_COMMIT || "";
+  const env = process.env.WORKERS_CI_COMMIT_SHA || process.env.CF_PAGES_COMMIT_SHA || process.env.GIT_COMMIT || "";
   if (env) return env.slice(0, 7);
   try {
     return execSync("git rev-parse --short=7 HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim();
