@@ -39,8 +39,22 @@ function commit(): string {
   }
 }
 
+/** A production build without the Clerk key would ship the "Sign-in isn't configured" page: fail the build instead. */
+function requireClerkKey(mode: string): Plugin {
+  return {
+    name: "ndc-require-clerk-key",
+    apply: "build",
+    configResolved() {
+      const env = { ...process.env, ...loadEnv(mode, process.cwd(), "VITE_") };
+      if (mode === "production" && !env.VITE_CLERK_PUBLISHABLE_KEY) {
+        throw new Error("VITE_CLERK_PUBLISHABLE_KEY is not set for this build. Add it (and VITE_API_BASE_URL) as build variables.");
+      }
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), securityFiles(mode)],
+  plugins: [react(), securityFiles(mode), requireClerkKey(mode)],
   define: {
     __APP_COMMIT__: JSON.stringify(commit()),
     __APP_BUILT_AT__: JSON.stringify(new Date().toISOString()),
