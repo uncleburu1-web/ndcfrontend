@@ -18,7 +18,7 @@ import { getLanguage, t } from "../i18n";
 import { defaultWritingLanguage, WrittenIn } from "../i18n/ContentLanguage";
 
 export function refusal(err: unknown): string {
-  if (!(err instanceof ApiError)) return "That didn’t work. Check your connection and try again.";
+  if (!(err instanceof ApiError)) return t("events.that-didn-t-work-check-your");
   const x = err.extra as { period_start?: string; period_end?: string; until?: string };
   if (err.code === "outside_campaign_period" && x?.period_start) return err.message;
   if (err.code === "publishing_paused" && x?.until) return `${err.message.replace(/\.$/, "")}.`;
@@ -61,7 +61,7 @@ export function EventEditor({ base, party = false, editing = null, onSaved, onCa
     setBanner("");
     const imageProblem = image ? checkImage(image) : null;
     if (imageProblem) return setErrors({ image: imageProblem.message });
-    if (image && !rights) return setErrors({ rights: "Confirm you took this photo or have the right to share it." });
+    if (image && !rights) return setErrors({ rights: t("events.confirm-you-took-this-photo-or") });
     setBusy(true);
     const body = { ...f, starts_at: fromLocalInput(f.starts_at), ends_at: fromLocalInput(f.ends_at), capacity: f.capacity ? Number(f.capacity) : null,
       ...(party ? {} : { members_only: false }) };

@@ -58,8 +58,8 @@ export default function AdminMembershipDetailPage() {
       setM(await api<AdminMembership>(`/admin/membership/${id}/${action}/`, { method: "POST", body }));
       setModal(null);
       setReason("");
-      toast.show({ tone: "success", message: { approve: "Approved. The member is now active.", reject: "Application rejected.",
-        cancel: "Membership cancelled.", "recheck-payment": "Payment re-checked with the provider." }[action] });
+      toast.show({ tone: "success", message: { approve: t("admin.approved-the-member-is-now-active"), reject: t("admin.application-rejected"),
+        cancel: t("admin.membership-cancelled"), "recheck-payment": t("admin.payment-re-checked-with-the-provider") }[action] });
     } catch (err) {
       toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("admin.that-didn-t-work") });
     } finally {

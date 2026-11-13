@@ -12,17 +12,17 @@ import { Banner, Button, Checkbox, EmptyState, RadioGroup, Select, Skeleton, Tex
 import { STATES } from "../../lib/nigeria";
 import type { MyArticle } from "../../news/types";
 import "../../news/news.css";
-import { getLanguage, t } from "../../i18n";
+import { getLanguage, t, lazy } from "../../i18n";
 import { defaultWritingLanguage, WrittenIn } from "../../i18n/ContentLanguage";
 
 export const TITLE_MAX = 150;
 export const BODY_MIN = 100;
 export const BODY_MAX = 5000;
-const DECLARATIONS = [
-  ["accurate", "This is accurate to the best of my knowledge."],
-  ["no_private_info", "It doesn’t share anyone’s private information without their consent."],
-  ["rules", "I’ve read the community news rules."],
-] as const;
+const DECLARATIONS = lazy(() => [
+  ["accurate", t("news.this-is-accurate-to-the-best")],
+  ["no_private_info", t("news.it-doesn-t-share-anyone-s")],
+  ["rules", t("news.i-ve-read-the-community-news")],
+] as const);
 type Errors = Record<string, string>;
 
 function flatten(fields: Record<string, unknown>, prefix = ""): Errors {
@@ -71,7 +71,7 @@ export default function SubmitNewsPage() {
     if (f.body.trim().length < BODY_MIN) e.body = t("news.write-at-least-characters", { BODY_MIN });
     if (f.body.length > BODY_MAX) e.body = t("news.keep-it-under-characters", { BODY_MAX: BODY_MAX.toLocaleString() });
     if (f.source_url && !f.source_url.startsWith("https://")) e.source_url = t("news.use-a-link-that-starts-with");
-    if (!editing) for (const [k] of DECLARATIONS) if (!decl[k]) e[`declarations.${k}`] = "Tick this to continue.";
+    if (!editing) for (const [k] of DECLARATIONS) if (!decl[k]) e[`declarations.${k}`] = t("news.tick-this-to-continue");
     const imageProblem = image ? checkImage(image) : null;  // type and size before anything is sent (spec 15 §15.4)
     if (imageProblem) e.image = imageProblem.message;
     if (image && !rights) e.rights = t("news.confirm-you-took-this-photo-or");

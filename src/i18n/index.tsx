@@ -272,3 +272,25 @@ export function clerkLocalization(): Record<string, unknown> | undefined {
   }
   return Object.keys(out).length ? out : undefined;
 }
+
+/**
+ * A module-level list whose words must follow the language: `export const STEPS = lazy(() => [t("…"), t("…")])`.
+ * Every read rebuilds the list, so it is never frozen in the language that was current when the module loaded.
+ */
+export function lazy<T extends object>(make: () => T): T {
+  const sample = make();
+  return new Proxy((Array.isArray(sample) ? [] : {}) as T, {
+    get: (_t, p) => {
+      const v = make();
+      const r = Reflect.get(v, p, v);
+      return typeof r === "function" ? r.bind(v) : r;
+    },
+    has: (_t, p) => Reflect.has(make(), p),
+    ownKeys: () => Reflect.ownKeys(make()),
+    getOwnPropertyDescriptor: (_t, p) => {
+      const d = Reflect.getOwnPropertyDescriptor(make(), p);
+      if (d && p !== "length") d.configurable = true;
+      return d;
+    },
+  });
+}

@@ -17,14 +17,14 @@ import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "../donations/admin-donations.css";
 import "./admin-pvc.css";
-import { t as tr } from "../../../i18n";
+import { t as tr, lazy } from "../../../i18n";
 
-export const REJECT_REASONS = [
-  "The details don’t match INEC’s record.",
-  "INEC’s checker doesn’t find this VIN.",
-  "The VIN is incomplete or unreadable.",
-  "Other",
-];
+export const REJECT_REASONS = lazy(() => [
+  tr("admin.the-details-don-t-match-inec"),
+  tr("admin.inec-s-checker-doesn-t-find"),
+  tr("admin.the-vin-is-incomplete-or-unreadable"),
+  tr("admin.other"),
+]);
 export { workingDaysSince }; // moved to lib/format (shared with the Admin home, spec 11)
 
 export function waitText(from: string, now = new Date()) {

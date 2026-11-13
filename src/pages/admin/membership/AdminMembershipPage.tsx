@@ -12,10 +12,10 @@ import { MembershipSubnav } from "./MembershipSubnav";
 import "../candidates/admin.css";
 import "../donations/admin-donations.css";
 import "./admin-membership.css";
-import { t } from "../../../i18n";
+import { t, lazy } from "../../../i18n";
 
-export const STATUS_LABELS: [MembershipStatus, string][] = [["draft", "Details in progress"], ["payment_pending", "Payment pending"],
-  ["pending_approval", "Pending approval"], ["active", "Active"], ["rejected", "Rejected"], ["cancelled", "Cancelled"], ["refunded", "Refunded"]];
+export const STATUS_LABELS: [MembershipStatus, string][] = lazy(() => [["draft", t("admin.details-in-progress")], ["payment_pending", t("admin.payment-pending")],
+  ["pending_approval", t("admin.pending-approval")], ["active", t("admin.active")], ["rejected", t("admin.rejected")], ["cancelled", t("admin.cancelled")], ["refunded", t("admin.refunded")]]);
 const FILTERS = ["status", "state", "date_from", "date_to", "q"] as const;
 
 export default function AdminMembershipPage() {

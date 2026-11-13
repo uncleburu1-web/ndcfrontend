@@ -68,6 +68,26 @@ Without `VITE_CLERK_PUBLISHABLE_KEY` the app shows a "Sign-in isn't configured" 
 - A paused account sees only "Your account is paused" (Reactivate, Download, Delete). `/people/:handle` shows a public profile only when the person turned it on, with `noindex`.
 - `/admin/settings/defaults` (system admins): enabled languages and defaults for new accounts.
 
+## Languages (spec 21)
+
+- **Every member-facing string is in `src/i18n/messages/en.json`** (keys like `news.back-to-news`; context for translators in
+  `en.context.json`). Components call `t("key", values)` or `t.rich("key", { link: (c) => <Link …>{c}</Link> })` from `src/i18n`;
+  module-level labels are getters (`get label() { return t("…"); }`) so they follow the language. Messages use a small ICU
+  subset: `{name}`, `{n, plural, one {# post} other {# posts}}`, `{x, select, …}`, `<tag>…</tag>`.
+- **Hausa, Igbo, Yoruba and Pidgin** (`ha.json`, `ig.json`, `yo.json`, `pcm.json`) are lazy chunks, fetched before a switch; a
+  missing string falls back to English inside `lang="en"`. A language is switched on only from Admin → Settings defaults, after
+  it is complete and a native speaker's review is recorded in Admin → Languages (`/admin/languages`).
+- **Checks:** `npm run check:i18n` (no hard-coded JSX text or text props, every key used exists, translations keep the English
+  placeholders and tags, chunk budgets; `-- --fix` removes unused keys; writes `src/i18n/completeness.json`) and
+  `npm run check:fonts` (every letter in the Archivo faces of `base.css`; Archivo has no Hausa ɓ ɗ ƙ ƴ or Igbo ṅ, so a 6 KB Noto Sans
+  subset in `src/assets/fonts/` supplies them; after changing a font run `python3 scripts/font-coverage.py`). Both run in CI.
+- **Translators:** `npm run i18n:export -- ha ha.csv` and `npm run i18n:import -- ha ha.csv [--status machine-draft|translated|reviewed]`
+  (interface and Clerk strings); the backend has `python manage.py i18n_export --lang ha`. Agreed terms: `src/i18n/glossary.csv`.
+- **Pseudo-language:** `?lang=qps` in development (accented, about 40% longer) shows any hard-coded text and layout that can't
+  stretch. `npm run i18n:extract` re-runs the extraction codemod (`scripts/i18n-extract.mjs`) on new code.
+- **What people write** carries its language: the "Written in" select on writing forms, `lang` on the text and an "In Hausa" label
+  when it isn't the reader's language (`src/i18n/ContentLanguage.tsx`), and a Language filter on News and community feeds.
+
 ## Security and privacy (spec 14)
 
 - `/privacy` (the notice, from the API's data register), `/security` (vulnerability disclosure), `/account/privacy` (Your data: download, consents, requests, delete), `/account-deleted`.

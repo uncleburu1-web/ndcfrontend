@@ -39,7 +39,7 @@ export class ApiError extends Error implements ApiErrorBody {
   extra: Record<string, unknown>;
 
   constructor(body: Partial<ApiErrorBody> & Record<string, unknown>) {
-    super(body.message ?? "Something went wrong. Please try again.");
+    super(body.message ?? t("auth.something-went-wrong-please-try-again"));
     this.status = body.status ?? 0;
     this.code = body.code ?? "error";
     this.fields = body.fields ?? {};

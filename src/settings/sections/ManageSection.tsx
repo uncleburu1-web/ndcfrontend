@@ -7,20 +7,20 @@ import { Banner, Button, Modal, TextField } from "../../components/ui";
 import { DeleteSection, DownloadSection } from "../../pages/privacy/YourDataPage";
 import type { MyPrivacy } from "../../privacy/types";
 import { SectionShell, useSettingsData } from "../SettingsLayout";
-import { t } from "../../i18n";
+import { t, lazy } from "../../i18n";
 
-const PAUSE_ROWS: [string, string][] = [
-  ["Signing in", "Still works, but shows only “Your account is paused” with Reactivate, Download your data and Delete."],
-  ["Public profile", "Hidden."],
-  ["Bylines", "Kept as they are."],
-  ["Notifications", "None while paused."],
-  ["Follows, bells, communities", "Kept, but nothing new is delivered."],
-  ["Future event registrations", "Cancelled, so your place goes to someone else."],
-  ["Volunteer applications waiting for a decision", "Withdrawn."],
-  ["Membership and PVC check", "Unchanged. A paused member stays on the party register."],
-  ["Donations", "Unchanged."],
-  ["Undo", "Reactivate at any time by signing in."],
-];
+const PAUSE_ROWS: [string, string][] = lazy(() => [
+  [t("settings.signing-in"), t("settings.still-works-but-shows-only-your")],
+  [t("settings.public-profile"), t("settings.hidden")],
+  [t("settings.bylines"), t("settings.kept-as-they-are")],
+  [t("settings.notifications"), t("settings.none-while-paused")],
+  [t("settings.follows-bells-communities"), t("settings.kept-but-nothing-new-is-delivered")],
+  [t("settings.future-event-registrations"), t("settings.cancelled-so-your-place-goes-to")],
+  [t("settings.volunteer-applications-waiting-for-a-decision"), t("settings.withdrawn")],
+  [t("settings.membership-and-pvc-check"), t("settings.unchanged-a-paused-member-stays-on")],
+  [t("settings.donations"), t("settings.unchanged")],
+  [t("settings.undo"), t("settings.reactivate-at-any-time-by-signing")],
+]);
 
 export function PauseDialog({ open, onClose, manage }: { open: boolean; onClose: () => void; manage: Schema<"SettingsManage"> | null }) {
   const api = useApi();

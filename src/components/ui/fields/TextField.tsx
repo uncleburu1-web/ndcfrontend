@@ -3,6 +3,7 @@
  */
 import type { InputHTMLAttributes } from "react";
 import { Field, type FieldFrameProps } from "./Field";
+import { t } from "../../../i18n";
 
 type InputType = "text" | "email" | "tel" | "number" | "datetime-local";  // number, datetime-local: spec 18 event editor
 
@@ -19,7 +20,7 @@ const DEFAULTS: Record<InputType, Partial<InputHTMLAttributes<HTMLInputElement>>
 };
 
 export function TextField({ label, hint, error, required, type = "text", ...input }: TextFieldProps) {
-  const finalHint = hint ?? (type === "tel" ? "Nigerian number. +234 is added for you." : undefined);
+  const finalHint = hint ?? (type === "tel" ? t("ui.nigerian-number-234-is-added-for") : undefined);
   return (
     <Field label={label} hint={finalHint} error={error} required={required}>
       {({ id, describedBy, invalid }) =>

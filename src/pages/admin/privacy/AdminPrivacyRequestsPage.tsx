@@ -11,10 +11,10 @@ import { AdminNav } from "../AdminNav";
 import { PrivacyNav } from "./PrivacyNav";
 import "../candidates/admin.css";
 import "../../../privacy/privacy.css";
-import { t } from "../../../i18n";
+import { t, lazy } from "../../../i18n";
 
 type Tab = "open" | "waiting" | "closed";
-const TABS: [Tab, string][] = [["open", "Open"], ["waiting", "Waiting for the person"], ["closed", "Closed"]];
+const TABS: [Tab, string][] = lazy(() => [["open", t("admin.open")], ["waiting", t("admin.waiting-for-the-person")], ["closed", t("admin.closed-3")]]);
 
 export default function AdminPrivacyRequestsPage() {
   const api = useApi();

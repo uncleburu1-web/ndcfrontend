@@ -165,6 +165,7 @@ function processFile(file) {
   })(sf);
   const already = /import \{[^}]*\bt as tr\b[^}]*\} from "[./]*i18n"/.test(src);
   const T = clash || already ? "tr" : "t";
+  let needsLazy = false;
 
   /** Code for an expression with its prose string leaves wrapped in t() (conditionals, ??, ||, parentheses, templates). */
   function exprCode(e, where, loose = false) {
@@ -352,6 +353,40 @@ function processFile(file) {
       const code = exprCode(node.arguments[0], `${node.expression.text}()`, true);
       if (code) add(node.arguments[0].getStart(sf), node.arguments[0].end, code);
     }
+    // Whole sentences in code ("That didn’t work. Try again."), inside functions: user-facing almost always.
+    if ((ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node) || ts.isTemplateExpression(node)) && insideFunction(node)
+        && sentence(node) && !inTranslateCall(node) && !ts.isImportDeclaration(node.parent) && !ts.isJsxAttribute(node.parent)
+        && !ts.isPropertyAssignment(node.parent) && !ts.isCaseClause(node.parent) && !ts.isElementAccessExpression(node.parent)
+        && !(ts.isBinaryExpression(node.parent) && [ts.SyntaxKind.EqualsEqualsEqualsToken, ts.SyntaxKind.ExclamationEqualsEqualsToken].includes(node.parent.operatorToken.kind))
+        && !(ts.isNewExpression(node.parent) || (ts.isCallExpression(node.parent) && /^console\./.test(node.parent.expression.getText(sf))))) {
+      const code = exprCode(node, "sentence in code", true);
+      if (code) add(node.getStart(sf), node.end, code);
+    }
+    if (ts.isPropertyAssignment(node) && insideFunction(node) && !NOT_TEXT_KEYS.has(node.name.getText(sf))
+        && (ts.isStringLiteral(node.initializer) || ts.isTemplateExpression(node.initializer)) && sentence(node.initializer) && !inTranslateCall(node)) {
+      const code = exprCode(node.initializer, `object ${node.name.getText(sf)}`, true);
+      if (code) add(node.initializer.getStart(sf), node.initializer.end, code);
+    }
+    // Module-level lists with words in them: lazy(() => [...]) so they follow the language (src/i18n lazy()).
+    if (ts.isVariableDeclaration(node) && node.initializer && !insideFunction(node)) {
+      let init = node.initializer;
+      while (ts.isAsExpression(init) || ts.isSatisfiesExpression?.(init)) init = init.expression;
+      if (ts.isArrayLiteralExpression(init) && !/^lazy\(/.test(node.initializer.getText(sf))) {
+        const edits2 = [];
+        (function leaves(n) {
+          if ((ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n)) && (looksProse(n.text) || /^[A-Z][a-z]+( [A-Za-z’'-]+)*$/.test(n.text))
+              && !(ts.isPropertyAssignment(n.parent) && NOT_TEXT_KEYS.has(n.parent.name.getText(sf)))) {
+            edits2.push([n.getStart(sf) - node.initializer.getStart(sf), n.end - node.initializer.getStart(sf), `${T}(${JSON.stringify(keyFor(file, esc(n.text), "list"))})`]);
+          } else if (!ts.isCallExpression(n) && !ts.isArrowFunction(n) && !ts.isFunctionExpression(n)) ts.forEachChild(n, leaves);
+        })(init);
+        if (edits2.length) {
+          let code = node.initializer.getText(sf);
+          for (const [a, b2, rep] of edits2.sort((x, y) => y[0] - x[0])) code = code.slice(0, a) + rep + code.slice(b2);
+          add(node.initializer.getStart(sf), node.initializer.end, `lazy(() => ${code})`);
+          needsLazy = true;
+        }
+      }
+    }
     // Saved-messages and dialogs: run(fn, "Language saved."), patch(…, "Saved."), onDone("…"), window.confirm("…"), setCodeMsg("…")
     if (ts.isCallExpression(node) && ["run", "patch", "save", "act", "onDone", "window.confirm", "window.prompt", "confirm", "setCodeMsg", "setCodeErr", "setErrors"]
         .includes(node.expression.getText(sf))) {
@@ -368,6 +403,16 @@ function processFile(file) {
     ts.forEachChild(node, visit);
   }
 
+  function sentence(n) {
+    const text = ts.isTemplateExpression(n) ? n.head.text + n.templateSpans.map((sp) => ` x ${sp.literal.text}`).join("") : n.text;
+    const tt = text.trim();
+    return /[A-Za-z]{2,}/.test(tt) && /\s/.test(tt) && /^[A-Z“‘"(]/.test(tt) && /[.!?…)”]$/.test(tt) && !/[{}<>=]|https?:|\/\//.test(tt);
+  }
+  function inTranslateCall(n) {
+    for (let q = n.parent, k = 0; q && k < 6; q = q.parent, k++) if (ts.isCallExpression(q) && /^(t|tr)(\.rich)?$/.test(q.expression.getText(sf))) return true;
+    return false;
+  }
+
   /** An object literal whose variable is a word/label map (EVENT_WORDS, ROLE_LABELS…): every prose value is text. */
   function textHolder(obj) {
     for (let p = obj; p; p = p.parent) {
@@ -382,6 +427,13 @@ function processFile(file) {
   edits.sort((a, b) => b.s - a.s);
   let out = src;
   for (const e of edits) out = out.slice(0, e.s) + e.text + out.slice(e.e);
+  if (needsLazy && !/import \{[^}]*\blazy\b[^}]*\} from "[./]*i18n"/.test(out)) {
+    out = out.replace(/import \{([^}]*)\} from "((?:\.\.?\/)+i18n)";/, (m, names, from) => `import {${names.trimEnd()}, lazy } from "${from}";`);
+    if (!/\blazy\b[^}]*\} from "[./]*i18n"/.test(out)) {
+      const rel2 = path.relative(path.dirname(file), path.join(SRC, "i18n")).replace(/\\/g, "/");
+      out = `import { lazy } from "${rel2.startsWith(".") ? rel2 : `./${rel2}`}";\n${out}`;
+    }
+  }
   if (!/import \{[^}]*\bt\b[^}]*\} from "[./]*i18n"/.test(out)) {
     let relImport = path.relative(path.dirname(file), path.join(SRC, "i18n")).replace(/\\/g, "/");
     if (!relImport.startsWith(".")) relImport = `./${relImport}`;

@@ -9,17 +9,17 @@ import { ConsentsSection } from "../../pages/privacy/YourDataPage";
 import type { MyPrivacy } from "../../privacy/types";
 import { usePreferences } from "../PreferencesProvider";
 import { Loading, SectionShell, useSettingsData } from "../SettingsLayout";
-import { t } from "../../i18n";
+import { t, lazy } from "../../i18n";
 
-const ALWAYS_PRIVATE: [string, string][] = [
-  ["Who you follow and your bells", "Following a candidate says something about your politics."],
-  ["Your communities", "Which communities you’re in shows where you live and vote."],
-  ["Your events and volunteering", "Only you and the organiser see your registrations; campaigns see applications you sent them."],
-  ["Your membership details", "The party keeps its register; nobody else sees it."],
-  ["Your PVC check", "Only the Verified voter badge, and only if you turn it on."],
-  ["Your donations and contact details", "Donations show your name only if you choose it on that donation."],
-  ["Your home state and LGA", "Private unless you show them on your public profile."],
-];
+const ALWAYS_PRIVATE: [string, string][] = lazy(() => [
+  [t("settings.who-you-follow-and-your-bells"), t("settings.following-a-candidate-says-something-about")],
+  [t("settings.your-communities"), t("settings.which-communities-you-re-in-shows")],
+  [t("settings.your-events-and-volunteering"), t("settings.only-you-and-the-organiser-see")],
+  [t("settings.your-membership-details"), t("settings.the-party-keeps-its-register-nobody")],
+  [t("settings.your-pvc-check"), t("settings.only-the-verified-voter-badge-and")],
+  [t("settings.your-donations-and-contact-details"), t("settings.donations-show-your-name-only-if")],
+  [t("settings.your-home-state-and-lga"), t("settings.private-unless-you-show-them-on")],
+]);
 
 export default function PrivacySection() {
   const api = useApi();

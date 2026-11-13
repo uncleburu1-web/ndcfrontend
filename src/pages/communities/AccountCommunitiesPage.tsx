@@ -65,7 +65,7 @@ export default function AccountCommunitiesPage() {
                         { method: "PATCH", body: { notify_new_posts: on } }), on ? t("communities.you-ll-be-told-about-new") : t("communities.new-post-notifications-off"))} />
                   )}
                   <Button variant="ghost" size="sm" loading={busy === `leave:${m.community.id}`} onClick={() => {
-                    const msg = m.level === "state" ? "Leave your state community? This also leaves your LGA, ward and polling unit communities." : `Leave ${m.community.name}?`;
+                    const msg = m.level === "state" ? t("communities.leave-your-state-community-this-also") : t("communities.leave-2", { name: m.community.name });
                     if (window.confirm(msg)) void run(`leave:${m.community.id}`, () => api<MyCommunities>(`/me/communities/${m.community.id}/`, { method: "DELETE" }), t("communities.you-ve-left"));
                   }}>{t("communities.leave")}</Button>
                 </div>

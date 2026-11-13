@@ -156,7 +156,7 @@
   display: grid;
   gap: var(--space-3);
   flex: 1;
-  min-width: 14rem;
+  min-width: min(14rem, 100%);
   justify-items: start;
 }
 .join-photo__controls .is-disabled {

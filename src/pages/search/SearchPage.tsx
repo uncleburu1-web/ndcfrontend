@@ -18,9 +18,9 @@ import { useHomeState } from "../../search/useHomeState";
 import "../../news/news.css";
 import "../../search/search.css";
 import "../../geo/geo.css";
-import { t as tr } from "../../i18n";
+import { t as tr, lazy } from "../../i18n";
 
-const TABS: [SearchType, string][] = [["all", "All"], ["candidates", "Candidates"], ["news", "News"], ["posts", "Candidate posts"]];
+const TABS: [SearchType, string][] = lazy(() => [["all", tr("search.all")], ["candidates", tr("search.candidates")], ["news", tr("search.news")], ["posts", tr("search.candidate-posts")]]);
 const SINCE = [{ value: "", get label() { return tr("search.any-time"); } }, { value: "week", get label() { return tr("search.past-week"); } }, { value: "month", get label() { return tr("search.past-month"); } }, { value: "year", get label() { return tr("search.past-year"); } }];
 
 function NoResults({ q, dym, onTry }: { q: string; dym: string | null; onTry: (q: string) => void }) {

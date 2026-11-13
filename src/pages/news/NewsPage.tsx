@@ -16,10 +16,10 @@ import type { FeedPost } from "../../posts/types";
 import { SourceBadges } from "../../news/SourceBadges";
 import { articlePath, type ArticleSummary, type NewsPage as Page } from "../../news/types";
 import "../../news/news.css";
-import { t } from "../../i18n";
+import { t, lazy } from "../../i18n";
 import { LanguageFilter } from "../../i18n/ContentLanguage";
 
-const TABS = [["", "All"], ["official", "Official"], ["community", "Community"], ["candidate", "Candidates"]] as const;
+const TABS = lazy(() => [["", t("news.tab.all")], ["official", t("news.tab.official")], ["community", t("news.tab.community")], ["candidate", t("news.tab.candidate")]] as const);
 
 function Item({ a }: { a: ArticleSummary }) {
   return (

@@ -6,6 +6,7 @@
   margin: 0 auto;
   padding: var(--space-8) var(--space-4) var(--space-16);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
 }
 .article-page,
@@ -53,7 +54,7 @@
   color: var(--brand-fg);
 }
 .news-state {
-  min-width: 14rem;
+  min-width: min(14rem, 100%);
 }
 .news-list {
   display: grid;

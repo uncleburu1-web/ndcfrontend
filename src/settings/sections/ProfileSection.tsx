@@ -94,7 +94,7 @@ export default function ProfileSection() {
       return true;
     } catch (err) {
       if (optimistic) patchSettings({ profile: p });
-      const msg = err instanceof ApiError ? err.message : "Couldn’t save. Try again.";
+      const msg = err instanceof ApiError ? err.message : t("settings.couldn-t-save-try-again");
       if (what === "bio") setBioError(msg);
       else toast.show({ tone: "error", message: msg });
       return false;

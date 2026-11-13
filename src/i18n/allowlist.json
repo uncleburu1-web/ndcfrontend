@@ -1,1 +1,16 @@
-{"strings": ["English", "NDCConnect", "NDC", "WAT", "INEC", "NIN", "VIN", "LGA", "PVC", "YYYY-MM-DD"], "files": []}
+{
+ "strings": [
+  "English",
+  "NDCConnect",
+  "NDC",
+  "WAT",
+  "INEC",
+  "NIN",
+  "VIN",
+  "LGA",
+  "PVC",
+  "YYYY-MM-DD",
+  "Connect"
+ ],
+ "files": []
+}

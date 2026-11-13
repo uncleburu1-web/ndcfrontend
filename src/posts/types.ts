@@ -1,4 +1,6 @@
+import { lazy } from "../i18n";
 import type { ArticleImage } from "../news/types";
+import { t } from "../i18n";
 
 export type PostKind = "announcement" | "news";
 export type PostStatus = "published" | "removed" | "deleted";
@@ -69,11 +71,11 @@ export interface AdminPost extends CampaignPost {
 export const postPath = (slug: string, id: string) => `/candidates/${encodeURIComponent(slug)}/posts/${id}`;
 export const TITLE_MAX = 150;
 export const BODY_MAX = 10_000;
-export const REMOVE_REASONS = [
-  "Abusive or inciting language (Electoral Act 2026 s. 96).",
-  "False or unsourced election results.",
-  "Shares someone’s private information.",
-  "Hate speech.",
-  "Copyright complaint.",
-  "Other",
-];
+export const REMOVE_REASONS = lazy(() => [
+  t("posts.abusive-or-inciting-language-electoral-act"),
+  t("posts.false-or-unsourced-election-results"),
+  t("posts.shares-someone-s-private-information"),
+  t("posts.hate-speech"),
+  t("posts.copyright-complaint"),
+  t("posts.other"),
+]);

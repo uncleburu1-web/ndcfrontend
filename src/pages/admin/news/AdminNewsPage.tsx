@@ -9,9 +9,9 @@ import type { AdminNewsPage as Page } from "../../../news/types";
 import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "../membership/admin-membership.css";
-import { t as tr } from "../../../i18n";
+import { t as tr, lazy } from "../../../i18n";
 
-const TABS = [["pending", "Pending"], ["reported", "Reported"], ["successful", "Published"], ["rejected", "Rejected"], ["removed", "Removed"]] as const;
+const TABS = lazy(() => [["pending", tr("admin.pending")], ["reported", tr("admin.reported")], ["successful", tr("admin.published")], ["rejected", tr("admin.rejected")], ["removed", tr("admin.removed")]] as const);
 
 function AdminNewsQueue() {
   const api = useApi();

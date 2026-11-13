@@ -11,10 +11,10 @@ import { formatDate } from "../../../lib/format";
 import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "./admin-donations.css";
-import { t } from "../../../i18n";
+import { t, lazy } from "../../../i18n";
 
-const STATUSES: [string, string][] = [["", "All statuses"], ["successful", "Successful"], ["pending", "Pending"], ["review", "Under review"],
-  ["failed", "Failed"], ["abandoned", "Abandoned"], ["refunded", "Refunded"], ["initiated", "Started"]];
+const STATUSES: [string, string][] = lazy(() => [["", t("admin.all-statuses")], ["successful", t("admin.successful")], ["pending", t("admin.pending")], ["review", t("admin.under-review")],
+  ["failed", t("admin.failed")], ["abandoned", t("admin.abandoned")], ["refunded", t("admin.refunded")], ["initiated", t("admin.started")]]);
 const FILTERS = ["status", "designation", "date_from", "date_to", "q"] as const;
 
 export default function AdminDonationsPage() {

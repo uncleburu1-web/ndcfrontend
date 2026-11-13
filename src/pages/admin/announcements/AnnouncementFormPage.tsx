@@ -126,7 +126,7 @@ export default function AnnouncementFormPage() {
       setA(await api<AdminArticle>(`/admin/announcements/${id}/${name}/`, { method: "POST", body }));
       setUnpublishing(false);
       setReason("");
-      toast.show({ tone: "success", message: { pin: "Pinned to the top of News.", unpin: "Unpinned.", unpublish: "Unpublished.", restore: "Restored." }[name] });
+      toast.show({ tone: "success", message: { pin: tr("admin.pinned-to-the-top-of-news"), unpin: "Unpinned.", unpublish: "Unpublished.", restore: "Restored." }[name] });
     } catch (err) {
       if (err instanceof ApiError && err.code === "too_many_pinned") {
         const list = await api<{ results: AdminArticle[] }>("/admin/announcements/");

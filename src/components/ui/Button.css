@@ -12,7 +12,10 @@
   font-weight: var(--weight-label);
   line-height: 1.2;
   text-decoration: none;
-  white-space: nowrap;
+  /* spec 21: a longer translation or 200% text wraps inside the button instead of widening the page */
+  white-space: normal;
+  max-width: 100%;
+  text-align: center;
   cursor: pointer;
   transition:
     background-color var(--duration-fast) var(--ease-standard),

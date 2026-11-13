@@ -1,13 +1,15 @@
+import { lazy } from "../i18n";
+import { t } from "../i18n";
 export type ArticleSource = "official" | "community";
 export type ArticleStatus = "pending" | "successful" | "rejected" | "withdrawn" | "removed";
 
-export const CATEGORIES = [
-  ["election_updates", "Official Election Updates"],
-  ["party", "Party Announcements"],
-  ["campaign", "Campaign Announcements"],
-  ["community", "Community Announcements"],
-  ["election_news", "General Election News"],
-] as const;
+export const CATEGORIES = lazy(() => [
+  ["election_updates", t("news.official-election-updates")],
+  ["party", t("news.party-announcements")],
+  ["campaign", t("news.campaign-announcements")],
+  ["community", t("news.community-announcements")],
+  ["election_news", t("news.general-election-news")],
+] as const);
 export type Category = (typeof CATEGORIES)[number][0];
 
 export interface ArticleImage {
@@ -93,34 +95,34 @@ export interface AdminNewsPage {
 }
 
 /** Fallback when /rules/ hasn't loaded; the server's list (with rules) wins (spec 13 §4.2). */
-export const REPORT_REASONS = [
-  ["violence", "Threat or incitement to violence", "R1"],
-  ["abuse", "Abusive or hateful", "R2"],
-  ["results", "Election results not from INEC", "R3"],
-  ["false", "False or misleading", "R4"],
-  ["privacy", "Private information about someone", "R5"],
-  ["ncii", "Intimate image shared without consent", "R6"],
-  ["copyright", "Copyright (my content was used)", "R7"],
-  ["spam", "Spam or advertising", "R8"],
-  ["impersonation", "Impersonation", "R9"],
-  ["other", "Something else", ""],
-] as const;
+export const REPORT_REASONS = lazy(() => [
+  ["violence", t("news.threat-or-incitement-to-violence"), "R1"],
+  ["abuse", t("news.abusive-or-hateful"), "R2"],
+  ["results", t("news.election-results-not-from-inec"), "R3"],
+  ["false", t("news.false-or-misleading"), "R4"],
+  ["privacy", t("news.private-information-about-someone"), "R5"],
+  ["ncii", t("news.intimate-image-shared-without-consent"), "R6"],
+  ["copyright", t("news.copyright-my-content-was-used"), "R7"],
+  ["spam", t("news.spam-or-advertising"), "R8"],
+  ["impersonation", t("news.impersonation"), "R9"],
+  ["other", t("news.something-else"), ""],
+] as const);
 
-export const PROFILE_REPORT_REASONS = [
-  ["profile_wrong", "Wrong or out-of-date details"],
-  ["not_ndc", "Not an NDC candidate"],
-  ["impersonation", "Impersonation"],
-  ["other", "Something else"],
-] as const;
+export const PROFILE_REPORT_REASONS = lazy(() => [
+  ["profile_wrong", t("news.wrong-or-out-of-date-details")],
+  ["not_ndc", t("news.not-an-ndc-candidate")],
+  ["impersonation", t("news.impersonation")],
+  ["other", t("news.something-else")],
+] as const);
 
-export const REJECT_REASONS = [
-  "We couldn’t verify it.",
-  "Election results must come from INEC.",
-  "Abusive or inciting language.",
-  "Shares private information.",
-  "Not news (opinion, advert or promotion).",
-  "Duplicate.",
-  "Other",
-];
+export const REJECT_REASONS = lazy(() => [
+  t("news.we-couldn-t-verify-it"),
+  t("news.election-results-must-come-from-inec"),
+  t("news.abusive-or-inciting-language"),
+  t("news.shares-private-information"),
+  t("news.not-news-opinion-advert-or-promotion"),
+  t("news.duplicate"),
+  t("news.other"),
+]);
 
 export const articlePath = (a: { id: string; source: ArticleSource }) => `/news/${a.source}/${a.id}`;

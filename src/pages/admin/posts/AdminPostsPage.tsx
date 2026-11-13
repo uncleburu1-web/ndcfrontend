@@ -9,10 +9,10 @@ import type { AdminPost } from "../../../posts/types";
 import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "../membership/admin-membership.css";
-import { t as tr } from "../../../i18n";
+import { t as tr, lazy } from "../../../i18n";
 
 interface Page { count: number; results: AdminPost[]; counts: { reported: number; oldest_open_report: string | null } }
-const TABS = [["published", "Published"], ["reported", "Reported"], ["removed", "Removed"], ["deleted", "Deleted"]] as const;
+const TABS = lazy(() => [["published", tr("admin.published")], ["reported", tr("admin.reported")], ["removed", tr("admin.removed")], ["deleted", tr("admin.deleted")]] as const);
 
 function AdminPostsList() {
   const api = useApi();

@@ -22,7 +22,7 @@ const LIMIT = { post: 2000, comment: 1000 };
 const MIN = { post: 10, comment: 2 };
 
 export function refusalWords(err: unknown): string {
-  if (!(err instanceof ApiError)) return "That didn’t post. Check your connection and try again.";
+  if (!(err instanceof ApiError)) return t("communities.that-didn-t-post-check-your");
   const until = (err.extra as { until?: string } | undefined)?.until;
   if (until && (err.code === "too_soon" || err.code === "posting_paused" || err.code === "publishing_paused")) {
     return `${err.message.replace(/\.$/, "")} (until ${formatDate(until, { withTime: true })}).`;

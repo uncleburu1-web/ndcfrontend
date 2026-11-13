@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 /**
  * Display and language preferences on this device (spec 20 §10.2, §13).
  *
@@ -68,8 +69,8 @@ function prefers(query: string): boolean {
 
 /** "system" resolved against the device: what tokens.css keys its palettes on. */
 export function resolved(p: DisplayPrefs): { scheme: "light" | "dark"; contrastLevel: "standard" | "more" } {
-  const scheme = p.theme === "system" ? (prefers("(prefers-color-scheme: dark)") ? "dark" : "light") : p.theme;
-  const contrastLevel = p.contrast === "system" ? (prefers("(prefers-contrast: more)") ? "more" : "standard") : p.contrast;
+  const scheme = p.theme === "system" ? (prefers(t("settings.prefers-color-scheme-dark")) ? "dark" : "light") : p.theme;
+  const contrastLevel = p.contrast === "system" ? (prefers(t("settings.prefers-contrast-more")) ? "more" : "standard") : p.contrast;
   return { scheme, contrastLevel };
 }
 
@@ -107,7 +108,7 @@ export function setPrefs(next: Partial<DevicePrefs>) {
   applyToDocument(current);
   // "System" follows the device live: switching the phone to dark mode switches the page too.
   if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
-    for (const q of ["(prefers-color-scheme: dark)", "(prefers-contrast: more)"]) {
+    for (const q of [t("settings.prefers-color-scheme-dark"), t("settings.prefers-contrast-more")]) {
       const mq = window.matchMedia(q);
       const onChange = () => {
         applyToDocument(current);

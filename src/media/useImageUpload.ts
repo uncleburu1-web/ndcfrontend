@@ -50,8 +50,8 @@ function invalid(message: string) {
 }
 
 export function checkImage(file: File, maxBytes = IMAGE_MAX_BYTES): ApiError | null {
-  if (!IMAGE_TYPES.includes(file.type)) return invalid("Use a JPEG, PNG or WebP image.");
-  if (file.size > maxBytes) return invalid("That image is larger than 5 MB. Choose a smaller file.");
+  if (!IMAGE_TYPES.includes(file.type)) return invalid(t("media.use-a-jpeg-png-or-webp"));
+  if (file.size > maxBytes) return invalid(t("media.that-image-is-larger-than-5"));
   return null;
 }
 
@@ -78,13 +78,13 @@ export function sendToCloudinary(sig: DirectSignature, file: File, onProgress: (
         onProgress(100);
         resolve({ public_id: String(data.public_id), version: data.version as number, signature: String(data.signature) });
       } else if (xhr.status >= 400 && xhr.status < 500) {
-        reject(invalid("That image couldn’t be uploaded. Use a JPEG, PNG or WebP image under 5 MB."));
+        reject(invalid(t("media.that-image-couldn-t-be-uploaded")));
       } else {
-        fail("Image upload isn’t working right now.");
+        fail(t("media.image-upload-isn-t-working-right"));
       }
     };
-    xhr.onerror = () => fail("Image upload isn’t working right now.");
-    xhr.ontimeout = () => fail("The image upload took too long.", "timeout");
+    xhr.onerror = () => fail(t("media.image-upload-isn-t-working-right"));
+    xhr.ontimeout = () => fail(t("media.the-image-upload-took-too-long"), "timeout");
     xhr.send(body);
   });
 }
@@ -100,7 +100,7 @@ export async function uploadImage<T>(api: ApiRequest, purpose: ImagePurpose, fil
     form.append("rights_confirmed", target.rightsConfirmed === false ? "false" : "true");
     return api<T>(target.url, { method: "PUT", body: form });
   }
-  if (sig.max_bytes && file.size > sig.max_bytes) throw invalid("That image is larger than 5 MB. Choose a smaller file.");
+  if (sig.max_bytes && file.size > sig.max_bytes) throw invalid(t("media.that-image-is-larger-than-5"));
   const asset = await sendToCloudinary(sig, file, onProgress);
   return api<T>(target.url, { method: "PUT", body: { asset, rights_confirmed: target.rightsConfirmed !== false } });
 }

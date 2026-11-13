@@ -9,7 +9,7 @@ import type { Assignment } from "./types";
 import { t } from "../i18n";
 
 export function roleErrorMessage(err: unknown) {
-  return err instanceof ApiError ? err.message : "That didn’t work. Try again.";
+  return err instanceof ApiError ? err.message : t("admin.that-didn-t-work-try-again");
 }
 
 export function RoleRows({ rows, showUser = true, onChanged }: { rows: Assignment[]; showUser?: boolean; onChanged: () => void }) {

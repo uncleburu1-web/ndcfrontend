@@ -74,11 +74,11 @@ export default function AdminIncidentPage() {
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (dialog === "step") void post("steps/", { text: step }, "Step added.");
-    if (dialog === "notify") void post("notifications/", notify, "Notification recorded.");
-    if (dialog === "notice") void post("notice/", notice, "Notice sent.");
-    if (dialog === "close") void post("close/", closing, "Incident closed.");
-    if (dialog === "edit") void post("", edit, "Incident updated.", "PATCH");
+    if (dialog === "step") void post("steps/", { text: step }, t("admin.step-added"));
+    if (dialog === "notify") void post("notifications/", notify, t("admin.notification-recorded"));
+    if (dialog === "notice") void post("notice/", notice, t("admin.notice-sent"));
+    if (dialog === "close") void post("close/", closing, t("admin.incident-closed-2"));
+    if (dialog === "edit") void post("", edit, t("admin.incident-updated-2"), "PATCH");
   };
 
   const open = inc && inc.status !== "closed";

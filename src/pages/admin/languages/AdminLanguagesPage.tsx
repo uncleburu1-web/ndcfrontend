@@ -106,7 +106,7 @@ export default function AdminLanguagesPage() {
 
       <form className="set-card" onSubmit={(e) => void submit(e)}>
         <h2>{t("languages.record-heading")}</h2>
-        <Select label={t("languages.col-language")} value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })}
+        <Select label={t("languages.form-language")} value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })}
           options={["ha", "ig", "yo", "pcm"].map((c) => ({ value: c, label: languageName(c) }))} />
         <RadioGroup legend={t("languages.scope")} name="scope" value={form.scope} onChange={(v) => setForm({ ...form, scope: v })}
           options={[{ value: "interface", label: t("languages.scope-interface"), hint: t("languages.scope-interface-hint", { version: WEB.version }) },

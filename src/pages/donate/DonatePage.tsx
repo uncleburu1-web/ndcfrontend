@@ -16,14 +16,14 @@ import { redirectTo } from "../../donations/navigation";
 import { formatNaira } from "../../lib/format";
 import { STATES } from "../../lib/nigeria";
 import "./donate.css";
-import { t as tr } from "../../i18n";
+import { t as tr, lazy } from "../../i18n";
 
 type Fields = Record<string, string>;
-const DECLARATIONS = [
-  ["own_funds", "I’m donating my own money."],
-  ["nigerian_source", "I’m a Nigerian citizen or resident, and this money doesn’t come from outside Nigeria."],
-  ["voluntary", "I understand donations are voluntary and don’t affect my vote or membership."],
-] as const;
+const DECLARATIONS = lazy(() => [
+  ["own_funds", tr("donate.i-m-donating-my-own-money")],
+  ["nigerian_source", tr("donate.i-m-a-nigerian-citizen-or")],
+  ["voluntary", tr("donate.i-understand-donations-are-voluntary-and")],
+] as const);
 
 /** DRF nested errors arrive as {declarations: {own_funds: [...]}}; flatten to "declarations.own_funds". */
 function flatten(fields: Record<string, unknown>, prefix = ""): Fields {
@@ -135,10 +135,10 @@ export default function DonatePage() {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     const local: Fields = {};
-    if (amount === null || amount <= 0) local.amount_kobo = "Choose or enter an amount.";
-    else if (amount < min || amount > max) local.amount_kobo = `Give between ${formatNaira(min)} and ${formatNaira(max)} in one payment.`;
-    if (designation === "candidate" && !candidate) local.candidate_slug = "Choose a candidate.";
-    for (const [k] of DECLARATIONS) if (!declared[k]) local[`declarations.${k}`] = "Tick this to continue.";
+    if (amount === null || amount <= 0) local.amount_kobo = tr("donate.choose-or-enter-an-amount");
+    else if (amount < min || amount > max) local.amount_kobo = tr("donate.give-between-and-in-one-payment", { formatNaira: formatNaira(min), formatNaira2: formatNaira(max) });
+    if (designation === "candidate" && !candidate) local.candidate_slug = tr("donate.choose-a-candidate");
+    for (const [k] of DECLARATIONS) if (!declared[k]) local[`declarations.${k}`] = tr("donate.tick-this-to-continue");
     setErrors(local);
     setFormError("");
     if (Object.keys(local).length) return;

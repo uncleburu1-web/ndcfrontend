@@ -117,8 +117,8 @@ export default function AdminCasePage() {
         </div>
         {canAct && !closed && (
           <div className="adm-actions">
-            {!mine ? <Button variant="secondary" onClick={() => void post("claim", {}, "It’s yours for 4 hours.")} loading={busy === "claim"}>{t("admin.take-this-case")}</Button>
-              : <Button variant="ghost" onClick={() => void post("release", {}, "Released to the pool.")} loading={busy === "release"}>{t("admin.release")}</Button>}
+            {!mine ? <Button variant="secondary" onClick={() => void post("claim", {}, t("admin.it-s-yours-for-4-hours"))} loading={busy === "claim"}>{t("admin.take-this-case")}</Button>
+              : <Button variant="ghost" onClick={() => void post("release", {}, t("admin.released-to-the-pool"))} loading={busy === "release"}>{t("admin.release")}</Button>}
           </div>
         )}
       </header>
@@ -142,14 +142,14 @@ export default function AdminCasePage() {
             {removable && <Button variant="danger" onClick={() => open("remove")}>{t("admin.remove-2")}</Button>}
             {c.decision === "removed" && c.target_kind !== "candidate" && <Button variant="secondary" onClick={() => open("restore")}>{t("admin.restore")}</Button>}
             {hideable && !closed && item?.status === "published" && mine && (
-              <Button variant="secondary" onClick={() => void post("hide", { note }, "Hidden while you decide. Remove, restore or keep it within 48 hours.")}
+              <Button variant="secondary" onClick={() => void post("hide", { note }, t("admin.hidden-while-you-decide-remove-restore"))}
                 loading={busy === "hide"}>{t("admin.hide-while-deciding")}</Button>)}
             {hideable && item?.status === "hidden" && (
-              <Button variant="secondary" onClick={() => void post("unhide", {}, "Shown again.")} loading={busy === "unhide"}>{t("admin.unhide")}</Button>)}
+              <Button variant="secondary" onClick={() => void post("unhide", {}, t("admin.shown-again"))} loading={busy === "unhide"}>{t("admin.unhide")}</Button>)}
             {hasAuthor && <Button variant="secondary" onClick={() => open("warn")}>{t("admin.warn-the-author")}</Button>}
             {hasAuthor && !pauseActive && <Button variant="secondary" onClick={() => open("pause")}>
               {isCommunityItem ? t("admin.pause-community-posting") : t("admin.pause-community-news")}</Button>}
-            {pauseActive && <Button variant="secondary" onClick={() => void post("lift-pause", { restriction: pauseActive.id }, "Pause lifted.")}>{t("admin.lift-the-pause")}</Button>}
+            {pauseActive && <Button variant="secondary" onClick={() => void post("lift-pause", { restriction: pauseActive.id }, t("admin.pause-lifted"))}>{t("admin.lift-the-pause")}</Button>}
             {!closed && c.status !== "escalated" && !c.is_system_admin && <Button variant="ghost" onClick={() => open("escalate")}>{t("admin.escalate")}</Button>}
             {!closed && c.status !== "escalated" && c.is_system_admin && <Button variant="ghost" onClick={() => open("escalate")}>{t("admin.mark-escalated")}</Button>}
           </div>
@@ -157,7 +157,7 @@ export default function AdminCasePage() {
             <p className="ds-field__hint">{t.rich("admin.candidate-profiles-aren-t-removed-correct", { link: (chunks) => <Link to={item?.admin_url ?? "/admin/candidates"}>{chunks}</Link> })}</p>
           )}
           {c.is_system_admin && (
-            <Switch label={t("admin.legal-hold")} checked={c.legal_hold} onChange={(v) => void post("hold", { on: v }, v ? "Legal hold on: nothing about this item is pruned." : "Legal hold off.")}
+            <Switch label={t("admin.legal-hold")} checked={c.legal_hold} onChange={(v) => void post("hold", { on: v }, v ? t("admin.legal-hold-on-nothing-about-this") : t("admin.legal-hold-off"))}
               hint={t("admin.stops-pruning-of-the-item-and")} />
           )}
         </section>
@@ -242,7 +242,7 @@ export default function AdminCasePage() {
 
       <Modal open={modal === "keep"} onClose={() => setModal(null)} title={t("admin.keep-it-up")}
         footer={<><Button variant="secondary" onClick={() => setModal(null)}>{t("admin.go-back")}</Button>
-          <Button onClick={() => void post("keep", { note: internal }, "Kept. Reporters are told the content stays up.")} loading={busy === "keep"}>{t("admin.keep-and-close")}</Button></>}>
+          <Button onClick={() => void post("keep", { note: internal }, t("admin.kept-reporters-are-told-the-content"))} loading={busy === "keep"}>{t("admin.keep-and-close")}</Button></>}>
         <p>{t("admin.the-case-closes-and-reports-are")}</p>
         <TextArea label={t("admin.internal-note-optional")} rows={2} maxLength={1000} value={internal} onChange={(e) => setInternal(e.target.value)} />
       </Modal>
@@ -251,7 +251,7 @@ export default function AdminCasePage() {
         footer={<><Button variant="secondary" onClick={() => setModal(null)}>{t("admin.go-back")}</Button>
           <Button variant="danger" disabled={!rule || (c.target_kind === "profile" && parts.length === 0)} loading={busy === "remove"}
             onClick={() => void post("remove", { rule, note_to_author: note, internal_note: internal, warn, ...(c.target_kind === "profile" ? { parts } : {}) },
-              "Removed. The author is told and can appeal.")}>
+              t("admin.removed-the-author-is-told-and"))}>
             {warn ? t("admin.remove-and-warn") : t("admin.remove-2")}
           </Button></>}>
         <p>{t("admin.it-s-hidden-from-the-public")}</p>
@@ -275,7 +275,7 @@ export default function AdminCasePage() {
 
       <Modal open={modal === "restore"} onClose={() => setModal(null)} title={t("admin.restore-it")}
         footer={<><Button variant="secondary" onClick={() => setModal(null)}>{t("admin.go-back")}</Button>
-          <Button onClick={() => void post("restore", { note }, "Restored. It’s public again.")} loading={busy === "restore"}>{t("admin.restore")}</Button></>}>
+          <Button onClick={() => void post("restore", { note }, t("admin.restored-it-s-public-again"))} loading={busy === "restore"}>{t("admin.restore")}</Button></>}>
         <p>{t("admin.the-removal-notice-goes-and-the")}</p>
         <TextArea label={t("admin.note")} hint={t("admin.for-example-mistake-or-upheld-on")} rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
       </Modal>
@@ -289,7 +289,7 @@ export default function AdminCasePage() {
 
       <Modal open={modal === "warn"} onClose={() => setModal(null)} title={t("admin.warn-the-author-2")}
         footer={<><Button variant="secondary" onClick={() => setModal(null)}>{t("admin.go-back")}</Button>
-          <Button disabled={!rule} onClick={() => void post("warn", { rule, reason: note }, "Warning added. The author is told.")} loading={busy === "warn"}>{t("admin.add-warning")}</Button></>}>
+          <Button disabled={!rule} onClick={() => void post("warn", { rule, reason: note }, t("admin.warning-added-the-author-is-told"))} loading={busy === "warn"}>{t("admin.add-warning")}</Button></>}>
         <p>{t("admin.a-warning-goes-on-the-author")}</p>
         <RuleSelect value={rule} onChange={setRule} />
         <TextArea label={t("admin.reason-shown-to-the-author")} rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
@@ -299,7 +299,7 @@ export default function AdminCasePage() {
         title={isCommunityItem ? t("admin.pause-this-author-s-community-posting") : t("admin.pause-this-author-s-community-news")}
         footer={<><Button variant="secondary" onClick={() => setModal(null)}>{t("admin.go-back")}</Button>
           <Button variant="danger" disabled={!rule} onClick={() => void post("pause", { days: Number(days), rule, reason: note, ...(isCommunityItem ? { scope: pauseScope } : {}) },
-            "Paused. The author is told and can appeal.")}
+            t("admin.paused-the-author-is-told-and"))}
             loading={busy === "pause"}>{t("admin.pause-for-day", { days, v: days === "1" ? "" : "s" })}</Button></>}>
         {isCommunityItem ? (
           <>

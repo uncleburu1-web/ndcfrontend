@@ -35,27 +35,27 @@ interface ActionSpec {
 const ACTIONS: Record<ActionName, ActionSpec> = {
   verify: {
     get label() { return t("admin.verify"); },
-    title: (n) => `Verify ${n}?`,
-    body: () => "Confirm you have checked this candidate's details against supporting information. Verification is required before publishing.",
+    title: (n) => t("admin.verify-2", { n }),
+    body: () => t("admin.confirm-you-have-checked-this-candidate"),
     input: { field: "notes", get label() { return t("admin.what-did-you-check"); }, get hint() { return t("admin.internal-note-never-shown-publicly-for"); } },
   },
-  unverify: { get label() { return t("admin.remove-verification"); }, variant: "secondary", title: (n) => `Remove verification from ${n}?`, body: () => "They can't be published again until someone verifies them." },
-  publish: { get label() { return t("admin.publish"); }, title: (n) => `Publish ${n}?`, body: (n) => `${n} will appear on the public Candidates page straight away.` },
+  unverify: { get label() { return t("admin.remove-verification"); }, variant: "secondary", title: (n) => t("admin.remove-verification-from", { n }), body: () => t("admin.they-can-t-be-published-again") },
+  publish: { get label() { return t("admin.publish"); }, title: (n) => t("admin.publish-2", { n }), body: (n) => `${n} will appear on the public Candidates page straight away.` },
   unpublish: {
     get label() { return t("admin.unpublish"); },
     variant: "secondary",
-    title: (n) => `Unpublish ${n}?`,
+    title: (n) => t("admin.unpublish-2", { n }),
     body: (n) => `${n} will disappear from the public Candidates page. Their profile link will show “not found”.`,
     input: { field: "reason", get label() { return t("admin.reason"); }, get hint() { return t("admin.recorded-in-the-audit-log"); } },
   },
   archive: {
     get label() { return t("admin.archive"); },
     variant: "danger",
-    title: (n) => `Archive ${n}?`,
+    title: (n) => t("admin.archive-2", { n }),
     body: (n) => `${n} will be hidden everywhere public, and every linked account will lose access to this candidate. History is kept, and you can restore later.`,
     input: { field: "reason", get label() { return t("admin.reason"); }, get hint() { return t("admin.recorded-in-the-audit-log"); } },
   },
-  restore: { get label() { return t("admin.restore"); }, variant: "secondary", title: (n) => `Restore ${n}?`, body: () => "They go back to draft, unverified. Linked accounts are not restored; link them again if needed." },
+  restore: { get label() { return t("admin.restore"); }, variant: "secondary", title: (n) => t("admin.restore-2", { n }), body: () => t("admin.they-go-back-to-draft-unverified") },
 };
 
 function availableActions(c: AdminCandidate): ActionName[] {
@@ -225,7 +225,7 @@ function PhotoPanel({ candidate, onDone }: { candidate: AdminCandidate; onDone: 
     if (!file) return;
     if (!rights) {  // checked before uploading, so nothing is sent for a photo the server would refuse
       setError(new ApiError({ status: 400, code: "validation_error",
-        fields: { rights_confirmed: ["Confirm you took this photo or have the right to share it."] } }));
+        fields: { rights_confirmed: [t("admin.confirm-you-took-this-photo-or")] } }));
       return;
     }
     setBusy(true);

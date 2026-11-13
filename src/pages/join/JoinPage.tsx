@@ -19,14 +19,14 @@ import { useAuthedImage } from "../../membership/useAuthedImage";
 import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
 import { DISPLAY_LABELS, type MembershipConfig, type MyMembership } from "../../membership/types";
 import "./join.css";
-import { t } from "../../i18n";
+import { t, lazy } from "../../i18n";
 
 type Errors = Record<string, string>;
-const DECLARATIONS = [
-  ["no_other_party", "I’m not a member of any other political party."],
-  ["constitution", "I agree to abide by the NDC constitution."],
-  ["data_processing", "I agree that NDCConnect and the NDC may process these details, including my NIN and photo, to keep the party’s membership register and submit it to INEC as the Electoral Act 2026 requires."],
-] as const;
+const DECLARATIONS = lazy(() => [
+  ["no_other_party", t("join.i-m-not-a-member-of")],
+  ["constitution", t("join.i-agree-to-abide-by-the")],
+  ["data_processing", t("join.i-agree-that-ndcconnect-and-the")],
+] as const);
 const EDITABLE = new Set([null, "draft", "rejected", "cancelled", "refunded"]);
 
 function flatten(fields: Record<string, unknown>, prefix = ""): Errors {
@@ -115,7 +115,7 @@ function DetailsForm({ m, onSaved }: { m: MyMembership | null; onSaved: (m: MyMe
       onSaved(await api<MyMembership>("/me/membership/photo/", { method: "PUT", body: form }));
       setPhotoVersion((v) => v + 1);
     } catch (err) {
-      setErrors((x) => ({ ...x, photo: err instanceof ApiError ? err.message : "Upload failed." }));
+      setErrors((x) => ({ ...x, photo: err instanceof ApiError ? err.message : t("join.upload-failed") }));
     } finally {
       setPhotoBusy(false);
     }

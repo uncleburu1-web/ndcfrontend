@@ -16,16 +16,16 @@ import "../candidates/admin.css";
 import "../donations/admin-donations.css";
 import "../membership/admin-membership.css";
 import "../../../news/news.css";
-import { t } from "../../../i18n";
+import { t, lazy } from "../../../i18n";
 
-const CHECKLIST = [
-  "The source checks out.",
-  "No false or unsourced election results (only INEC).",
-  "No abusive or inciting language (Electoral Act 2026 s. 96).",
-  "No private information about anyone.",
-  "Image rights are plausible.",
-  "It’s news, not an advert or a personal attack.",
-];
+const CHECKLIST = lazy(() => [
+  t("admin.the-source-checks-out"),
+  t("admin.no-false-or-unsourced-election-results"),
+  t("admin.no-abusive-or-inciting-language-electoral"),
+  t("admin.no-private-information-about-anyone"),
+  t("admin.image-rights-are-plausible"),
+  t("admin.it-s-news-not-an-advert"),
+]);
 type Modal = "reject" | "remove" | null;
 
 export default function AdminNewsDetailPage() {
@@ -51,7 +51,7 @@ export default function AdminNewsDetailPage() {
       setA(await api<AdminArticle>(`/admin/news/${id}/${action}/`, { method: "POST", body }));
       setModal(null);
       setReason("");
-      toast.show({ tone: "success", message: { approve: "Approved and published.", reject: "Rejected. The author sees your reason.", remove: "Removed from NDCConnect.", restore: "Restored." }[action] });
+      toast.show({ tone: "success", message: { approve: t("admin.approved-and-published"), reject: t("admin.rejected-the-author-sees-your-reason"), remove: t("admin.removed-from-ndcconnect"), restore: "Restored." }[action] });
     } catch (err) {
       toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("admin.that-didn-t-work") });
       res.retry();
