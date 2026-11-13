@@ -1,5 +1,6 @@
 /** Spec 18: event and volunteering shapes, from the generated OpenAPI types. */
 import type { Schema } from "../api/typed";
+import { format, t as tr } from "../i18n";
 
 export type EventCard = Schema<"EventCardSchema">;
 export type EventDetail = Schema<"EventDetailSchema">;
@@ -9,36 +10,32 @@ export type MyEvent = Schema<"MyEventSchema">;
 export type EventList = Schema<"EventList">;
 
 export const TYPE_OPTIONS = [
-  { value: "rally", label: "Rally" }, { value: "canvass", label: "Canvassing drive" }, { value: "town_hall", label: "Town hall" },
-  { value: "meeting", label: "Meeting" }, { value: "training", label: "Training" }, { value: "other", label: "Other" },
+  { value: "rally", get label() { return tr("events.rally"); } }, { value: "canvass", get label() { return tr("events.canvassing-drive"); } }, { value: "town_hall", get label() { return tr("events.town-hall"); } },
+  { value: "meeting", get label() { return tr("events.meeting"); } }, { value: "training", get label() { return tr("events.training"); } }, { value: "other", get label() { return tr("events.other"); } },
 ];
 export const MODE_OPTIONS = [
-  { value: "in_person", label: "In person" }, { value: "online", label: "Online" }, { value: "hybrid", label: "In person and online" },
+  { value: "in_person", get label() { return tr("events.in-person"); } }, { value: "online", get label() { return tr("events.online"); } }, { value: "hybrid", get label() { return tr("events.in-person-and-online"); } },
 ];
 /** Rule 3: no place of worship, police station or public office (Electoral Act 2026 s. 96). */
 export const VENUE_OPTIONS = [
-  { value: "open_ground", label: "Open ground or field" }, { value: "hall", label: "Hall or event centre" }, { value: "hotel", label: "Hotel" },
-  { value: "school", label: "School (outside school hours)" }, { value: "market", label: "Market" },
-  { value: "street", label: "Street or neighbourhood" }, { value: "private_premises", label: "Private premises" },
+  { value: "open_ground", get label() { return tr("events.open-ground-or-field"); } }, { value: "hall", get label() { return tr("events.hall-or-event-centre"); } }, { value: "hotel", get label() { return tr("events.hotel"); } },
+  { value: "school", get label() { return tr("events.school-outside-school-hours"); } }, { value: "market", get label() { return tr("events.market"); } },
+  { value: "street", get label() { return tr("events.street-or-neighbourhood"); } }, { value: "private_premises", get label() { return tr("events.private-premises"); } },
 ];
 export const DECLARATION_WORDS: Record<string, string> = {
-  no_inducements: "This event offers no money, gifts or goods for attending or voting (a “transport refund” counts). Electoral Act 2026 s. 22.",
-  lawful_venue: "The venue isn’t a place of worship, a police station or a public office. Electoral Act 2026 s. 96.",
-  police_notified: "The police have been, or will be, told about this public rally (Police Act 2020 s. 83(4)). No permit is needed.",
+  get no_inducements() { return tr("events.this-event-offers-no-money-gifts"); },
+  get lawful_venue() { return tr("events.the-venue-isn-t-a-place"); },
+  get police_notified() { return tr("events.the-police-have-been-or-will"); },
 };
 export const VOLUNTEER_ROLE_WORDS: Record<string, string> = {
-  canvassing: "Canvassing", events: "Events", social_media: "Social media", logistics: "Logistics", data_and_tech: "Data and tech",
-  outreach_youth: "Youth outreach", outreach_women: "Women’s outreach", outreach_disability: "Disability outreach", other: "Other",
+  get canvassing() { return tr("events.canvassing"); }, get events() { return tr("events.events"); }, get social_media() { return tr("events.social-media"); }, get logistics() { return tr("events.logistics"); }, get data_and_tech() { return tr("events.data-and-tech"); },
+  get outreach_youth() { return tr("events.youth-outreach"); }, get outreach_women() { return tr("events.women-s-outreach"); }, get outreach_disability() { return tr("events.disability-outreach"); }, get other() { return tr("events.other"); },
 };
-export const AVAILABILITY_WORDS: Record<string, string> = { weekdays: "Weekdays", weekday_evenings: "Weekday evenings", weekends: "Weekends" };
+export const AVAILABILITY_WORDS: Record<string, string> = { get weekdays() { return tr("events.weekdays"); }, get weekday_evenings() { return tr("events.weekday-evenings"); }, get weekends() { return tr("events.weekends"); } };
 
 /** "Sat 14 Nov, 10:00 (WAT)" — Lagos time always (rule 11). */
 export function whenWords(iso: string, withDay = true): string {
-  const d = new Date(iso);
-  const parts = new Intl.DateTimeFormat("en-GB", { weekday: withDay ? "short" : undefined, day: "numeric", month: "short",
-    hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Lagos" }).formatToParts(d);
-  const g = (t: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === t)?.value ?? "";
-  return `${withDay ? `${g("weekday")} ` : ""}${g("day")} ${g("month")}, ${g("hour")}:${g("minute")} (WAT)`;
+  return format.when(iso, withDay); // spec 21 §4: in the current language
 }
 
 /** Lagos wall-clock "YYYY-MM-DDTHH:mm" for <input type="datetime-local">, and back to ISO with +01:00. */

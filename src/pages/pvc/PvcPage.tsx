@@ -16,6 +16,7 @@ import { formatDate } from "../../lib/format";
 import type { MyPvc, PvcConfig } from "../../pvc/types";
 import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
 import "./pvc.css";
+import { t } from "../../i18n";
 
 type Errors = Record<string, string>;
 
@@ -58,48 +59,48 @@ function VerifyForm({ initial, onDone }: { initial?: MyPvc; onDone: (p: MyPvc) =
   return (
     <form className="pvc-form" onSubmit={submit} noValidate>
       {formError && <Banner tone="error">{formError}</Banner>}
-      <TextField label="VIN (Voter Identification Number)" required value={form.vin} onChange={(e) => setForm({ ...form, vin: e.target.value })}
-        hint="19 letters and numbers as printed on your card, or the last 10." error={errors.vin} autoComplete="off" />
-      <TextField label="Surname as printed on the card" required value={form.surname} onChange={(e) => setForm({ ...form, surname: e.target.value })}
+      <TextField label={t("pvc.vin-voter-identification-number")} required value={form.vin} onChange={(e) => setForm({ ...form, vin: e.target.value })}
+        hint={t("pvc.19-letters-and-numbers-as-printed")} error={errors.vin} autoComplete="off" />
+      <TextField label={t("pvc.surname-as-printed-on-the-card")} required value={form.surname} onChange={(e) => setForm({ ...form, surname: e.target.value })}
         error={errors.surname} />
-      <Select label="State of registration" required value={form.state} onChange={(e) => { setForm({ ...form, state: e.target.value }); setGeo(EMPTY_GEO); }}
-        error={errors.state} options={[{ value: "", label: "Choose a state" }, ...STATES]} />
+      <Select label={t("pvc.state-of-registration")} required value={form.state} onChange={(e) => { setForm({ ...form, state: e.target.value }); setGeo(EMPTY_GEO); }}
+        error={errors.state} options={[{ value: "", label: t("pvc.choose-a-state") }, ...STATES]} />
       <GeoPicker state={form.state} value={geo} onChange={setGeo} errors={errors} required={["lga"]}
-        hint="Your LGA of registration. Ward and polling unit are optional; the officer confirms them from INEC’s checker." />
+        hint={t("pvc.your-lga-of-registration-ward-and")} />
       <Checkbox required checked={form.consent} onChange={(e) => setForm({ ...form, consent: e.target.checked })} error={errors.consent}
-        label="NDCConnect may check these details on INEC’s voter register to confirm my registration." />
-      <Button type="submit" loading={busy} loadingLabel="Sending…">Send for checking</Button>
+        label={t("pvc.ndcconnect-may-check-these-details-on")} />
+      <Button type="submit" loading={busy} loadingLabel={t("pvc.sending")}>{t("pvc.send-for-checking")}</Button>
     </form>
   );
 }
 
 function GetYourPvc({ config, failed }: { config: PvcConfig | null; failed: boolean }) {
-  if (failed) return <p className="pvc-private">INEC’s links couldn’t load. Visit inecnigeria.org.</p>;
+  if (failed) return <p className="pvc-private">{t("pvc.inec-s-links-couldn-t-load")}</p>;
   if (!config) return <Skeleton width="80%" />;
   return (
     <>
       {config.guidance_note && <Banner tone="info">{config.guidance_note}</Banner>}
       <div className="pvc-guide">
-        <h3>Collect your card</h3>
-        <p>{config.collection_note || "Collect your card from the INEC office where you registered."}</p>
+        <h3>{t("pvc.collect-your-card")}</h3>
+        <p>{config.collection_note || t("pvc.collect-your-card-from-the-inec")}</p>
       </div>
       <div className="pvc-guide">
-        <h3>Check your registration</h3>
-        <p>Search INEC’s voter register with your VIN, or your name and date of birth.</p>
+        <h3>{t("pvc.check-your-registration")}</h3>
+        <p>{t("pvc.search-inec-s-voter-register-with")}</p>
         <Button variant="secondary" href={config.inec_voter_check_url} target="_blank" rel="noopener noreferrer">
-          Check on INEC’s voter checker<span className="visually-hidden"> (INEC’s site, opens in a new tab)</span>
+          {t.rich("pvc.check-on-inec-s-voter-checker", { span: (chunks) => <span className="visually-hidden">{chunks}</span> })}
         </Button>
       </div>
       {config.inec_pvc_url && (
         <div className="pvc-guide">
-          <h3>Register, transfer or replace</h3>
-          <p>New registration, transfers and replacement cards are handled by INEC.</p>
+          <h3>{t("pvc.register-transfer-or-replace")}</h3>
+          <p>{t("pvc.new-registration-transfers-and-replacement-cards")}</p>
           <Button variant="secondary" href={config.inec_pvc_url} target="_blank" rel="noopener noreferrer">
-            Go to INEC’s portal<span className="visually-hidden"> (INEC’s site, opens in a new tab)</span>
+            {t.rich("pvc.go-to-inec-s-portal-inec", { span: (chunks) => <span className="visually-hidden">{chunks}</span> })}
           </Button>
         </div>
       )}
-      <p className="pvc-private">NDCConnect isn’t INEC. Only INEC issues and replaces PVCs.</p>
+      <p className="pvc-private">{t("pvc.ndcconnect-isn-t-inec-only-inec")}</p>
     </>
   );
 }
@@ -117,7 +118,7 @@ export default function PvcPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    document.title = "PVC | NDCConnect";
+    document.title = t("pvc.pvc-ndcconnect");
   }, []);
   useEffect(() => {
     if (!isSignedIn) return;
@@ -144,31 +145,30 @@ export default function PvcPage() {
   const toggleBadge = async (show: boolean) => {
     try {
       setPvc(await api<MyPvc>("/me/pvc/badge/", { method: "PATCH", body: { show_badge: show } }));
-      toast.show({ tone: "success", message: show ? "Your Verified voter badge will show beside your name where it’s public." : "Badge hidden from public pages." });
+      toast.show({ tone: "success", message: show ? t("pvc.your-verified-voter-badge-will-show") : t("pvc.badge-hidden-from-public-pages") });
     } catch (err) {
       if (err instanceof ApiError && err.code === CONSENT_DECLINED) return; // "Not now": nothing changes (spec 14 §4.2)
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Couldn’t change that." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("pvc.couldn-t-change-that") });
     }
   };
 
   return (
     <div className="pvc-page">
       <header>
-        <h1>Your PVC</h1>
+        <h1>{t("pvc.your-pvc")}</h1>
         <p className="pvc-page__lead">
-          A PVC is only needed to join the NDC. You never need one to browse, vote (follow) candidates, donate or read news.
-        </p>
+          {t("pvc.a-pvc-is-only-needed-to")}</p>
       </header>
 
       <div className="pvc-grid">
         <section className="pvc-card" aria-labelledby="verify-title">
-          <h2 id="verify-title">Verify your PVC</h2>
+          <h2 id="verify-title">{t("pvc.verify-your-pvc")}</h2>
           {!isLoaded || loading ? (
             <Skeleton width="80%" />
           ) : !isSignedIn ? (
             <>
-              <p>Sign in to verify your PVC.</p>
-              <Button href="/sign-in?redirect_url=%2Fpvc">Sign in</Button>
+              <p>{t("pvc.sign-in-to-verify-your-pvc")}</p>
+              <Button href="/sign-in?redirect_url=%2Fpvc">{t("pvc.sign-in")}</Button>
             </>
           ) : !pvc || pvc.status === "unverified" || editing ? (
             <VerifyForm initial={editing ? pvc ?? undefined : undefined} onDone={done} />
@@ -177,32 +177,29 @@ export default function PvcPage() {
               {pvc.status === "successful" ? <VerifiedVoterBadge /> : <StatusBadge set="pvc" status={pvc.status} />}
               {pvc.status === "pending" && (
                 <p>
-                  We’re checking your details on INEC’s voter register. This is done by a person and usually takes up to 3 working days.
-                  We’ll send you a notification when it’s done.
-                </p>
+                  {t("pvc.we-re-checking-your-details-on")}</p>
               )}
-              {pvc.status === "successful" && <p>Verified{pvc.reviewed_at ? ` on ${formatDate(pvc.reviewed_at)}` : ""}.</p>}
-              {pvc.status === "rejected" && <Banner tone="error" title="We couldn’t verify your PVC">{pvc.reason}</Banner>}
+              {pvc.status === "successful" && <p>{t("pvc.verified", { v: pvc.reviewed_at ? t("pvc.on", { formatDate: formatDate(pvc.reviewed_at) }) : "" })}</p>}
+              {pvc.status === "rejected" && <Banner tone="error" title={t("pvc.we-couldn-t-verify-your-pvc")}>{pvc.reason}</Banner>}
               <dl className="pvc-details">
-                <div><dt>VIN</dt><dd>{pvc.vin_masked}</dd></div>
-                <div><dt>Surname</dt><dd>{pvc.surname}</dd></div>
-                <div><dt>Registered in</dt><dd>{pvc.lga}, {pvc.state_label}</dd></div>
-                {pvc.place?.polling_unit && <div><dt>Polling unit</dt><dd>{pvc.place.polling_unit.name} · {pvc.place.polling_unit.code}</dd></div>}
+                <div><dt>{t("pvc.vin")}</dt><dd>{pvc.vin_masked}</dd></div>
+                <div><dt>{t("pvc.surname")}</dt><dd>{pvc.surname}</dd></div>
+                <div><dt>{t("pvc.registered-in")}</dt><dd>{pvc.lga}, {pvc.state_label}</dd></div>
+                {pvc.place?.polling_unit && <div><dt>{t("pvc.polling-unit")}</dt><dd>{pvc.place.polling_unit.name} · {pvc.place.polling_unit.code}</dd></div>}
               </dl>
-              {pvc.pending_place?.lga && <p className="pvc-private">Your change to {pvc.pending_place.polling_unit?.name ?? pvc.pending_place.lga.name} waits
-                for a PVC officer. Your communities stay as they are until then.</p>}
-              <p className="pvc-private">These details are private and encrypted.</p>
+              {pvc.pending_place?.lga && <p className="pvc-private">{t("pvc.your-change-to-waits-for-a", { v: pvc.pending_place.polling_unit?.name ?? pvc.pending_place.lga.name })}</p>}
+              <p className="pvc-private">{t("pvc.these-details-are-private-and-encrypted")}</p>
               {pvc.status === "successful" && (
-                <Switch label="Show my Verified voter badge publicly" checked={Boolean(pvc.show_badge)} onChange={(v) => void toggleBadge(v)}
-                  hint="Only shown next to your name where your name is already public, such as news you chose to sign with your name." />
+                <Switch label={t("pvc.show-my-verified-voter-badge-publicly")} checked={Boolean(pvc.show_badge)} onChange={(v) => void toggleBadge(v)}
+                  hint={t("pvc.only-shown-next-to-your-name")} />
               )}
               <div className="pvc-actions">
-                {pvc.status === "pending" && <Button variant="secondary" loading={busy} onClick={() => void withdraw()}>Withdraw</Button>}
-                {pvc.status === "rejected" && <Button onClick={() => setEditing(true)}>Try again</Button>}
+                {pvc.status === "pending" && <Button variant="secondary" loading={busy} onClick={() => void withdraw()}>{t("pvc.withdraw")}</Button>}
+                {pvc.status === "rejected" && <Button onClick={() => setEditing(true)}>{t("pvc.try-again")}</Button>}
                 {pvc.status === "successful" && (
                   <>
-                    {!activeMember && <Button href="/join">Continue to Join NDC</Button>}
-                    <Button variant="ghost" onClick={() => setEditing(true)}>Changed your registration? Submit new details</Button>
+                    {!activeMember && <Button href="/join">{t("pvc.continue-to-join-ndc")}</Button>}
+                    <Button variant="ghost" onClick={() => setEditing(true)}>{t("pvc.changed-your-registration-submit-new-details")}</Button>
                   </>
                 )}
               </div>
@@ -211,7 +208,7 @@ export default function PvcPage() {
         </section>
 
         <section className="pvc-card" aria-labelledby="get-title">
-          <h2 id="get-title">Get your PVC</h2>
+          <h2 id="get-title">{t("pvc.get-your-pvc")}</h2>
           <GetYourPvc config={config.data} failed={Boolean(config.error)} />
         </section>
       </div>

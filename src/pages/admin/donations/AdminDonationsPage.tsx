@@ -11,6 +11,7 @@ import { formatDate } from "../../../lib/format";
 import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "./admin-donations.css";
+import { t } from "../../../i18n";
 
 const STATUSES: [string, string][] = [["", "All statuses"], ["successful", "Successful"], ["pending", "Pending"], ["review", "Under review"],
   ["failed", "Failed"], ["abandoned", "Abandoned"], ["refunded", "Refunded"], ["initiated", "Started"]];
@@ -31,7 +32,7 @@ export default function AdminDonationsPage() {
   const res = useRequest(`admin-donations:${qs}`, (signal) => api<AdminDonationPage>(`/admin/donations/${qs.toString() ? `?${qs}` : ""}`, { signal }));
 
   useEffect(() => {
-    document.title = "Donations | NDCConnect admin";
+    document.title = t("admin.donations-ndcconnect-admin");
   }, []);
 
   const set = (changes: Record<string, string>) => {
@@ -53,9 +54,9 @@ export default function AdminDonationsPage() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      toast.show({ tone: "success", message: "Export downloaded. Exports are recorded in the audit log." });
+      toast.show({ tone: "success", message: t("admin.export-downloaded-exports-are-recorded-in") });
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof Error ? err.message : "Export failed." });
+      toast.show({ tone: "error", message: err instanceof Error ? err.message : t("admin.export-failed") });
     } finally {
       setExporting(false);
     }
@@ -71,48 +72,46 @@ export default function AdminDonationsPage() {
       <AdminNav current="donations" />
       <header className="adm-page__head">
         <div>
-          <h1>Donations</h1>
-          <p className="ds-field__hint">Full records for party returns. Donor details are private; viewing and exporting them is audited.</p>
+          <h1>{t("admin.donations")}</h1>
+          <p className="ds-field__hint">{t("admin.full-records-for-party-returns-donor")}</p>
         </div>
-        <Button variant="secondary" onClick={() => void exportCsv()} loading={exporting} loadingLabel="Exporting…">Export CSV</Button>
+        <Button variant="secondary" onClick={() => void exportCsv()} loading={exporting} loadingLabel={t("admin.exporting")}>{t("admin.export-csv")}</Button>
       </header>
 
       {res.data && res.data.totals.review > 0 && params.get("status") !== "review" && (
-        <Banner tone="warning" title={`${res.data.totals.review} donation${res.data.totals.review === 1 ? "" : "s"} need review`}
-          action={<Button size="sm" variant="secondary" onClick={() => set({ status: "review" })}>Show them</Button>}>
-          Amount mismatches or limit breaches. Resolve them in the payment provider’s dashboard, then re-check.
-        </Banner>
+        <Banner tone="warning" title={t("admin.donation-need-review", { review: res.data.totals.review, v: res.data.totals.review === 1 ? "" : "s" })}
+          action={<Button size="sm" variant="secondary" onClick={() => set({ status: "review" })}>{t("admin.show-them")}</Button>}>
+          {t("admin.amount-mismatches-or-limit-breaches-resolve")}</Banner>
       )}
 
       <form className="adm-donation-filters" onSubmit={onSearch}>
-        <Select label="Status" value={params.get("status") ?? ""} onChange={(e) => set({ status: e.target.value })}
+        <Select label={t("admin.status")} value={params.get("status") ?? ""} onChange={(e) => set({ status: e.target.value })}
           options={STATUSES.map(([value, label]) => ({ value, label }))} />
-        <Select label="Given to" value={params.get("designation") ?? ""} onChange={(e) => set({ designation: e.target.value })}
-          options={[{ value: "", label: "Everything" }, { value: "party", label: "NDC general fund" }, { value: "candidate", label: "Candidates" }]} />
-        <label className="adm-date">From<input type="date" className="ds-input" value={params.get("date_from") ?? ""} onChange={(e) => set({ date_from: e.target.value })} /></label>
-        <label className="adm-date">To<input type="date" className="ds-input" value={params.get("date_to") ?? ""} onChange={(e) => set({ date_to: e.target.value })} /></label>
+        <Select label={t("admin.given-to")} value={params.get("designation") ?? ""} onChange={(e) => set({ designation: e.target.value })}
+          options={[{ value: "", label: t("admin.everything") }, { value: "party", label: t("admin.ndc-general-fund") }, { value: "candidate", label: t("admin.candidates") }]} />
+        <label className="adm-date">{t.rich("admin.from", { input: <input type="date" className="ds-input" value={params.get("date_from") ?? ""} onChange={(e) => set({ date_from: e.target.value })} /> })}</label>
+        <label className="adm-date">{t.rich("admin.to", { input: <input type="date" className="ds-input" value={params.get("date_to") ?? ""} onChange={(e) => set({ date_to: e.target.value })} /> })}</label>
         <div className="adm-donation-filters__search">
-          <TextField label="Search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Reference, name or email" />
-          <Button type="submit" variant="secondary">Search</Button>
+          <TextField label={t("admin.search")} value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("admin.reference-name-or-email")} />
+          <Button type="submit" variant="secondary">{t("admin.search")}</Button>
         </div>
       </form>
 
       {res.error ? (
-        <Banner tone="error" title="We couldn’t load donations" action={<Button variant="secondary" size="sm" onClick={res.retry}>Try again</Button>}>{res.error.message}</Banner>
+        <Banner tone="error" title={t("admin.we-couldn-t-load-donations")} action={<Button variant="secondary" size="sm" onClick={res.retry}>{t("admin.try-again-2")}</Button>}>{res.error.message}</Banner>
       ) : res.loading && !res.data ? (
         <Skeleton width="100%" height={160} />
       ) : res.data && res.data.count === 0 ? (
-        <EmptyState title="No donations match">Try other filters.</EmptyState>
+        <EmptyState title={t("admin.no-donations-match")}>{t("admin.try-other-filters")}</EmptyState>
       ) : res.data ? (
         <>
           <p className="adm-donation-totals">
-            Successful in this view: <strong>{formatKobo(res.data.totals.successful.total_kobo)}</strong> from {res.data.totals.successful.count} donations
-            {res.data.totals.demo?.count > 0 && (
-              <> · <DemoBadge /> plus {res.data.totals.demo.count.toLocaleString("en-NG")} demo donations ({formatKobo(res.data.totals.demo.total_kobo)}), not counted and never exported</>
-            )}
+            {t.rich("admin.successful-in-this-view-from-donations", { formatKobo: formatKobo(res.data.totals.successful.total_kobo), strong: (chunks) => <strong>{chunks}</strong>, count: res.data.totals.successful.count, x4: res.data.totals.demo?.count > 0 && (
+              <> {t.rich("admin.plus-demo-donations-not-counted-and", { demobadge: <DemoBadge />, count: res.data.totals.demo.count.toLocaleString("en-NG"), formatKobo: formatKobo(res.data.totals.demo.total_kobo) })}</>
+            ) })}
           </p>
           <div className="adm-table-wrap"><table className="adm-table">
-            <thead><tr><th>Date</th><th>Reference</th><th>Donor</th><th>Amount</th><th>Given to</th><th>Status</th></tr></thead>
+            <thead><tr><th>{t("admin.date")}</th><th>{t("admin.reference")}</th><th>{t("admin.donor")}</th><th>{t("admin.amount")}</th><th>{t("admin.given-to")}</th><th>{t("admin.status")}</th></tr></thead>
             <tbody>
               {res.data.results.map((d) => (
                 <tr key={d.id}>
@@ -126,7 +125,7 @@ export default function AdminDonationsPage() {
               ))}
             </tbody>
           </table></div>
-          <Pagination page={page} pageCount={Math.ceil(res.data.count / 20)} onChange={(p) => set({ page: p > 1 ? String(p) : "" })} label="Donation pages" />
+          <Pagination page={page} pageCount={Math.ceil(res.data.count / 20)} onChange={(p) => set({ page: p > 1 ? String(p) : "" })} label={t("admin.donation-pages")} />
         </>
       ) : null}
     </div>

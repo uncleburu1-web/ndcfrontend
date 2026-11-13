@@ -9,6 +9,7 @@ import { ConsentsSection } from "../../pages/privacy/YourDataPage";
 import type { MyPrivacy } from "../../privacy/types";
 import { usePreferences } from "../PreferencesProvider";
 import { Loading, SectionShell, useSettingsData } from "../SettingsLayout";
+import { t } from "../../i18n";
 
 const ALWAYS_PRIVATE: [string, string][] = [
   ["Who you follow and your bells", "Following a candidate says something about your politics."],
@@ -41,10 +42,10 @@ export default function PrivacySection() {
     try {
       const r = await api<Schema<"SettingsPrivacy">>("/me/settings/privacy/", { method: "PATCH", body: { donation_name_default: v } });
       patchSettings({ privacy: r });
-      toast.show({ tone: "success", message: "Default saved. You still choose on each donation." });
+      toast.show({ tone: "success", message: t("settings.default-saved-you-still-choose-on") });
     } catch (err) {
       patchSettings({ privacy: pv });
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Couldn’t save that. Try again." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("settings.couldn-t-save-that-try-again") });
     } finally {
       setBusy(false);
     }
@@ -53,29 +54,29 @@ export default function PrivacySection() {
   const nameNow = examples ? (pv?.name_style === "full" ? examples.full : examples.first_initial) : "";
 
   return (
-    <SectionShell title="Privacy" intro="What anyone can see about you, what never is, and the consents you’ve given.">
+    <SectionShell title={t("settings.privacy")} intro={t("settings.what-anyone-can-see-about-you")}>
       {!pv ? (
         <Loading error={settingsError} retry={() => void loadSettings()} />
       ) : (
         <div className="set-card">
-          <h3>What is public about you now</h3>
+          <h3>{t("settings.what-is-public-about-you-now")}</h3>
           <dl className="set-facts">
-            <div><dt>Public profile</dt><dd>{pv.public_profile ? "On" : "Off"} · <Link to="/settings/profile">Change</Link></dd></div>
-            <div><dt>Verified voter badge</dt><dd>{pv.verified_badge ? "On" : "Off"} · <Link to="/pvc">Change</Link></dd></div>
+            <div><dt>{t("settings.public-profile")}</dt><dd>{pv.public_profile ? t("settings.on-2") : t("settings.off-2")} · <Link to="/settings/profile">{t("settings.change")}</Link></dd></div>
+            <div><dt>{t("settings.verified-voter-badge")}</dt><dd>{pv.verified_badge ? t("settings.on-2") : t("settings.off-2")} · <Link to="/pvc">{t("settings.change")}</Link></dd></div>
             <div>
-              <dt>Name on news you submit</dt>
-              <dd>{pv.named_news > 0 ? `Your name, on ${pv.named_news} ${pv.named_news === 1 ? "story" : "stories"}` : "“A member”"} · <Link to="/news/mine">Change per story</Link></dd>
+              <dt>{t("settings.name-on-news-you-submit")}</dt>
+              <dd>{pv.named_news > 0 ? `Your name, on ${pv.named_news} ${pv.named_news === 1 ? "story" : "stories"}` : t("settings.a-member")} · <Link to="/news/mine">{t("settings.change-per-story")}</Link></dd>
             </div>
-            <div><dt>Name style</dt><dd>{nameNow || "—"} · <Link to="/settings/profile">Change</Link></dd></div>
+            <div><dt>{t("settings.name-style")}</dt><dd>{nameNow || "—"} · <Link to="/settings/profile">{t("settings.change")}</Link></dd></div>
           </dl>
-          <RadioGroup legend="Default name on donations" name="donation_name_default" value={pv.donation_name_default}
-            hint="Only pre-selects the choice on the donation form. You still choose on each donation."
+          <RadioGroup legend={t("settings.default-name-on-donations")} name="donation_name_default" value={pv.donation_name_default}
+            hint={t("settings.only-pre-selects-the-choice-on")}
             onChange={(v) => !busy && void setDonationName(v)}
-            options={[{ value: "anonymous", label: "Anonymous" }, { value: "name", label: `My public name${nameNow ? ` (${nameNow})` : ""}` }]} />
+            options={[{ value: "anonymous", label: t("settings.anonymous") }, { value: "name", label: t("settings.my-public-name", { v: nameNow ? ` (${nameNow})` : "" }) }]} />
         </div>
       )}
       <div className="set-card">
-        <h3>Always private</h3>
+        <h3>{t("settings.always-private")}</h3>
         <ul className="set-private">
           {ALWAYS_PRIVATE.map(([what, why]) => (
             <li key={what}><strong>{what}</strong><span className="set-meta">{why}</span></li>
@@ -83,16 +84,15 @@ export default function PrivacySection() {
         </ul>
       </div>
       {mineError && (
-        <Banner tone="error" title="We couldn’t load your consents" action={<Button size="sm" variant="secondary" onClick={loadMine}>Try again</Button>}>
-          Check your connection.
-        </Banner>
+        <Banner tone="error" title={t("settings.we-couldn-t-load-your-consents")} action={<Button size="sm" variant="secondary" onClick={loadMine}>{t("settings.try-again")}</Button>}>
+          {t("settings.check-your-connection")}</Banner>
       )}
       {!mine && !mineError && <Skeleton width="100%" height={160} />}
       {mine && <div className="set-embed"><ConsentsSection consents={mine.consents} onChanged={() => { loadMine(); void loadSettings(); }} /></div>}
       <div className="set-card">
-        <h3>Your data</h3>
-        <p>Download everything NDCConnect keeps about you, make a privacy request, or see your history.</p>
-        <Link to="/settings/privacy/data">Open Your data</Link>
+        <h3>{t("settings.your-data")}</h3>
+        <p>{t("settings.download-everything-ndcconnect-keeps-about-you")}</p>
+        <Link to="/settings/privacy/data">{t("settings.open-your-data")}</Link>
       </div>
     </SectionShell>
   );

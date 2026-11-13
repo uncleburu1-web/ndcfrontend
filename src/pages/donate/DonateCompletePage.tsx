@@ -10,6 +10,7 @@ import { Banner, Button, EmptyState, Skeleton } from "../../components/ui";
 import { designationText, formatKobo } from "../../donations/money";
 import type { DonationReceipt } from "../../donations/types";
 import "./donate.css";
+import { t } from "../../i18n";
 
 export const POLL_MS = 3000;
 export const POLL_LIMIT_MS = 30000;
@@ -23,7 +24,7 @@ export default function DonateCompletePage() {
   const started = useRef(Date.now());
 
   useEffect(() => {
-    document.title = "Donation | NDCConnect";
+    document.title = t("donate.donation-ndcconnect");
   }, []);
 
   useEffect(() => {
@@ -53,23 +54,22 @@ export default function DonateCompletePage() {
   if (!reference || error?.status === 404) {
     return (
       <div className="page-shell">
-        <EmptyState title="We couldn’t find that donation" action={<Button href="/donate">Go to Donate</Button>}>
-          Check the link from your payment, or start again.
-        </EmptyState>
+        <EmptyState title={t("donate.we-couldn-t-find-that-donation")} action={<Button href="/donate">{t("donate.go-to-donate")}</Button>}>
+          {t("donate.check-the-link-from-your-payment")}</EmptyState>
       </div>
     );
   }
   if (error) {
     return (
       <div className="page-shell">
-        <Banner tone="error" title="We couldn’t check your donation">{error.message}</Banner>
+        <Banner tone="error" title={t("donate.we-couldn-t-check-your-donation")}>{error.message}</Banner>
       </div>
     );
   }
   if (!d) {
     return (
       <div className="donate-result" aria-busy="true">
-        <span className="visually-hidden">Checking your payment</span>
+        <span className="visually-hidden">{t("donate.checking-your-payment")}</span>
         <Skeleton width="60%" height={32} />
       </div>
     );
@@ -82,15 +82,14 @@ export default function DonateCompletePage() {
   if (d.status === "successful" || d.status === "refunded") {
     return (
       <div className="donate-result">
-        <h1>Thank you, {first}.</h1>
+        <h1>{t("donate.thank-you", { first })}</h1>
         <p className="donate-result__lead">
-          {formatKobo(d.amount_kobo)} to {designationText(d)}.
-        </p>
+          {t("donate.to", { formatKobo: formatKobo(d.amount_kobo), designationText: designationText(d) })}</p>
         <div className="donate-result__actions">
-          <Button href={receipt}>View receipt</Button>
+          <Button href={receipt}>{t("donate.view-receipt")}</Button>
           {d.candidate?.is_public && (
             <Button variant="secondary" href={`/candidates/${d.candidate.slug}`}>
-              Back to {d.candidate.full_name}
+              {t("donate.back-to", { full_name: d.candidate.full_name })}
             </Button>
           )}
         </div>
@@ -100,30 +99,28 @@ export default function DonateCompletePage() {
   if (d.status === "failed" || d.status === "abandoned") {
     return (
       <div className="donate-result">
-        <h1>Your payment didn’t go through.</h1>
-        <p className="donate-result__lead">No money was taken.</p>
-        <Button href={retry}>Try again</Button>
+        <h1>{t("donate.your-payment-didn-t-go-through")}</h1>
+        <p className="donate-result__lead">{t("donate.no-money-was-taken")}</p>
+        <Button href={retry}>{t("donate.try-again")}</Button>
       </div>
     );
   }
   if (d.status === "review") {
     return (
       <div className="donate-result">
-        <h1>We’re checking your payment.</h1>
-        <p className="donate-result__lead">Our finance team is confirming it with the bank. Your receipt will update once it’s confirmed.</p>
-        <Button variant="secondary" href={receipt}>View receipt</Button>
+        <h1>{t("donate.we-re-checking-your-payment")}</h1>
+        <p className="donate-result__lead">{t("donate.our-finance-team-is-confirming-it")}</p>
+        <Button variant="secondary" href={receipt}>{t("donate.view-receipt")}</Button>
       </div>
     );
   }
   return (
     <div className="donate-result" aria-live="polite">
-      <h1>{timedOut ? "This is taking longer than usual." : "We’re confirming your payment with the bank…"}</h1>
+      <h1>{timedOut ? t("donate.this-is-taking-longer-than-usual") : t("donate.we-re-confirming-your-payment-with")}</h1>
       <p className="donate-result__lead">
-        {timedOut
-          ? "We’ll update your donation as soon as the bank confirms. You can close this page."
-          : "This usually takes a few seconds. Please don’t pay again."}
+        {timedOut ? t("donate.we-ll-update-your-donation-as") : t("donate.this-usually-takes-a-few-seconds")}
       </p>
-      <Button variant="secondary" href={receipt}>View receipt</Button>
+      <Button variant="secondary" href={receipt}>{t("donate.view-receipt")}</Button>
     </div>
   );
 }

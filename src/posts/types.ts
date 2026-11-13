@@ -16,6 +16,8 @@ export interface PostCandidate {
 
 export interface PostSummary {
   id: string;
+  /** Spec 21 §9: the language it's written in. */
+  language?: string;
   kind: PostKind;
   kind_label: string;
   title: string;

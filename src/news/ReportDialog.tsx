@@ -11,6 +11,7 @@ import { Button, Modal, RadioGroup, TextArea, TextField, useToast } from "../com
 import { useRules } from "../moderation/rules";
 import { REPORT_REASONS, PROFILE_REPORT_REASONS } from "./types";
 import "../moderation/moderation.css";
+import { t } from "../i18n";
 
 interface Props {
   articleId?: string;
@@ -40,8 +41,8 @@ export function ReportDialog({ articleId, path, title = "Report this article", v
     ? (rules?.profile_reasons ?? PROFILE_REPORT_REASONS.map(([reason, label]) => ({ reason, label }))).map((r) => ({ ...r, rule: "" }))
     : variant === "event"  // spec 18 §8: 13's reasons plus two for events (R11)
       ? (rules?.event_reasons ?? [...REPORT_REASONS.map(([reason, label, rule]) => ({ reason, label, rule })),
-        { reason: "inducement", label: "Offers money or gifts to attend or vote", rule: "R11" },
-        { reason: "banned_venue", label: "At a place of worship, police station or public office", rule: "R11" }])
+        { reason: "inducement", label: t("news.offers-money-or-gifts-to-attend"), rule: "R11" },
+        { reason: "banned_venue", label: t("news.at-a-place-of-worship-police"), rule: "R11" }])
       : (rules?.reasons ?? REPORT_REASONS.map(([reason, label, rule]) => ({ reason, label, rule })));
 
   const close = () => {
@@ -71,7 +72,7 @@ export function ReportDialog({ articleId, path, title = "Report this article", v
       }
       setReference(out.reference ?? "");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "We couldn’t send your report.");
+      setError(err instanceof ApiError ? err.message : t("news.we-couldn-t-send-your-report"));
     } finally {
       setBusy(false);
     }
@@ -80,21 +81,21 @@ export function ReportDialog({ articleId, path, title = "Report this article", v
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(reference);
-      toast.show({ tone: "success", message: "Reference copied." });
+      toast.show({ tone: "success", message: t("news.reference-copied") });
     } catch {
-      toast.show({ tone: "error", message: "Couldn’t copy. Select the reference and copy it instead." });
+      toast.show({ tone: "error", message: t("news.couldn-t-copy-select-the-reference") });
     }
   };
 
   if (reference) {
     return (
-      <Modal open={open} onClose={close} title="Thanks for reporting" footer={<Button onClick={close}>Done</Button>}>
-        <p>We’ll review it. Your reference is:</p>
-        <p className="mod-ref"><strong>{reference}</strong> <Button size="sm" variant="secondary" onClick={() => void copy()}>Copy</Button></p>
+      <Modal open={open} onClose={close} title={t("news.thanks-for-reporting")} footer={<Button onClick={close}>{t("news.done")}</Button>}>
+        <p>{t("news.we-ll-review-it-your-reference")}</p>
+        <p className="mod-ref"><strong>{reference}</strong> <Button size="sm" variant="secondary" onClick={() => void copy()}>{t("news.copy")}</Button></p>
         <p>
           {isSignedIn
-            ? <>You’ll find it under <Link to="/reports" onClick={close}>My reports</Link>, and we’ll tell you when it’s decided.</>
-            : <>Check its status any time at <Link to="/reports/status" onClick={close}>Check a report</Link>.</>}
+            ? <>{t.rich("news.you-ll-find-it-under-my", { link: (chunks) => <Link to="/reports" onClick={close}>{chunks}</Link> })}</>
+            : <>{t.rich("news.check-its-status-any-time-at", { link: (chunks) => <Link to="/reports/status" onClick={close}>{chunks}</Link> })}</>}
         </p>
       </Modal>
     );
@@ -102,24 +103,24 @@ export function ReportDialog({ articleId, path, title = "Report this article", v
 
   return (
     <Modal open={open} onClose={close} title={title}
-      footer={<><Button variant="secondary" onClick={close}>Cancel</Button>
-        <Button onClick={() => void send()} disabled={!reason} loading={busy} loadingLabel="Sending…">
-          {reason === "copyright" ? "Continue to the copyright form" : "Send report"}
+      footer={<><Button variant="secondary" onClick={close}>{t("news.cancel")}</Button>
+        <Button onClick={() => void send()} disabled={!reason} loading={busy} loadingLabel={t("news.sending")}>
+          {reason === "copyright" ? t("news.continue-to-the-copyright-form") : t("news.send-report")}
         </Button></>}>
-      <p>Reports are private. The author never sees who reported. A person decides every report, against our <Link to="/rules" onClick={close}>community rules</Link>.</p>
-      <RadioGroup legend="What’s wrong?" name="report-reason" required value={reason} onChange={setReason}
+      <p>{t.rich("news.reports-are-private-the-author-never", { link: (chunks) => <Link to="/rules" onClick={close}>{chunks}</Link> })}</p>
+      <RadioGroup legend={t("news.what-s-wrong")} name="report-reason" required value={reason} onChange={setReason}
         options={reasons.map((r) => ({
           value: r.reason,
           label: r.rule ? `${r.label} (${r.rule})` : r.label,
         }))} />
       {reason === "copyright" ? (
-        <p className="ds-field__hint">Copyright complaints need a few legal details. We’ll take you to the copyright form.</p>
+        <p className="ds-field__hint">{t("news.copyright-complaints-need-a-few-legal")}</p>
       ) : (
         <>
-          <TextArea label="Details (optional)" rows={3} maxLength={1000} value={details} onChange={(e) => setDetails(e.target.value)} />
+          <TextArea label={t("news.details-optional")} rows={3} maxLength={1000} value={details} onChange={(e) => setDetails(e.target.value)} />
           {!isSignedIn && (
-            <TextField label="Your email (optional)" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              hint="Only if you’d like us to contact you about this report." />
+            <TextField label={t("news.your-email-optional")} type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+              hint={t("news.only-if-you-d-like-us")} />
           )}
         </>
       )}

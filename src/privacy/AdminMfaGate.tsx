@@ -7,6 +7,7 @@ import { Outlet } from "react-router-dom";
 import { adminAreas } from "../auth/guards";
 import { useMe, useMfaBlocked } from "../auth/session";
 import { Banner, Button, EmptyState } from "../components/ui";
+import { t } from "../i18n";
 
 export function AdminMfaGate({ children }: { children?: ReactNode }) {
   const { me } = useMe();
@@ -17,12 +18,10 @@ export function AdminMfaGate({ children }: { children?: ReactNode }) {
   if (admin && (blocked || off)) {
     return (
       <div className="page-shell">
-        <EmptyState icon="shield" title="Turn on two-step verification to use the admin">
-          Admin accounts need a second step when signing in (an authenticator app or a passkey). Turn it on in your account’s security
-          settings, then sign in again.
-          <div className="privacy-gate-actions">
-            <Button href="/settings/security">Open account security</Button>
-          </div>
+        <EmptyState icon="shield" title={t("privacy.turn-on-two-step-verification-to")}>
+          {t.rich("privacy.admin-accounts-need-a-second-step", { div: <div className="privacy-gate-actions">
+            <Button href="/settings/security">{t("privacy.open-account-security")}</Button>
+          </div> })}
         </EmptyState>
       </div>
     );
@@ -33,8 +32,7 @@ export function AdminMfaGate({ children }: { children?: ReactNode }) {
       <>
         <div className="app-banner">
           <Banner tone="warning" dismissKey="admin-mfa-dev">
-            Development mode: admin two-step verification isn’t enforced, and the <code>mfa</code> session claim isn’t configured in Clerk.
-          </Banner>
+            {t.rich("privacy.development-mode-admin-two-step-verification", { code: (chunks) => <code>{chunks}</code> })}</Banner>
         </div>
         {body}
       </>

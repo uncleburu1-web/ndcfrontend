@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 /** Shapes from /admin/overview/, /admin/team/, /admin/users/ and /admin/audit/ (spec 11 §7). */
 export type Severity = "ok" | "warning" | "error" | "info";
 
@@ -102,11 +103,11 @@ export interface UserDetail extends UserSummary {
 }
 
 export const ROLE_LABELS: Record<string, string> = {
-  system_admin: "System administrator",
-  news_reviewer: "News reviewer",
-  pvc_officer: "PVC officer",
-  membership_officer: "Membership officer",
-  finance_officer: "Finance officer",
-  moderator: "Moderator",
-  candidate: "Candidate link",
+  get system_admin() { return t("admin.system-administrator"); },
+  get news_reviewer() { return t("admin.news-reviewer"); },
+  get pvc_officer() { return t("admin.pvc-officer"); },
+  get membership_officer() { return t("admin.membership-officer"); },
+  get finance_officer() { return t("admin.finance-officer"); },
+  get moderator() { return t("admin.moderator"); },
+  get candidate() { return t("admin.candidate-link"); },
 };

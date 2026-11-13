@@ -12,6 +12,8 @@ import { formatDate } from "../../lib/format";
 import { ReportDialog } from "../../news/ReportDialog";
 import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
 import "../../settings/settings.css";
+import { t } from "../../i18n";
+import { InLanguage } from "../../i18n/ContentLanguage";
 
 type Profile = Schema<"PublicProfile">;
 
@@ -47,7 +49,7 @@ export default function PublicProfilePage() {
     api<Profile>(`/people/${encodeURIComponent(handle.toLowerCase())}/`, { anonymous: true })
       .then((d) => {
         setP(d);
-        document.title = `${d.name} | NDCConnect`;
+        document.title = t("people.ndcconnect", { name: d.name });
       })
       .catch((err) => (err instanceof ApiError && err.status === 404 ? setMissing(true) : setFailed(true)));
   }, [api, handle]);
@@ -55,8 +57,8 @@ export default function PublicProfilePage() {
   if (missing) {
     return (
       <div className="page-shell">
-        <EmptyState title="This profile isn’t available">
-          It may have been turned off, or the link may be wrong. <Link to="/news">Read the news</Link>
+        <EmptyState title={t("people.this-profile-isn-t-available")}>
+          {t.rich("people.it-may-have-been-turned-off", { link: (chunks) => <Link to="/news">{chunks}</Link> })}
         </EmptyState>
       </div>
     );
@@ -64,7 +66,7 @@ export default function PublicProfilePage() {
   if (failed) {
     return (
       <div className="page-shell">
-        <EmptyState icon="alert" title="We couldn’t load this profile">Check your connection and try again.</EmptyState>
+        <EmptyState icon="alert" title={t("people.we-couldn-t-load-this-profile")}>{t("people.check-your-connection-and-try-again")}</EmptyState>
       </div>
     );
   }
@@ -79,13 +81,13 @@ export default function PublicProfilePage() {
           <h1>{p.name}</h1>
           {p.verified_voter && <VerifiedVoterBadge />}
           {where && <p className="set-meta">{where}</p>}
-          <p className="set-meta">On NDCConnect since {sinceWords(p.member_since)}</p>
+          <p className="set-meta">{t("people.on-ndcconnect-since", { sinceWords: sinceWords(p.member_since) })}</p>
         </div>
       </header>
-      {p.bio && <p className="people-bio">{p.bio}</p>}
+      {p.bio && <InLanguage language={(p as { bio_language?: string }).bio_language} as="p" className="people-bio">{p.bio}</InLanguage>}
       {p.news.length > 0 && (
         <section aria-labelledby="people-news-h">
-          <h2 id="people-news-h">News they published</h2>
+          <h2 id="people-news-h">{t("people.news-they-published")}</h2>
           <ul className="people-news">
             {p.news.map((n) => (
               <li key={n.id}>
@@ -97,9 +99,9 @@ export default function PublicProfilePage() {
         </section>
       )}
       <p className="people-report">
-        <Button variant="ghost" size="sm" onClick={() => setReporting(true)}>Report this profile</Button>
+        <Button variant="ghost" size="sm" onClick={() => setReporting(true)}>{t("people.report-this-profile")}</Button>
       </p>
-      <ReportDialog path={`/people/${p.handle}/report/`} title="Report this profile’s bio or photo" open={reporting} onClose={() => setReporting(false)} />
+      <ReportDialog path={`/people/${p.handle}/report/`} title={t("people.report-this-profile-s-bio-or")} open={reporting} onClose={() => setReporting(false)} />
     </article>
   );
 }

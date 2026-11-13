@@ -15,6 +15,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Icon } from "./Icon";
 import { useToast } from "./Toast";
 import "./VoteToggle.css";
+import { t } from "../../i18n";
 
 const CONFIRM_WINDOW_MS = 4000;
 
@@ -52,9 +53,7 @@ export function VoteToggle({ candidateName, following, onChange, loading, confir
     } catch {
       toast.show({
         tone: "error",
-        message: next
-          ? `We couldn't follow ${candidateName}. Check your connection and tap Vote again.`
-          : `We couldn't unfollow ${candidateName}. Check your connection and try again.`,
+        message: next ? t("ui.we-couldn-t-follow-check-your", { candidateName }) : t("ui.we-couldn-t-unfollow-check-your", { candidateName }),
       });
     } finally {
       setBusy(false);
@@ -106,11 +105,10 @@ export function VoteToggle({ candidateName, following, onChange, loading, confir
       </button>
       {!hideHelper && (
         <p id={helperId} className="ds-vote__helper">
-          Voting here means following, not an official ballot.
-        </p>
+          {t("ui.voting-here-means-following-not-an")}</p>
       )}
       <span className="visually-hidden" aria-live="polite">
-        {following && isArmed ? `Tap again to unfollow ${candidateName}.` : ""}
+        {following && isArmed ? t("ui.tap-again-to-unfollow", { candidateName }) : ""}
       </span>
     </div>
   );

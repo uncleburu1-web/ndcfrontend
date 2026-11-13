@@ -6,6 +6,7 @@ import { useApi, useMe } from "../auth/session";
 import { Banner, Button, EmptyState } from "../components/ui";
 import { DeleteSection, DownloadSection } from "../pages/privacy/YourDataPage";
 import "./settings.css";
+import { t } from "../i18n";
 
 export default function AccountPausedPage() {
   const api = useApi();
@@ -14,7 +15,7 @@ export default function AccountPausedPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   useEffect(() => {
-    document.title = "Your account is paused | NDCConnect";
+    document.title = t("settings.your-account-is-paused-ndcconnect");
   }, []);
   const reactivate = async () => {
     setBusy(true);
@@ -23,22 +24,21 @@ export default function AccountPausedPage() {
       await api("/me/reactivate/", { method: "POST" });
       await refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Couldn’t reactivate your account. Try again.");
+      setError(err instanceof ApiError ? err.message : t("settings.couldn-t-reactivate-your-account-try"));
     } finally {
       setBusy(false);
     }
   };
   return (
     <div className="set-paused">
-      <EmptyState icon="info" title="Your account is paused"
+      <EmptyState icon="info" title={t("settings.your-account-is-paused")}
         action={
           <div className="set-actions">
-            <Button onClick={() => void reactivate()} loading={busy} loadingLabel="Reactivating…">Reactivate my account</Button>
-            <Button variant="ghost" onClick={() => void signOut({ redirectUrl: "/" })}>Sign out</Button>
+            <Button onClick={() => void reactivate()} loading={busy} loadingLabel={t("settings.reactivating")}>{t("settings.reactivate-my-account")}</Button>
+            <Button variant="ghost" onClick={() => void signOut({ redirectUrl: "/" })}>{t("settings.sign-out")}</Button>
           </div>
         }>
-        Nothing new is delivered while it’s paused, and your public profile is hidden. Reactivate to use NDCConnect again.
-      </EmptyState>
+        {t("settings.nothing-new-is-delivered-while-it")}</EmptyState>
       {error && <Banner tone="error">{error}</Banner>}
       <DownloadSection onDone={() => undefined} />
       <DeleteSection data={null} />

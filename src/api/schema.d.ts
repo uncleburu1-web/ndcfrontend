@@ -298,6 +298,75 @@ export interface paths {
         patch: operations["admin_settings_defaults_patch"];
         trace?: never;
     };
+    "/api/v1/languages/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Enabled interface languages (spec 21 §13) */
+        get: operations["languages_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/languages/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Translation completeness and review sign-offs per language (spec 21 §14) */
+        get: operations["admin_languages_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/languages/{code}/reviews/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record a native speaker's (or lawyer's) review of a language (audited) */
+        post: operations["admin_language_reviews_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/me/languages/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The languages I read, for my review queues (spec 21 §9) */
+        get: operations["admin_my_languages_get"];
+        /** Set the languages I read */
+        put: operations["admin_my_languages_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/webhooks/clerk/": {
         parameters: {
             query?: never;
@@ -1620,6 +1689,58 @@ export interface paths {
         post?: never;
         /** DELETE admin announcement image */
         delete: operations["admin_announcement_image_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/announcements/{id}/translations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** An announcement's versions in other languages */
+        get: operations["admin_announcement_translations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/announcements/{id}/translations/{code}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Write or change the version in one language (goes back to draft; audited) */
+        put: operations["admin_announcement_translation_put"];
+        post?: never;
+        /** Delete the version in one language (audited) */
+        delete: operations["admin_announcement_translation_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/announcements/{id}/translations/{code}/publish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Review and publish a version someone else wrote (audited) */
+        post: operations["admin_announcement_translation_publish_post"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -4478,6 +4599,12 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        AdminLanguages: {
+            languages: {
+                [key: string]: unknown;
+            }[];
+            legal_version: string;
+        };
         AliasCreateRequest: {
             level: components["schemas"]["GeoPlaceLevelEnum"];
             target_id: number;
@@ -4494,6 +4621,29 @@ export interface components {
             /** Format: date-time */
             created_at: string;
         };
+        AnnouncementVersion: {
+            language: string;
+            title: string;
+            body: string;
+            status: components["schemas"]["AnnouncementVersionStatusEnum"];
+            out_of_date: boolean;
+            translated_by: string;
+            reviewed_by: string;
+            /** Format: date-time */
+            published_at: string | null;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        AnnouncementVersionInRequest: {
+            title: string;
+            body: string;
+        };
+        /** @enum {string} */
+        AnnouncementVersionStatusEnum: "draft" | "published";
+        AnnouncementVersions: {
+            language: string;
+            versions: components["schemas"]["AnnouncementVersion"][];
+        };
         ApplyRequestRequest: {
             /** @description The second system admin confirms (the 95% rule) */
             confirm_second?: boolean;
@@ -4508,6 +4658,8 @@ export interface components {
         };
         /** @enum {string} */
         AvailabilityEnum: "weekdays" | "weekday_evenings" | "weekends";
+        /** @enum {string} */
+        BiographyLanguageEnum: "en" | "ha" | "ig" | "yo" | "pcm" | "und";
         /** @enum {unknown} */
         BlankEnum: "";
         BlockSchema: {
@@ -4825,6 +4977,7 @@ export interface components {
             cover: components["schemas"]["ImageSchema"] | null;
             ended: boolean;
             description: string;
+            language: string;
             venue_name: string;
             /** @description Null when only registered people may see it */
             venue_address: string | null;
@@ -4877,6 +5030,8 @@ export interface components {
             mode: components["schemas"]["EventModeEnum"];
             title: string;
             description: string;
+            /** @description Spec 21 §9: the description's language */
+            language?: components["schemas"]["LanguageEnum"];
             /** Format: date-time */
             starts_at: string;
             /** Format: date-time */
@@ -4977,6 +5132,13 @@ export interface components {
             webhooks: components["schemas"]["WebhookCounts"][];
             outbox: components["schemas"]["OutboxStats"];
         };
+        Language: {
+            code: string;
+            native: string;
+            english: string;
+        };
+        /** @enum {string} */
+        LanguageEnum: "en" | "ha" | "ig" | "yo" | "pcm" | "und";
         LanguageOption: {
             code: string;
             label: string;
@@ -4988,6 +5150,14 @@ export interface components {
             label: string;
             native: string;
             enabled: boolean;
+        };
+        LanguageReviewOut: {
+            /** Format: uuid */
+            id: string;
+        };
+        Languages: {
+            languages: components["schemas"]["Language"][];
+            legal_version: string;
         };
         /** @enum {string} */
         LevelEnum: "national" | "state" | "lga" | "ward" | "polling_unit";
@@ -5269,6 +5439,7 @@ export interface components {
             cover: components["schemas"]["ImageSchema"] | null;
             ended: boolean;
             description: string;
+            language: string;
             venue_name: string;
             /** @description Null when only registered people may see it */
             venue_address: string | null;
@@ -5377,6 +5548,8 @@ export interface components {
             mode?: components["schemas"]["EventModeEnum"];
             title?: string;
             description?: string;
+            /** @description Spec 21 §9: the description's language */
+            language?: components["schemas"]["LanguageEnum"];
             /** Format: date-time */
             starts_at?: string;
             /** Format: date-time */
@@ -5449,6 +5622,7 @@ export interface components {
             name_style?: components["schemas"]["NameStyleEnum"];
             name_examples?: components["schemas"]["NameExamplesRequest"];
             bio?: string;
+            bio_language?: string;
             bio_removed?: boolean;
             photo_removed?: boolean;
             profile_location?: components["schemas"]["ProfileLocationEnum"];
@@ -5552,6 +5726,7 @@ export interface components {
             readonly state: components["schemas"]["NigerianStateEnum"];
             readonly area_display: string;
             readonly biography: string;
+            readonly biography_language: components["schemas"]["BiographyLanguageEnum"];
             readonly campaign_summary: string;
             readonly priorities: unknown;
             readonly links: unknown;
@@ -5581,6 +5756,7 @@ export interface components {
             handle: string;
             name: string;
             bio: string;
+            bio_language: string;
             location: components["schemas"]["PublicProfileLocation"] | null;
             verified_voter: boolean;
             photo_url: string | null;
@@ -5652,6 +5828,18 @@ export interface components {
             lga: string;
             count: number;
         };
+        ReviewInputRequest: {
+            scope: components["schemas"]["ScopeEnum"];
+            reviewer_name: string;
+            /** @description Interface: the web app's catalogue version (completeness.json). Legal: ignored. */
+            catalogue_version?: string;
+            /**
+             * @description The web app's completeness for this language when reviewed
+             * @default 0
+             */
+            interface_percent: number;
+            note?: string;
+        };
         ReviewItemSchema: {
             kind: components["schemas"]["GeoRecordKindEnum"];
             /** Format: uuid */
@@ -5674,6 +5862,8 @@ export interface components {
         };
         /** @enum {string} */
         RolesEnum: "canvassing" | "events" | "social_media" | "logistics" | "data_and_tech" | "outreach_youth" | "outreach_women" | "outreach_disability" | "other";
+        /** @enum {string} */
+        ScopeEnum: "interface" | "legal";
         Settings: {
             language: components["schemas"]["SettingsLanguage"];
             accessibility: components["schemas"]["SettingsAccessibility"];
@@ -5779,6 +5969,7 @@ export interface components {
             name_style: components["schemas"]["NameStyleEnum"];
             name_examples: components["schemas"]["NameExamples"];
             bio: string;
+            bio_language: string;
             bio_removed: boolean;
             photo_removed: boolean;
             profile_location: components["schemas"]["ProfileLocationEnum"];
@@ -5787,6 +5978,12 @@ export interface components {
         };
         SignedOut: {
             signed_out: number;
+        };
+        StaffLanguages: {
+            languages: string[];
+        };
+        StaffLanguagesRequest: {
+            languages: string[];
         };
         StateSchema: {
             slug: string;
@@ -6510,6 +6707,115 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettingsDefaults"];
+                };
+            };
+        };
+    };
+    languages_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Languages"];
+                };
+            };
+        };
+    };
+    admin_languages_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminLanguages"];
+                };
+            };
+        };
+    };
+    admin_language_reviews_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewInputRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReviewInputRequest"];
+                "multipart/form-data": components["schemas"]["ReviewInputRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LanguageReviewOut"];
+                };
+            };
+        };
+    };
+    admin_my_languages_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffLanguages"];
+                };
+            };
+        };
+    };
+    admin_my_languages_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffLanguagesRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["StaffLanguagesRequest"];
+                "multipart/form-data": components["schemas"]["StaffLanguagesRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffLanguages"];
                 };
             };
         };
@@ -8679,6 +8985,98 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    admin_announcement_translations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnnouncementVersions"];
+                };
+            };
+        };
+    };
+    admin_announcement_translation_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnnouncementVersionInRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AnnouncementVersionInRequest"];
+                "multipart/form-data": components["schemas"]["AnnouncementVersionInRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnnouncementVersion"];
+                };
+            };
+        };
+    };
+    admin_announcement_translation_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Response (untyped; see docs/api.md) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_announcement_translation_publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnnouncementVersion"];
+                };
             };
         };
     };

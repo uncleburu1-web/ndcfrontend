@@ -4,6 +4,7 @@ import { ApiError } from "../../auth/api";
 import { useApi } from "../../auth/session";
 import { Banner, Button, TextField } from "../../components/ui";
 import "../../moderation/moderation.css";
+import { t } from "../../i18n";
 
 export default function ReportStatusPage() {
   const api = useApi();
@@ -12,7 +13,7 @@ export default function ReportStatusPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   useEffect(() => {
-    document.title = "Check a report | NDCConnect";
+    document.title = t("reports.check-a-report-ndcconnect");
   }, []);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -22,21 +23,21 @@ export default function ReportStatusPage() {
     try {
       setResult(await api(`/reports/status/?reference=${encodeURIComponent(ref.trim())}`, { anonymous: true }));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "We couldn’t check that reference.");
+      setError(err instanceof ApiError ? err.message : t("reports.we-couldn-t-check-that-reference"));
     } finally {
       setBusy(false);
     }
   };
   return (
     <div className="mod-page">
-      <h1>Check a report</h1>
-      <p className="mod-lead">Enter the reference you got when you reported something, for example RPT-7K2Q9M.</p>
+      <h1>{t("reports.check-a-report")}</h1>
+      <p className="mod-lead">{t("reports.enter-the-reference-you-got-when")}</p>
       <form onSubmit={(e) => void submit(e)} noValidate>
-        <TextField label="Reference" value={ref} onChange={(e) => setRef(e.target.value)} autoComplete="off" required />
-        <Button type="submit" loading={busy} loadingLabel="Checking…" disabled={!ref.trim()}>Check status</Button>
+        <TextField label={t("reports.reference")} value={ref} onChange={(e) => setRef(e.target.value)} autoComplete="off" required />
+        <Button type="submit" loading={busy} loadingLabel={t("reports.checking")} disabled={!ref.trim()}>{t("reports.check-status")}</Button>
       </form>
       <div aria-live="polite">
-        {result && <Banner tone="info" title={result.reference}>Status: <strong>{result.status_label}</strong></Banner>}
+        {result && <Banner tone="info" title={result.reference}>{t.rich("reports.status-2", { status_label: result.status_label, strong: (chunks) => <strong>{chunks}</strong> })}</Banner>}
         {error && <Banner tone="error">{error}</Banner>}
       </div>
     </div>

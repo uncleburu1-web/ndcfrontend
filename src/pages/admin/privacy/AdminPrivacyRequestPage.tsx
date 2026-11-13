@@ -12,13 +12,14 @@ import { AdminNav } from "../AdminNav";
 import { PrivacyNav } from "./PrivacyNav";
 import "../candidates/admin.css";
 import "../../../privacy/privacy.css";
+import { t } from "../../../i18n";
 
 type Action = "reply" | "ask-info" | "resume" | "close";
 const LINKED_BUTTON: Record<string, string> = {
   restrict_notifications: "Turn off follow notifications", hide_bylines: "Hide their name on news", erase_follows: "Remove all follows",
   erase_pvc: "Erase PVC record", erase_membership: "Erase membership register data",
 };
-const LABEL: Record<Action, string> = { reply: "Reply", "ask-info": "Ask for more information", resume: "Resume", close: "Close the request" };
+const LABEL: Record<Action, string> = { get reply() { return t("admin.reply"); }, get "ask-info"() { return t("admin.ask-for-more-information"); }, get resume() { return t("admin.resume"); }, get close() { return t("admin.close-the-request"); } };
 
 export default function AdminPrivacyRequestPage() {
   const { id = "" } = useParams();
@@ -36,7 +37,7 @@ export default function AdminPrivacyRequestPage() {
     if (res.data) setReq(res.data);
   }, [res.data]);
   useEffect(() => {
-    document.title = "Privacy request | NDCConnect admin";
+    document.title = t("admin.privacy-request-ndcconnect-admin");
   }, []);
 
   const run = async (e: FormEvent) => {
@@ -47,11 +48,11 @@ export default function AdminPrivacyRequestPage() {
     try {
       const body = action === "close" ? { outcome, text } : { text };
       setReq(await api<PrivacyRequest>(`/admin/privacy/requests/${id}/${action}/`, { method: "POST", body }));
-      toast.show({ tone: "success", message: action === "close" ? "Request closed. The person was told." : "Saved. The person was told." });
+      toast.show({ tone: "success", message: action === "close" ? t("admin.request-closed-the-person-was-told") : t("admin.saved-the-person-was-told") });
       setAction(null);
       setText("");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Couldn’t save that.");
+      setError(err instanceof ApiError ? err.message : t("admin.couldn-t-save-that"));
     } finally {
       setBusy(false);
     }
@@ -66,7 +67,7 @@ export default function AdminPrivacyRequestPage() {
       setLinked(null);
       res.retry();
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Couldn’t do that." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("admin.couldn-t-do-that") });
     } finally {
       setBusy(false);
     }
@@ -81,11 +82,11 @@ export default function AdminPrivacyRequestPage() {
       a.download = `ndcconnect-data-${req?.reference ?? id}.zip`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      toast.show({ tone: "success", message: "Export downloaded. It was recorded with the request." });
+      toast.show({ tone: "success", message: t("admin.export-downloaded-it-was-recorded-with") });
       res.retry();
     } catch (err) {
       if (err instanceof ApiError && err.code === CANCELLED_REVERIFICATION) return;
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Couldn’t export." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("admin.couldn-t-export") });
     }
   };
 
@@ -94,9 +95,9 @@ export default function AdminPrivacyRequestPage() {
     <div className="adm-page">
       <AdminNav current="privacy" />
       <PrivacyNav current="requests" />
-      <p><Link to="/admin/privacy">All requests</Link></p>
+      <p><Link to="/admin/privacy">{t("admin.all-requests")}</Link></p>
       {res.error ? (
-        <Banner tone="error" title="We couldn’t load this request" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>{res.error.message}</Banner>
+        <Banner tone="error" title={t("admin.we-couldn-t-load-this-request")} action={<Button size="sm" variant="secondary" onClick={res.retry}>{t("admin.try-again-2")}</Button>}>{res.error.message}</Banner>
       ) : !req ? (
         <Skeleton width="100%" height={200} />
       ) : (
@@ -105,36 +106,34 @@ export default function AdminPrivacyRequestPage() {
             <div>
               <h1>{req.reference}: {req.kind_label}</h1>
               <p className="privacy-meta">
-                Received {formatDate(req.received_at, { withTime: true })} ·{" "}
-                <span className={`mod-due${req.overdue ? " mod-due--overdue" : ""}`}>{req.due_words}</span>
-                {req.status !== "waiting" && req.status === "open" && <> · due {formatDate(req.due_at)}</>}
+                {t.rich("admin.received-3", { formatDate: formatDate(req.received_at, { withTime: true }), due_words: req.due_words, span: (chunks) => <span className={`mod-due${req.overdue ? " mod-due--overdue" : ""}`}>{chunks}</span>, x4: req.status !== "waiting" && req.status === "open" && <> {t("admin.due", { formatDate: formatDate(req.due_at) })}</> })}
               </p>
             </div>
             <RequestStatusBadge status={req.status} officer />
           </header>
           <section className="adm-panel">
-            <h2>The person</h2>
+            <h2>{t("admin.the-person")}</h2>
             {req.person ? (
-              req.person.deleted ? <p>Deleted account</p> : (
+              req.person.deleted ? <p>{t("admin.deleted-account")}</p> : (
                 <p><Link to={`/admin/users/${req.person.id}`}>{req.person.name || req.person.email}</Link> · {req.person.email}</p>
               )
-            ) : <p>Deleted account</p>}
-            <h2>What they asked</h2>
-            <p className="privacy-note">{req.details || "No details given."}</p>
+            ) : <p>{t("admin.deleted-account")}</p>}
+            <h2>{t("admin.what-they-asked")}</h2>
+            <p className="privacy-note">{req.details || t("admin.no-details-given")}</p>
           </section>
           {open && (
             <section className="adm-panel">
-              <h2>Actions</h2>
+              <h2>{t("admin.actions")}</h2>
               <div className="privacy-inline-actions">
-                <Button size="sm" onClick={() => { setAction("reply"); setError(""); }}>Reply</Button>
-                {req.status === "open" && <Button size="sm" variant="secondary" onClick={() => { setAction("ask-info"); setError(""); }}>Ask for more information</Button>}
-                {req.status === "waiting" && <Button size="sm" variant="secondary" onClick={() => { setAction("resume"); setError(""); }}>Resume</Button>}
-                <Button size="sm" variant="secondary" onClick={() => { setAction("close"); setError(""); }}>Close…</Button>
+                <Button size="sm" onClick={() => { setAction("reply"); setError(""); }}>{t("admin.reply")}</Button>
+                {req.status === "open" && <Button size="sm" variant="secondary" onClick={() => { setAction("ask-info"); setError(""); }}>{t("admin.ask-for-more-information")}</Button>}
+                {req.status === "waiting" && <Button size="sm" variant="secondary" onClick={() => { setAction("resume"); setError(""); }}>{t("admin.resume")}</Button>}
+                <Button size="sm" variant="secondary" onClick={() => { setAction("close"); setError(""); }}>{t("admin.close-2")}</Button>
               </div>
-              <h3>Linked actions</h3>
-              <p className="ds-field__hint">Each uses the owning area’s own rules and is recorded on the request.</p>
+              <h3>{t("admin.linked-actions")}</h3>
+              <p className="ds-field__hint">{t("admin.each-uses-the-owning-area-s")}</p>
               <div className="privacy-inline-actions">
-                <Button size="sm" variant="secondary" onClick={exportData}>Export their data</Button>
+                <Button size="sm" variant="secondary" onClick={exportData}>{t("admin.export-their-data")}</Button>
                 {(req.linked_actions ?? []).map((a) => (
                   <Button key={a.key} size="sm" variant="ghost" onClick={() => setLinked(a)}>{LINKED_BUTTON[a.key] ?? a.label}…</Button>
                 ))}
@@ -143,16 +142,16 @@ export default function AdminPrivacyRequestPage() {
           )}
           {req.outcome && (
             <section className="adm-panel">
-              <h2>Outcome</h2>
+              <h2>{t("admin.outcome")}</h2>
               <p>{req.outcome}</p>
             </section>
           )}
           <section className="adm-panel">
-            <h2>History</h2>
+            <h2>{t("admin.history")}</h2>
             <ol className="privacy-events">
               {req.events.map((e, i) => (
                 <li key={i}>
-                  <span className="privacy-meta">{formatDate(e.at, { withTime: true })}{e.by ? ` · ${e.by}` : ""}{e.shown_to_person ? " · shown to the person" : " · internal"}</span>
+                  <span className="privacy-meta">{formatDate(e.at, { withTime: true })}{e.by ? ` · ${e.by}` : ""}{e.shown_to_person ? t("admin.shown-to-the-person") : t("admin.internal")}</span>
                   <br />{e.event.replace(/_/g, " ")}
                   {e.note && <p className="privacy-note">{e.note}</p>}
                 </li>
@@ -162,23 +161,23 @@ export default function AdminPrivacyRequestPage() {
         </>
       )}
       <Modal open={action !== null} onClose={() => setAction(null)} title={action ? LABEL[action] : ""}
-        footer={<><Button variant="secondary" onClick={() => setAction(null)}>Cancel</Button>
-          <Button type="submit" form="req-action" loading={busy}>{action === "close" ? "Close request" : "Send"}</Button></>}>
+        footer={<><Button variant="secondary" onClick={() => setAction(null)}>{t("admin.cancel")}</Button>
+          <Button type="submit" form="req-action" loading={busy}>{action === "close" ? t("admin.close-request") : t("admin.send")}</Button></>}>
         <form id="req-action" onSubmit={(e) => void run(e)} noValidate>
           {error && <Banner tone="error">{error}</Banner>}
           {action === "close" && (
-            <RadioGroup legend="Outcome" name="outcome" value={outcome} onChange={setOutcome}
-              options={[{ value: "done", label: "Done" }, { value: "refused", label: "Refused (give the legal reason)" }]} />
+            <RadioGroup legend={t("admin.outcome")} name="outcome" value={outcome} onChange={setOutcome}
+              options={[{ value: "done", label: t("admin.done") }, { value: "refused", label: t("admin.refused-give-the-legal-reason") }]} />
           )}
-          <TextArea label={action === "close" ? "What was done, or why it was refused" : action === "ask-info" ? "What you need from them (shown to the person)" : "Message (shown to the person)"}
+          <TextArea label={action === "close" ? t("admin.what-was-done-or-why-it") : action === "ask-info" ? t("admin.what-you-need-from-them-shown") : t("admin.message-shown-to-the-person")}
             required={action !== "resume"} value={text} onChange={(e) => setText(e.target.value)} rows={4} />
-          {action === "ask-info" && <p className="ds-field__hint">The 30-day clock pauses until they answer.</p>}
+          {action === "ask-info" && <p className="ds-field__hint">{t("admin.the-30-day-clock-pauses-until")}</p>}
         </form>
       </Modal>
-      <Modal open={linked !== null} onClose={() => setLinked(null)} title="Confirm"
-        footer={<><Button variant="secondary" onClick={() => setLinked(null)}>Cancel</Button>
-          <Button variant="danger" onClick={doLinked} loading={busy}>Do it</Button></>}>
-        <p>{linked?.label}. This takes effect at once and is recorded on the request.</p>
+      <Modal open={linked !== null} onClose={() => setLinked(null)} title={t("admin.confirm")}
+        footer={<><Button variant="secondary" onClick={() => setLinked(null)}>{t("admin.cancel")}</Button>
+          <Button variant="danger" onClick={doLinked} loading={busy}>{t("admin.do-it")}</Button></>}>
+        <p>{t("admin.this-takes-effect-at-once-and", { label: linked?.label })}</p>
       </Modal>
     </div>
   );

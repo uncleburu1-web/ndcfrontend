@@ -6,6 +6,7 @@ import { Banner, Button, EmptyState, Skeleton } from "../components/ui";
 import { EventDashboard, EventEditor } from "./EventEditor";
 import type { OrganiserEvent } from "./types";
 import "./events.css";
+import { t } from "../i18n";
 
 export function OrganiserEvents({ base, party = false, canWrite = true }: { base: string; party?: boolean; canWrite?: boolean }) {
   const api = useApi();
@@ -22,9 +23,9 @@ export function OrganiserEvents({ base, party = false, canWrite = true }: { base
   }
   return (
     <div className="ev-form">
-      {canWrite && <div><Button onClick={() => setMode("new")}>New event</Button></div>}
+      {canWrite && <div><Button onClick={() => setMode("new")}>{t("events.new-event")}</Button></div>}
       {items.length === 0 ? (
-        <EmptyState title="No events yet">Events appear on {party ? "the Events page" : "the candidate’s profile, the Events page and state and community pages"} once published.</EmptyState>
+        <EmptyState title={t("events.no-events-yet")}>{t("events.events-appear-on-once-published", { v: party ? t("events.the-events-page") : t("events.the-candidate-s-profile-the-events") })}</EmptyState>
       ) : items.map((e) => (
         <EventDashboard key={e.id} base={base} e={e} onEdit={() => setMode(e)}
           onChange={(n) => (n ? upsert(n) : setItems((xs) => (xs ?? []).filter((x) => x.id !== e.id)))} />

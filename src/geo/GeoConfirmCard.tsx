@@ -12,6 +12,7 @@ import { stateLabel } from "../lib/nigeria";
 import { GeoPicker } from "./GeoPicker";
 import { geoBody, type ConfirmItem, type ConfirmResult, type GeoValue } from "./types";
 import "./geo.css";
+import { t } from "../i18n";
 
 function initial(item: ConfirmItem): GeoValue {
   const s = item.suggestion;
@@ -31,7 +32,7 @@ function One({ item, onDone }: { item: ConfirmItem; onDone: (msg: string) => voi
     setErrors({});
     try {
       const r = await api<ConfirmResult>(`/me/geo-confirm/${item.kind}/`, { method: "POST", body: geoBody(value) });
-      onDone(r.waits_for_officer ? "Saved. A PVC officer checks the change before your communities move." : "Saved. Thank you.");
+      onDone(r.waits_for_officer ? t("geo.saved-a-pvc-officer-checks-the") : t("geo.saved-thank-you"));
     } catch (err) {
       if (err instanceof ApiError) {
         const field = String(err.extra.field ?? "").replace(/_id$/, "");
@@ -44,13 +45,12 @@ function One({ item, onDone }: { item: ConfirmItem; onDone: (msg: string) => voi
   };
   return (
     <form className="geo-card" onSubmit={(e) => void save(e)} aria-labelledby={`gc-${item.kind}`}>
-      <h3 id={`gc-${item.kind}`}>Your {what} · {stateLabel(item.state)}</h3>
+      <h3 id={`gc-${item.kind}`}>{t("geo.your", { what, stateLabel: stateLabel(item.state) })}</h3>
       <p className="news-meta">
-        {item.retired ? "INEC changed the polling unit on your record. Please choose the current one."
-          : `You typed: ${[item.typed.lga, item.typed.ward, item.typed.polling_unit].filter(Boolean).join(" · ") || "nothing yet"}. Choose it from INEC’s list.`}
+        {item.retired ? t("geo.inec-changed-the-polling-unit-on") : t("geo.you-typed-choose-it-from-inec", { v: [item.typed.lga, item.typed.ward, item.typed.polling_unit].filter(Boolean).join(" · ") || t("geo.nothing-yet") })}
       </p>
       <GeoPicker state={item.state} value={value} onChange={setValue} errors={errors} required={["lga"]} />
-      <div className="geo-actions"><Button type="submit" loading={busy}>Confirm</Button></div>
+      <div className="geo-actions"><Button type="submit" loading={busy}>{t("geo.confirm")}</Button></div>
     </form>
   );
 }
@@ -64,12 +64,12 @@ export function GeoConfirmCard() {
   if (!items.length) return null;
   return (
     <section className="account-voter" aria-labelledby="geo-confirm-h">
-      <h2 id="geo-confirm-h">Confirm where you vote</h2>
-      <p className="news-meta">Only you and the officers who check your records can see this.</p>
+      <h2 id="geo-confirm-h">{t("geo.confirm-where-you-vote")}</h2>
+      <p className="news-meta">{t("geo.only-you-and-the-officers-who")}</p>
       {items.map((i) => (
         <One key={i.kind} item={i} onDone={(msg) => {
           if (msg) toast.show({ tone: "success", message: msg });
-          else toast.show({ tone: "error", message: "That didn’t save. Try again." });
+          else toast.show({ tone: "error", message: t("geo.that-didn-t-save-try-again") });
           setNonce((n) => n + 1);
         }} />
       ))}

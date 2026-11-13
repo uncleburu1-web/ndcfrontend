@@ -5,6 +5,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Icon, type IconName } from "./Icon";
 import "./Toast.css";
+import { t as tr } from "../../i18n";
 
 export type ToastTone = "info" | "success" | "warning" | "error";
 
@@ -68,7 +69,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={api}>
       {children}
-      <div className="ds-toasts" role="region" aria-label="Notifications">
+      <div className="ds-toasts" role="region" aria-label={tr("ui.notifications")}>
         {/* polite: never steals focus or interrupts */}
         <div aria-live="polite" aria-atomic="false">
           {items.map((t) => (
@@ -111,7 +112,7 @@ export function Toast({ tone, message, action, onDismiss }: { tone: ToastTone; m
         )}
       </p>
       {onDismiss && (
-        <button type="button" className="ds-toast__close" onClick={onDismiss} aria-label="Dismiss notification">
+        <button type="button" className="ds-toast__close" onClick={onDismiss} aria-label={tr("ui.dismiss-notification")}>
           <Icon name="close" size={18} />
         </button>
       )}

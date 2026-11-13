@@ -14,6 +14,7 @@ import { POSITIONS, STATES } from "../../lib/nigeria";
 import { HomeStateChip } from "../../search/HomeStateChip";
 import { useHomeState } from "../../search/useHomeState";
 import "./candidates.css";
+import { t } from "../../i18n";
 
 const PAGE_SIZE = 20;
 
@@ -39,7 +40,7 @@ export default function CandidatesPage() {
 
   useEffect(() => setSearch(q), [q]);
   useEffect(() => {
-    document.title = "Candidates | NDCConnect";
+    document.title = t("candidates.candidates-ndcconnect");
   }, []);
 
   const update = (changes: Record<string, string>) => {
@@ -86,59 +87,54 @@ export default function CandidatesPage() {
   return (
     <div className="cand-page">
       <header className="cand-page__head">
-        <h1>Candidates</h1>
+        <h1>{t("candidates.candidates")}</h1>
         <p className="cand-page__lead">
-          NDC candidates by elective office{year ? ` for the ${year} elections` : ""}. Every profile here has been checked by
-          NDCConnect before publishing.
-        </p>
+          {t("candidates.ndc-candidates-by-elective-office-every", { v: year ? t("candidates.for-the-elections", { year }) : "" })}</p>
         <p className="cand-page__vote-help">
-          Tap <strong>Vote</strong> to follow a candidate. Voting here means following, not an official ballot. It’s free, and who
-          you follow is private.
-        </p>
+          {t.rich("candidates.tap-vote-to-follow-a-candidate", { strong: (chunks) => <strong>{chunks}</strong> })}</p>
       </header>
 
-      <form className="cand-filters" onSubmit={onSearch} role="search" aria-label="Filter candidates">
+      <form className="cand-filters" onSubmit={onSearch} role="search" aria-label={t("candidates.filter-candidates")}>
         <Select
-          label="Office"
+          label={t("candidates.office")}
           value={position}
           onChange={(e) => update({ position: e.target.value })}
           options={[
-            { value: "", label: "All offices" },
+            { value: "", label: t("candidates.all-offices") },
             ...POSITIONS.map((p) => ({ value: p.value, label: counts.has(p.value) ? `${p.label} (${counts.get(p.value)})` : p.label })),
           ]}
         />
         <Select
-          label="State"
+          label={t("candidates.state")}
           value={state}
           onChange={(e) => update({ state: e.target.value })}
-          options={[{ value: "", label: "All states" }, ...STATES]}
+          options={[{ value: "", label: t("candidates.all-states") }, ...STATES]}
         />
         <div className="cand-filters__search">
-          <TextField label="Search" name="q" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Name or area" />
+          <TextField label={t("candidates.search")} name="q" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("candidates.name-or-area")} />
           <Button type="submit" variant="secondary">
-            Search
-          </Button>
+            {t("candidates.search")}</Button>
         </div>
       </form>
       {home.fromHome && <HomeStateChip state={home.home} onClear={home.dismiss} />}
 
       {list.error ? (
-        <Banner tone="error" title="We couldn’t load candidates" action={<Button variant="secondary" size="sm" onClick={list.retry}>Try again</Button>}>
+        <Banner tone="error" title={t("candidates.we-couldn-t-load-candidates")} action={<Button variant="secondary" size="sm" onClick={list.retry}>{t("candidates.try-again")}</Button>}>
           {list.error.message}
         </Banner>
       ) : list.loading && !list.data ? (
         <div className="cand-grid" aria-busy="true">
-          <span className="visually-hidden">Loading candidates</span>
+          <span className="visually-hidden">{t("candidates.loading-candidates")}</span>
           {Array.from({ length: 6 }, (_, i) => (
             <CandidateCardSkeleton key={i} />
           ))}
         </div>
       ) : list.data && list.data.results.length === 0 ? (
         <EmptyState
-          title={filtered ? "No published candidates match these filters" : "No candidates have been published yet"}
-          action={filtered ? <Button variant="secondary" onClick={() => { if (home.fromHome) home.dismiss(); setParams(new URLSearchParams()); }}>Clear filters</Button> : undefined}
+          title={filtered ? t("candidates.no-published-candidates-match-these-filters") : t("candidates.no-candidates-have-been-published-yet")}
+          action={filtered ? <Button variant="secondary" onClick={() => { if (home.fromHome) home.dismiss(); setParams(new URLSearchParams()); }}>{t("candidates.clear-filters")}</Button> : undefined}
         >
-          {filtered ? "Try another office or state, or clear the search." : "Check back soon."}
+          {filtered ? t("candidates.try-another-office-or-state-or") : t("candidates.check-back-soon")}
         </EmptyState>
       ) : list.data ? (
         <div aria-busy={list.loading || undefined}>
@@ -166,7 +162,7 @@ export default function CandidatesPage() {
               </div>
             </section>
           ))}
-          <Pagination page={page} pageCount={Math.ceil(list.data.count / PAGE_SIZE)} onChange={(p) => update({ page: p > 1 ? String(p) : "" })} label="Candidate pages" />
+          <Pagination page={page} pageCount={Math.ceil(list.data.count / PAGE_SIZE)} onChange={(p) => update({ page: p > 1 ? String(p) : "" })} label={t("candidates.candidate-pages")} />
         </div>
       ) : null}
     </div>

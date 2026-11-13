@@ -5,6 +5,7 @@
  */
 import { Icon } from "./Icon";
 import "./Pagination.css";
+import { t } from "../../i18n";
 
 interface PaginationProps {
   page: number;
@@ -31,7 +32,7 @@ export function Pagination({ page, pageCount, onChange, label = "Pagination" }: 
     <nav className="ds-pagination" aria-label={label}>
       <button type="button" className="ds-pagination__step" onClick={() => onChange(page - 1)} disabled={page <= 1}>
         <Icon name="chevronLeft" size={18} />
-        <span>Previous</span>
+        <span>{t("ui.previous")}</span>
       </button>
 
       <ol className="ds-pagination__pages">
@@ -46,7 +47,7 @@ export function Pagination({ page, pageCount, onChange, label = "Pagination" }: 
                 type="button"
                 className="ds-pagination__page"
                 aria-current={p === page ? "page" : undefined}
-                aria-label={`Page ${p}`}
+                aria-label={t("ui.page", { p })}
                 onClick={() => onChange(p)}
               >
                 {p}
@@ -56,11 +57,11 @@ export function Pagination({ page, pageCount, onChange, label = "Pagination" }: 
         )}
       </ol>
       <p className="ds-pagination__summary">
-        Page {page} of {pageCount}
+        {t("ui.page-of", { page, pageCount })}
       </p>
 
       <button type="button" className="ds-pagination__step" onClick={() => onChange(page + 1)} disabled={page >= pageCount}>
-        <span>Next</span>
+        <span>{t("ui.next")}</span>
         <Icon name="chevronRight" size={18} />
       </button>
     </nav>

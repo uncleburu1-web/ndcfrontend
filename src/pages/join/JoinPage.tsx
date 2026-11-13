@@ -19,6 +19,7 @@ import { useAuthedImage } from "../../membership/useAuthedImage";
 import { VerifiedVoterBadge } from "../../pvc/VerifiedVoterBadge";
 import { DISPLAY_LABELS, type MembershipConfig, type MyMembership } from "../../membership/types";
 import "./join.css";
+import { t } from "../../i18n";
 
 type Errors = Record<string, string>;
 const DECLARATIONS = [
@@ -52,7 +53,7 @@ function Step({ n, title, state, children }: { n: number; title: string; state: 
       <div className="join-step__body">
         <h3>
           {title}
-          <span className="visually-hidden">{state === "done" ? " (done)" : state === "current" ? " (current step)" : ""}</span>
+          <span className="visually-hidden">{state === "done" ? t("join.done") : state === "current" ? t("join.current-step") : ""}</span>
         </h3>
         {children}
       </div>
@@ -90,7 +91,7 @@ function DetailsForm({ m, onSaved }: { m: MyMembership | null; onSaved: (m: MyMe
       const saved = await api<MyMembership>("/me/membership/", { method: "PUT", body });
       setF((x) => ({ ...x, nin: "" }));
       onSaved(saved);
-      toast.show({ tone: "success", message: "Details saved." });
+      toast.show({ tone: "success", message: t("join.details-saved") });
     } catch (err) {
       const e2 = err instanceof ApiError ? err : new ApiError({});
       const flat = flatten(e2.fields);
@@ -123,35 +124,35 @@ function DetailsForm({ m, onSaved }: { m: MyMembership | null; onSaved: (m: MyMe
   return (
     <form className="join-form" onSubmit={save} noValidate>
       {errors._form && <Banner tone="error">{errors._form}</Banner>}
-      <p className="join-note">These go on the NDC membership register the law requires (Electoral Act 2026 s. 77). They’re private.</p>
-      <TextField label="Full name (as on your NIN)" required value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} error={errors.full_name} />
-      <RadioGroup legend="Sex" name="sex" required value={f.sex} onChange={(v) => setF({ ...f, sex: v as "male" | "female" })} error={errors.sex}
-        options={[{ value: "female", label: "Female" }, { value: "male", label: "Male" }]} />
+      <p className="join-note">{t("join.these-go-on-the-ndc-membership")}</p>
+      <TextField label={t("join.full-name-as-on-your-nin")} required value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} error={errors.full_name} />
+      <RadioGroup legend={t("join.sex")} name="sex" required value={f.sex} onChange={(v) => setF({ ...f, sex: v as "male" | "female" })} error={errors.sex}
+        options={[{ value: "female", label: t("join.female") }, { value: "male", label: t("join.male") }]} />
       <label className="join-date">
-        <span className="ds-field__label">Date of birth <span className="ds-field__required">(required)</span></span>
+        <span className="ds-field__label">{t.rich("join.date-of-birth-required", { span: (chunks) => <span className="ds-field__required">{chunks}</span> })}</span>
         <input type="date" className="ds-input" value={f.date_of_birth ?? ""} onChange={(e) => setF({ ...f, date_of_birth: e.target.value })}
           aria-invalid={errors.date_of_birth ? true : undefined} />
         {errors.date_of_birth && <span className="ds-field__error" role="alert">{errors.date_of_birth}</span>}
       </label>
-      <TextArea label="Residential address" required rows={2} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} error={errors.address} />
-      <Select label="State" required value={f.state} onChange={(e) => { setF({ ...f, state: e.target.value }); setGeo(EMPTY_GEO); }} error={errors.state}
-        options={[{ value: "", label: "Choose your state" }, ...STATES]} />
+      <TextArea label={t("join.residential-address")} required rows={2} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} error={errors.address} />
+      <Select label={t("join.state")} required value={f.state} onChange={(e) => { setF({ ...f, state: e.target.value }); setGeo(EMPTY_GEO); }} error={errors.state}
+        options={[{ value: "", label: t("join.choose-your-state") }, ...STATES]} />
       <GeoPicker state={f.state} value={geo} onChange={setGeo} errors={errors} required={["lga", "ward", "polling_unit"]}
-        hint="Where you registered to vote, from INEC’s list." />
+        hint={t("join.where-you-registered-to-vote-from")} />
       <TextField label="NIN" required inputMode="numeric" autoComplete="off" value={f.nin} onChange={(e) => setF({ ...f, nin: e.target.value })}
-        hint={m?.nin_masked ? `Saved: ${m.nin_masked}. Enter it again only to change it.` : "Your 11-digit National Identification Number. Stored encrypted."}
+        hint={m?.nin_masked ? t("join.saved-enter-it-again-only-to", { nin_masked: m.nin_masked }) : t("join.your-11-digit-national-identification-number")}
         error={errors.nin} />
 
       <fieldset className="join-photo">
-        <legend className="ds-field__label">Passport-style photo <span className="ds-field__required">(required)</span></legend>
-        <p className="join-note">A recent photo with your face clearly visible. JPEG, PNG or WebP, up to 5 MB, at least 400 × 400 px. Location data is removed.</p>
+        <legend className="ds-field__label">{t.rich("join.passport-style-photo-required", { span: (chunks) => <span className="ds-field__required">{chunks}</span> })}</legend>
+        <p className="join-note">{t("join.a-recent-photo-with-your-face")}</p>
         <div className="join-photo__row">
-          {photoUrl ? <img src={photoUrl} alt="Your membership photo" width={96} height={96} className="join-photo__img" /> : <span className="join-photo__empty" aria-hidden="true">No photo</span>}
+          {photoUrl ? <img src={photoUrl} alt={t("join.your-membership-photo")} width={96} height={96} className="join-photo__img" /> : <span className="join-photo__empty" aria-hidden="true">{t("join.no-photo")}</span>}
           <div className="join-photo__controls">
-            <Checkbox label="This is a recent photo of me that the NDC may use on my membership card and register." checked={photoConsent}
+            <Checkbox label={t("join.this-is-a-recent-photo-of")} checked={photoConsent}
               onChange={(e) => setPhotoConsent(e.target.checked)} />
             <label className={`ds-button ds-button--secondary ds-button--sm${!photoConsent || photoBusy ? " is-disabled" : ""}`}>
-              {photoBusy ? "Uploading…" : m?.has_photo ? "Replace photo" : "Choose photo"}
+              {photoBusy ? t("join.uploading") : m?.has_photo ? t("join.replace-photo") : t("join.choose-photo")}
               <input type="file" accept="image/jpeg,image/png,image/webp" className="visually-hidden" disabled={!photoConsent || photoBusy}
                 onChange={(e) => void upload(e.target.files?.[0])} />
             </label>
@@ -161,12 +162,12 @@ function DetailsForm({ m, onSaved }: { m: MyMembership | null; onSaved: (m: MyMe
       </fieldset>
 
       <fieldset className="join-declarations">
-        <legend className="ds-field__label">Please confirm</legend>
+        <legend className="ds-field__label">{t("join.please-confirm")}</legend>
         {DECLARATIONS.map(([k, label]) => (
           <Checkbox key={k} label={label} required checked={decl[k]} error={errors[`declarations.${k}`]} onChange={(e) => setDecl({ ...decl, [k]: e.target.checked })} />
         ))}
       </fieldset>
-      <Button type="submit" variant="secondary" loading={busy} loadingLabel="Saving…">Save details</Button>
+      <Button type="submit" variant="secondary" loading={busy} loadingLabel={t("join.saving")}>{t("join.save-details")}</Button>
     </form>
   );
 }
@@ -185,7 +186,7 @@ export default function JoinPage() {
   const [cancelReason, setCancelReason] = useState("");
 
   useEffect(() => {
-    document.title = "Join NDC | NDCConnect";
+    document.title = t("join.join-ndc-ndcconnect");
   }, []);
   const load = useCallback(() => {
     setLoading(true);
@@ -214,7 +215,7 @@ export default function JoinPage() {
       const r = await api<{ reference: string; checkout_url: string }>("/me/membership/pay/", { method: "POST" });
       redirectTo(r.checkout_url);
     } catch (err) {
-      setPayError(err instanceof ApiError ? err.message : "Payment couldn’t start.");
+      setPayError(err instanceof ApiError ? err.message : t("join.payment-couldn-t-start"));
       setPayBusy(false);
       load();
     }
@@ -223,19 +224,19 @@ export default function JoinPage() {
     try {
       setM(await api<MyMembership>("/me/membership/cancel/", { method: "POST", body: { reason: cancelReason } }));
       setCancelOpen(false);
-      toast.show({ tone: "success", message: "Your membership has been cancelled." });
+      toast.show({ tone: "success", message: t("join.your-membership-has-been-cancelled") });
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Couldn’t cancel." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("join.couldn-t-cancel") });
     }
   };
 
   const intro = (
     <header className="join-hero">
       <div className="join-hero__inner">
-        <h1>Join the NDC</h1>
-        <p>Become a registered member of the Nigeria Democratic Congress: take part in party life and be on the register for primaries and congresses.</p>
-        <p className="join-fee">Membership fee <strong>{fee}</strong></p>
-        <p className="join-hero__small">Membership is private. Joining doesn’t follow a candidate or count as a donation.</p>
+        <h1>{t("join.join-the-ndc")}</h1>
+        <p>{t("join.become-a-registered-member-of-the")}</p>
+        <p className="join-fee">{t.rich("join.membership-fee", { fee, strong: (chunks) => <strong>{chunks}</strong> })}</p>
+        <p className="join-hero__small">{t("join.membership-is-private-joining-doesn-t")}</p>
       </div>
     </header>
   );
@@ -249,12 +250,12 @@ export default function JoinPage() {
         {intro}
         <div className="join-page">
           <ol className="join-steps join-steps--plain">
-            <Step n={1} title="Verify your PVC" state="todo" />
-            <Step n={2} title="Your details" state="todo" />
-            <Step n={3} title={`Pay ${fee}`} state="todo" />
-            <Step n={4} title="Approval" state="todo" />
+            <Step n={1} title={t("join.verify-your-pvc")} state="todo" />
+            <Step n={2} title={t("join.your-details")} state="todo" />
+            <Step n={3} title={t("join.pay", { fee })} state="todo" />
+            <Step n={4} title={t("join.approval")} state="todo" />
           </ol>
-          <Button href="/sign-in?redirect_url=%2Fjoin">Sign in to join</Button>
+          <Button href="/sign-in?redirect_url=%2Fjoin">{t("join.sign-in-to-join")}</Button>
         </div>
       </>
     );
@@ -265,77 +266,74 @@ export default function JoinPage() {
     <>
       {intro}
       <div className="join-page">
-        <p className="join-status">Status: <strong>{DISPLAY_LABELS[display]}</strong></p>
+        <p className="join-status">{t.rich("join.status", { DISPLAY_LABELS: DISPLAY_LABELS[display], strong: (chunks) => <strong>{chunks}</strong> })}</p>
         {me && !me.profile_complete && (
-          <Banner tone="info" title="Finish setting up your profile first" action={<Button size="sm" href="/setup-profile">Finish profile</Button>}>
-            We need your name and phone number before you can apply.
-          </Banner>
+          <Banner tone="info" title={t("join.finish-setting-up-your-profile-first")} action={<Button size="sm" href="/setup-profile">{t("join.finish-profile")}</Button>}>
+            {t("join.we-need-your-name-and-phone")}</Banner>
         )}
-        {!open && <Banner tone="info">Membership registration opens soon. You can verify your PVC and save your details now.</Banner>}
+        {!open && <Banner tone="info">{t("join.membership-registration-opens-soon-you-can")}</Banner>}
 
         {status === "active" && (
           <section className="join-panel join-panel--success" aria-labelledby="active-title">
-            <h2 id="active-title">You’re an NDC member</h2>
-            <p>Membership number <strong>{m?.membership_number}</strong>{m?.activated_at ? ` · since ${formatDate(m.activated_at)}` : ""}</p>
+            <h2 id="active-title">{t("join.you-re-an-ndc-member")}</h2>
+            <p>{t.rich("join.membership-number", { membership_number: m?.membership_number, strong: (chunks) => <strong>{chunks}</strong>, v: m?.activated_at ? t("join.since", { formatDate: formatDate(m.activated_at) }) : "" })}</p>
             <div className="join-actions">
-              <Button href="/membership/card">My membership card</Button>
-              <Button variant="ghost" onClick={() => setCancelOpen(true)}>Cancel membership</Button>
+              <Button href="/membership/card">{t("join.my-membership-card")}</Button>
+              <Button variant="ghost" onClick={() => setCancelOpen(true)}>{t("join.cancel-membership")}</Button>
             </div>
           </section>
         )}
         {status === "pending_approval" && (
           <section className="join-panel" aria-labelledby="pending-title">
-            <h2 id="pending-title">Payment received</h2>
-            <p>Your application is with the membership team. We’ll update this page when it’s decided.</p>
-            <Button variant="ghost" onClick={() => setCancelOpen(true)}>Cancel application</Button>
+            <h2 id="pending-title">{t("join.payment-received-2")}</h2>
+            <p>{t("join.your-application-is-with-the-membership-2")}</p>
+            <Button variant="ghost" onClick={() => setCancelOpen(true)}>{t("join.cancel-application")}</Button>
           </section>
         )}
         {status === "payment_pending" && (
           <section className="join-panel" aria-labelledby="paying-title">
-            <h2 id="paying-title">Payment in progress</h2>
-            <p>We’re waiting for the bank to confirm your payment.</p>
-            {m?.latest_payment && <Button variant="secondary" href={`/join/complete?reference=${m.latest_payment.reference}`}>Check payment</Button>}
+            <h2 id="paying-title">{t("join.payment-in-progress")}</h2>
+            <p>{t("join.we-re-waiting-for-the-bank")}</p>
+            {m?.latest_payment && <Button variant="secondary" href={`/join/complete?reference=${m.latest_payment.reference}`}>{t("join.check-payment")}</Button>}
           </section>
         )}
         {status === "rejected" && (
-          <Banner tone="error" title="Your application wasn’t approved">
-            {m?.decision_reason} {m?.latest_payment?.status === "successful" && "Your fee will be refunded to your original payment method."} You can apply again below.
-          </Banner>
+          <Banner tone="error" title={t("join.your-application-wasn-t-approved")}>
+            {t("join.you-can-apply-again-below", { decision_reason: m?.decision_reason, v: m?.latest_payment?.status === "successful" && t("join.your-fee-will-be-refunded-to") })}</Banner>
         )}
-        {status === "refunded" && <Banner tone="info" title="Refunded">Your membership fee was refunded. You can apply again below.</Banner>}
-        {status === "cancelled" && <Banner tone="info" title="Membership cancelled">{m?.cancel_reason} You can apply again below.</Banner>}
+        {status === "refunded" && <Banner tone="info" title={t("join.refunded")}>{t("join.your-membership-fee-was-refunded-you")}</Banner>}
+        {status === "cancelled" && <Banner tone="info" title={t("join.membership-cancelled")}>{t("join.you-can-apply-again-below-2", { cancel_reason: m?.cancel_reason })}</Banner>}
 
         {(!settled || status === "rejected" || status === "cancelled" || status === "refunded") && (
           <ol className="join-steps">
-            <Step n={1} title="Verify your PVC" state={pvcOk ? "done" : "current"}>
+            <Step n={1} title={t("join.verify-your-pvc")} state={pvcOk ? "done" : "current"}>
               {pvcOk ? <p><VerifiedVoterBadge /></p> : (
                 <p>
-                  {pvcStatus === "pending" ? "We’re checking your PVC. " : pvcStatus === "rejected" ? "We couldn’t verify your PVC. " : "Your PVC must be verified before you can pay. "}
-                  <Link to="/pvc">{pvcStatus === "pending" ? "See status" : "Verify your PVC"}</Link>
+                  {pvcStatus === "pending" ? t("join.we-re-checking-your-pvc") : pvcStatus === "rejected" ? t("join.we-couldn-t-verify-your-pvc") : t("join.your-pvc-must-be-verified-before")}
+                  <Link to="/pvc">{pvcStatus === "pending" ? t("join.see-status") : t("join.verify-your-pvc")}</Link>
                 </p>
               )}
             </Step>
-            <Step n={2} title="Your details" state={complete ? "done" : pvcOk ? "current" : "todo"}>
+            <Step n={2} title={t("join.your-details")} state={complete ? "done" : pvcOk ? "current" : "todo"}>
               {EDITABLE.has(status) && me?.profile_complete ? <DetailsForm m={m} onSaved={setM} /> : null}
             </Step>
-            <Step n={3} title={`Pay ${fee} membership fee`} state={pvcOk && complete ? "current" : "todo"}>
+            <Step n={3} title={t("join.pay-membership-fee", { fee })} state={pvcOk && complete ? "current" : "todo"}>
               {payError && <Banner tone="error">{payError}</Banner>}
-              <Button onClick={() => void pay()} disabled={!open || !pvcOk || !complete} loading={payBusy} loadingLabel="Starting…">
-                Pay {fee} membership fee
-              </Button>
-              {(!pvcOk || !complete) && <p className="join-note">Available once your PVC is verified and your details are complete.</p>}
+              <Button onClick={() => void pay()} disabled={!open || !pvcOk || !complete} loading={payBusy} loadingLabel={t("join.starting")}>
+                {t("join.pay-membership-fee", { fee })}</Button>
+              {(!pvcOk || !complete) && <p className="join-note">{t("join.available-once-your-pvc-is-verified")}</p>}
             </Step>
-            <Step n={4} title="Approval" state="todo">
-              <p>{config.data?.requires_approval ? "The membership team reviews your application after payment." : "You become a member as soon as payment is confirmed."}</p>
+            <Step n={4} title={t("join.approval")} state="todo">
+              <p>{config.data?.requires_approval ? t("join.the-membership-team-reviews-your-application") : t("join.you-become-a-member-as-soon")}</p>
             </Step>
           </ol>
         )}
       </div>
 
-      <Modal open={cancelOpen} onClose={() => setCancelOpen(false)} title="Cancel your membership?"
-        footer={<><Button variant="secondary" onClick={() => setCancelOpen(false)}>Keep membership</Button><Button variant="danger" onClick={() => void cancel()} disabled={!cancelReason.trim()}>Cancel membership</Button></>}>
-        <p>You’ll be removed from future registers. {status === "active" ? "The membership fee isn’t refunded once you’re active." : ""}</p>
-        <TextArea label="Reason" required rows={2} value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} />
+      <Modal open={cancelOpen} onClose={() => setCancelOpen(false)} title={t("join.cancel-your-membership")}
+        footer={<><Button variant="secondary" onClick={() => setCancelOpen(false)}>{t("join.keep-membership")}</Button><Button variant="danger" onClick={() => void cancel()} disabled={!cancelReason.trim()}>{t("join.cancel-membership")}</Button></>}>
+        <p>{t("join.you-ll-be-removed-from-future", { v: status === "active" ? t("join.the-membership-fee-isn-t-refunded") : "" })}</p>
+        <TextArea label={t("join.reason")} required rows={2} value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} />
       </Modal>
     </>
   );

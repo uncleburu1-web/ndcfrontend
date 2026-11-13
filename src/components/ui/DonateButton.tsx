@@ -6,6 +6,7 @@
  */
 import { Button } from "./Button";
 import { Icon } from "./Icon";
+import { t } from "../../i18n";
 
 interface DonateButtonProps {
   href?: string;
@@ -19,11 +20,9 @@ export function DonateButton({ href, onClick, size = "md", fullWidth, className 
   const common = { variant: "primary" as const, size, fullWidth, className, icon: <Icon name="heart" size={18} /> };
   return href ? (
     <Button {...common} href={href}>
-      Donate
-    </Button>
+      {t("ui.donate")}</Button>
   ) : (
     <Button {...common} onClick={onClick}>
-      Donate
-    </Button>
+      {t("ui.donate")}</Button>
   );
 }

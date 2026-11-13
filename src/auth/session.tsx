@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { ConsentDialog, type ConsentAsk } from "../privacy/ConsentDialog";
 import "../privacy/privacy.css";
 import { ApiError, createApiClient, type ApiRequest } from "./api";
+import { t } from "../i18n";
 
 export interface Me {
   id: string;
@@ -107,7 +108,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         onConsentRequired: (err) =>
           new Promise<boolean>((resolve) => {
             const x = err.extra as { purpose?: string; version?: number; label?: string; text?: string };
-            setConsentAsk({ purpose: x.purpose ?? "", version: x.version ?? 1, label: x.label ?? "Your consent", text: x.text ?? err.message, resolve });
+            setConsentAsk({ purpose: x.purpose ?? "", version: x.version ?? 1, label: x.label ?? t("auth.your-consent"), text: x.text ?? err.message, resolve });
           }),
         onPaused: () => void refreshRef.current?.(),
         onDeactivated: () => {

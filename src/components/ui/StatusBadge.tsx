@@ -4,6 +4,7 @@
  */
 import { Icon, type IconName } from "./Icon";
 import "./Badge.css";
+import { getLanguage, hasOwn, t } from "../../i18n";
 
 export type Tone = "warning" | "success" | "error" | "neutral";
 
@@ -137,7 +138,9 @@ interface StatusBadgeProps<S extends StatusSet> {
 }
 
 export function StatusBadge<S extends StatusSet>({ set, status }: StatusBadgeProps<S>) {
-  const [label, tone] = (STATUS_SETS[set] as Record<string, readonly [string, Tone]>)[status as string];
+  const [english, tone] = (STATUS_SETS[set] as Record<string, readonly [string, Tone]>)[status as string];
+  const label = hasOwn(`status.${set}.${String(status)}`) || getLanguage() !== "en" ? t(`status.${set}.${String(status)}`, {}) : english;
+  // spec 21: status words come from the catalogue (status.<set>.<status>), English as written here when missing
   return (
     <span className={`ds-badge ds-badge--${tone}`}>
       <Icon name={TONE_ICON[tone]} size={14} />

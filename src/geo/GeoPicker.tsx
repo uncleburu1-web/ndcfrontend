@@ -10,6 +10,7 @@ import { Button, Checkbox, Select, TextField } from "../components/ui";
 import { geoApi, useGeoList, fold, CODE_RE } from "./useGeo";
 import { lgaWord, type GeoLga, type GeoUnit, type GeoValue, type GeoWard } from "./types";
 import "./geo.css";
+import { t } from "../i18n";
 
 export type GeoDepth = "lga" | "ward" | "polling_unit";
 
@@ -64,57 +65,57 @@ export function GeoPicker({ state, value, onChange, depth = "polling_unit", requ
   const findCode = async () => {
     const c = code.trim();
     if (!CODE_RE.test(c)) {
-      setCodeMsg("Codes look like 24-07-05-004.");
+      setCodeMsg(t("geo.codes-look-like-24-07-05"));
       return;
     }
     setFinding(true);
     setCodeMsg("");
     try {
       const u = await geoApi.byCode(api, c);
-      if (u.state.slug !== state) setCodeMsg(`That code is in ${u.state.name}, not the state you chose.`);
-      else if (!u.active) setCodeMsg("That polling unit is no longer in INEC’s current list.");
+      if (u.state.slug !== state) setCodeMsg(t("geo.that-code-is-in-not-the", { name: u.state.name }));
+      else if (!u.active) setCodeMsg(t("geo.that-polling-unit-is-no-longer"));
       else {
         onChange({ ...value, not_listed: false, lga_id: u.lga.id, ward_id: u.ward.id, polling_unit_id: u.id, lga: u.lga.name,
           ward: u.ward.name, polling_unit: u.name });
-        setCodeMsg(`Found: ${u.name}.`);
+        setCodeMsg(t("geo.found", { name: u.name }));
       }
     } catch (err) {
-      setCodeMsg(err instanceof ApiError && err.status === 404 ? "No polling unit has that code." : "Couldn’t look that up. Try again.");
+      setCodeMsg(err instanceof ApiError && err.status === 404 ? t("geo.no-polling-unit-has-that-code") : t("geo.couldn-t-look-that-up-try"));
     } finally {
       setFinding(false);
     }
   };
 
-  if (!state) return <p className="news-meta">Choose your state first.</p>;
+  if (!state) return <p className="news-meta">{t("geo.choose-your-state-first")}</p>;
   const isReq = (k: GeoDepth) => required.includes(k);
 
   return (
     <fieldset className="geo-picker" disabled={disabled} aria-describedby={hint ? `${id}-hint` : undefined}>
-      <legend className="visually-hidden">Where you vote</legend>
+      <legend className="visually-hidden">{t("geo.where-you-vote")}</legend>
       {hint && <p id={`${id}-hint`} className="news-meta">{hint}</p>}
       {value.not_listed ? (
         <div className="geo-picker__typed">
           <TextField label={word} value={value.lga} required={isReq("lga")} maxLength={120} error={pickErr(errors, "lga")}
             onChange={(e) => set({ lga: e.target.value })} />
-          {wantWard && <TextField label="Ward" value={value.ward} required={isReq("ward")} maxLength={120} error={pickErr(errors, "ward")}
+          {wantWard && <TextField label={t("geo.ward")} value={value.ward} required={isReq("ward")} maxLength={120} error={pickErr(errors, "ward")}
             onChange={(e) => set({ ward: e.target.value })} />}
-          {wantUnit && <TextField label="Polling unit" value={value.polling_unit} required={isReq("polling_unit")} maxLength={160}
+          {wantUnit && <TextField label={t("geo.polling-unit")} value={value.polling_unit} required={isReq("polling_unit")} maxLength={160}
             error={pickErr(errors, "polling_unit")} onChange={(e) => set({ polling_unit: e.target.value })} />}
-          <p className="news-meta">{noList ? `INEC’s list for this state isn’t on NDCConnect yet, so type your ${word.toLowerCase()}${wantWard ? " and ward" : ""}. An officer will check it.` : "An officer will check this against INEC’s list."}</p>
+          <p className="news-meta">{noList ? t("geo.inec-s-list-for-this-state", { toLowerCase: word.toLowerCase(), v: wantWard ? t("geo.and-ward") : "" }) : t("geo.an-officer-will-check-this-against")}</p>
         </div>
       ) : (
         <>
-          <Select label={word} required={isReq("lga")} value={value.lga_id ? String(value.lga_id) : ""} placeholder={lgas.loading ? "Loading…" : `Choose your ${word}`}
-            options={lgas.data.map((l) => ({ value: String(l.id), label: l.name }))} error={pickErr(errors, "lga") ?? (lgas.error ? "Couldn’t load the list." : undefined)}
+          <Select label={word} required={isReq("lga")} value={value.lga_id ? String(value.lga_id) : ""} placeholder={lgas.loading ? t("geo.loading") : t("geo.choose-your", { word })}
+            options={lgas.data.map((l) => ({ value: String(l.id), label: l.name }))} error={pickErr(errors, "lga") ?? (lgas.error ? t("geo.couldn-t-load-the-list") : undefined)}
             onChange={(e) => {
               const v = Number(e.target.value) || null;
               set({ lga_id: v, ward_id: null, polling_unit_id: null, lga: nameOf(lgas.data, v), ward: "", polling_unit: "" });
             }} />
           {wantWard && (
-            <Select label="Ward" required={isReq("ward")} disabled={!value.lga_id} value={value.ward_id ? String(value.ward_id) : ""}
-              placeholder={!value.lga_id ? `Choose your ${word} first` : wards.loading ? "Loading…" : "Choose your ward"}
-              hint="Wards are INEC registration areas."
-              options={wards.data.map((w) => ({ value: String(w.id), label: `${w.name} · ${w.code} (${w.polling_units} unit${w.polling_units === 1 ? "" : "s"})` }))}
+            <Select label={t("geo.ward")} required={isReq("ward")} disabled={!value.lga_id} value={value.ward_id ? String(value.ward_id) : ""}
+              placeholder={!value.lga_id ? t("geo.choose-your-first", { word }) : wards.loading ? t("geo.loading") : t("geo.choose-your-ward")}
+              hint={t("geo.wards-are-inec-registration-areas")}
+              options={wards.data.map((w) => ({ value: String(w.id), label: t("geo.unit", { name: w.name, code: w.code, polling_units: w.polling_units, v: w.polling_units === 1 ? "" : "s" }) }))}
               error={pickErr(errors, "ward")}
               onChange={(e) => {
                 const v = Number(e.target.value) || null;
@@ -123,12 +124,12 @@ export function GeoPicker({ state, value, onChange, depth = "polling_unit", requ
               }} />
           )}
           {wantUnit && value.ward_id && units.data.length > 12 && (
-            <TextField label="Filter polling units" value={filter} onChange={(e) => setFilter(e.target.value)} hint="Part of the name or the code" />
+            <TextField label={t("geo.filter-polling-units")} value={filter} onChange={(e) => setFilter(e.target.value)} hint={t("geo.part-of-the-name-or-the")} />
           )}
           {wantUnit && (
-            <Select label="Polling unit" required={isReq("polling_unit")} disabled={!value.ward_id}
+            <Select label={t("geo.polling-unit")} required={isReq("polling_unit")} disabled={!value.ward_id}
               value={value.polling_unit_id ? String(value.polling_unit_id) : ""}
-              placeholder={!value.ward_id ? "Choose your ward first" : units.loading ? "Loading…" : shown.length ? "Choose your polling unit" : "No match"}
+              placeholder={!value.ward_id ? t("geo.choose-your-ward-first") : units.loading ? t("geo.loading") : shown.length ? t("geo.choose-your-polling-unit") : t("geo.no-match")}
               options={shown.map((u) => ({ value: String(u.id), label: `${u.name} · ${u.delimitation}` }))}
               error={pickErr(errors, "polling_unit")}
               onChange={(e) => {
@@ -138,16 +139,16 @@ export function GeoPicker({ state, value, onChange, depth = "polling_unit", requ
           )}
           {wantUnit && (
             <div className="geo-picker__code">
-              <TextField label="Or find it by code" value={code} placeholder="24-07-05-004" inputMode="numeric" maxLength={12}
-                hint={codeMsg || "The code is on your voter’s card and on INEC’s polling-unit locator."} onChange={(e) => setCode(e.target.value)} />
-              <Button type="button" variant="secondary" size="sm" loading={finding} onClick={() => void findCode()}>Find</Button>
+              <TextField label={t("geo.or-find-it-by-code")} value={code} placeholder="24-07-05-004" inputMode="numeric" maxLength={12}
+                hint={codeMsg || t("geo.the-code-is-on-your-voter")} onChange={(e) => setCode(e.target.value)} />
+              <Button type="button" variant="secondary" size="sm" loading={finding} onClick={() => void findCode()}>{t("geo.find")}</Button>
             </div>
           )}
         </>
       )}
       {allowNotListed && !noList && (
-        <Checkbox label="My place isn’t listed" checked={value.not_listed}
-          hint={value.not_listed ? undefined : "Type it instead; an officer links it later."}
+        <Checkbox label={t("geo.my-place-isn-t-listed")} checked={value.not_listed}
+          hint={value.not_listed ? undefined : t("geo.type-it-instead-an-officer-links")}
           onChange={(e) => set({ not_listed: e.target.checked })} />
       )}
     </fieldset>
@@ -161,12 +162,12 @@ export function LgaPicker({ state, value, onChange, label, required, error, opti
 }) {
   const lgas = useGeoList<GeoLga>(state ? (a) => geoApi.lgas(a, state) : null, `lgas:${state}`);
   const word = lgaWord(state);
-  if (!state) return <Select label={label ?? word} disabled value="" options={[]} placeholder="Choose the state first" />;
+  if (!state) return <Select label={label ?? word} disabled value="" options={[]} placeholder={t("geo.choose-the-state-first-2")} />;
   return (
-    <Select label={label ?? word} required={required} value={value ? String(value) : ""} error={error ?? (lgas.error ? "Couldn’t load the list." : undefined)}
-      options={[...(optional ? [{ value: "", label: lgas.loading ? "Loading…" : `Any ${word.toLowerCase()} / not sure` }] : []),
+    <Select label={label ?? word} required={required} value={value ? String(value) : ""} error={error ?? (lgas.error ? t("geo.couldn-t-load-the-list") : undefined)}
+      options={[...(optional ? [{ value: "", label: lgas.loading ? t("geo.loading") : t("geo.any-not-sure", { toLowerCase: word.toLowerCase() }) }] : []),
         ...lgas.data.map((l) => ({ value: String(l.id), label: l.name }))]}
-      placeholder={optional ? undefined : `Choose the ${word}`}
+      placeholder={optional ? undefined : t("geo.choose-the", { word })}
       onChange={(e) => {
         const id = Number(e.target.value) || null;
         onChange(id, lgas.data.find((l) => l.id === id)?.name ?? "");

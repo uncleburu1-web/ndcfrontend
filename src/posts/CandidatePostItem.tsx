@@ -6,6 +6,7 @@ import { ArticleImage } from "../news/ArticleImage";
 import { KindBadge } from "./KindBadge";
 import { postPath, type PostCandidate, type PostSummary } from "./types";
 import "./posts.css";
+import { t } from "../i18n";
 
 export function CandidatePostItem({ post, candidate, showAttribution = true }: { post: PostSummary; candidate: PostCandidate; showAttribution?: boolean }) {
   return (
@@ -19,7 +20,7 @@ export function CandidatePostItem({ post, candidate, showAttribution = true }: {
           <KindBadge kind={post.kind} label={post.kind_label} />
         </span>
         <h2><Link to={postPath(candidate.slug, post.id)}>{post.title}</Link></h2>
-        <p className="news-meta">{formatDate(post.published_at)}{post.edited_at ? " · Edited" : ""}</p>
+        <p className="news-meta">{formatDate(post.published_at)}{post.edited_at ? t("posts.edited") : ""}</p>
         <p>{post.excerpt}</p>
       </div>
       {post.image && <ArticleImage image={post.image} thumb />}

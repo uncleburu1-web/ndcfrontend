@@ -17,9 +17,11 @@ import { KindBadge } from "../../posts/KindBadge";
 import { RemovalNotice, useAuthorView } from "../../moderation/AuthorStanding";
 import "../../news/news.css";
 import "../../posts/posts.css";
+import { getLanguage, t } from "../../i18n";
+import { defaultWritingLanguage, WrittenIn } from "../../i18n/ContentLanguage";
 
 type Errors = Record<string, string>;
-interface Draft { kind: PostKind | ""; title: string; body: string }
+interface Draft { kind: PostKind | ""; title: string; body: string; language: string }
 
 function PostForm({ candidate, editing, onSaved, onCancel }: {
   candidate: CampaignCandidate; editing: CampaignPost | null; onSaved: (p: CampaignPost) => void; onCancel: () => void;
@@ -27,7 +29,8 @@ function PostForm({ candidate, editing, onSaved, onCancel }: {
   const api = useApi();
   const toast = useToast();
   const { upload: uploadImage, progress } = useImageUpload("post_image");
-  const [f, setF] = useState<Draft>({ kind: editing?.kind ?? "", title: editing?.title ?? "", body: editing?.body ?? "" });
+  const [f, setF] = useState<Draft>({ kind: editing?.kind ?? "", title: editing?.title ?? "", body: editing?.body ?? "",
+    language: editing?.language ?? defaultWritingLanguage(getLanguage()) });
   const [image, setImage] = useState<File | null>(null);
   const [rights, setRights] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
@@ -37,13 +40,13 @@ function PostForm({ candidate, editing, onSaved, onCancel }: {
 
   const validate = () => {
     const e: Errors = {};
-    if (!f.kind) e.kind = "Choose Announcement or News.";
-    if (!f.title.trim()) e.title = "Give it a title.";
-    if (!f.body.trim()) e.body = "Write the post.";
-    if (f.body.length > BODY_MAX) e.body = `Keep it under ${BODY_MAX.toLocaleString()} characters.`;
+    if (!f.kind) e.kind = t("campaign.choose-announcement-or-news");
+    if (!f.title.trim()) e.title = t("campaign.give-it-a-title");
+    if (!f.body.trim()) e.body = t("campaign.write-the-post");
+    if (f.body.length > BODY_MAX) e.body = t("campaign.keep-it-under-characters", { BODY_MAX: BODY_MAX.toLocaleString() });
     const imageProblem = image ? checkImage(image) : null;  // type and size before anything is sent (spec 15 §15.4)
     if (imageProblem) e.image = imageProblem.message;
-    if (image && !rights) e.rights = "Confirm you took this photo or have the right to share it.";
+    if (image && !rights) e.rights = t("campaign.confirm-you-took-this-photo-or");
     return e;
   };
   const submit = (ev: FormEvent) => {
@@ -63,10 +66,10 @@ function PostForm({ candidate, editing, onSaved, onCancel }: {
         try {
           saved = await uploadImage<CampaignPost>(image, { targetId: saved.id, url: `${base}${saved.id}/image/`, field: "image" });
         } catch (err) {
-          toast.show({ tone: "warning", message: `Your post is live, but the image wasn’t saved: ${err instanceof ApiError ? err.message : "try again"}` });
+          toast.show({ tone: "warning", message: t("campaign.your-post-is-live-but-the", { v: err instanceof ApiError ? err.message : t("campaign.try-again") }) });
         }
       }
-      toast.show({ tone: "success", message: editing ? "Saved. Followers weren’t notified again." : "Published." });
+      toast.show({ tone: "success", message: editing ? t("campaign.saved-followers-weren-t-notified-again") : t("campaign.published") });
       onSaved(saved);
     } catch (err) {
       const e2 = err instanceof ApiError ? err : new ApiError({});
@@ -80,38 +83,37 @@ function PostForm({ candidate, editing, onSaved, onCancel }: {
 
   return (
     <form className="campaign-form" onSubmit={submit} noValidate>
-      <h2>{editing ? "Edit post" : "New post"}</h2>
+      <h2>{editing ? t("campaign.edit-post") : t("campaign.new-post")}</h2>
       {errors._form && <Banner tone="error">{errors._form}</Banner>}
-      <Banner tone="info">Posts must follow the Electoral Act 2026: no abusive or inciting language, and election results only from INEC.</Banner>
-      <RadioGroup legend="Kind" name="kind" required value={f.kind} onChange={(v) => setF({ ...f, kind: v as PostKind })} error={errors.kind}
-        options={[{ value: "announcement", label: "Announcement" }, { value: "news", label: "News" }]} />
-      <TextField label="Title" required maxLength={TITLE_MAX} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} error={errors.title} />
+      <Banner tone="info">{t("campaign.posts-must-follow-the-electoral-act")}</Banner>
+      <RadioGroup legend={t("campaign.kind")} name="kind" required value={f.kind} onChange={(v) => setF({ ...f, kind: v as PostKind })} error={errors.kind}
+        options={[{ value: "announcement", label: t("campaign.announcement") }, { value: "news", label: t("campaign.news") }]} />
+      <TextField label={t("campaign.title")} required maxLength={TITLE_MAX} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} error={errors.title} />
       <p className="news-counter">{f.title.length} / {TITLE_MAX}</p>
-      <TextArea label="Post" required rows={10} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} error={errors.body}
-        hint="Plain text. Leave a blank line between paragraphs." />
+      <TextArea label={t("campaign.post")} required rows={10} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} error={errors.body}
+        hint={t("campaign.plain-text-leave-a-blank-line")} />
+      <WrittenIn value={f.language} onChange={(language) => setF({ ...f, language })} />
       <p className={`news-counter${f.body.length > BODY_MAX ? " news-counter--over" : ""}`}>{f.body.length.toLocaleString()} / {BODY_MAX.toLocaleString()}</p>
       <fieldset className="news-form-fieldset">
-        <legend className="ds-field__label">Image (optional)</legend>
-        <p className="news-note">JPEG, PNG or WebP, up to 5 MB, at least 400 px on the short side. Location data is removed.</p>
-        {editing?.image && !image && <div className="news-image-row"><img src={editing.image.url_thumb} alt="Current image" /></div>}
-        <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choose an image" aria-invalid={errors.image ? true : undefined} onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
+        <legend className="ds-field__label">{t("campaign.image-optional")}</legend>
+        <p className="news-note">{t("campaign.jpeg-png-or-webp-up-to")}</p>
+        {editing?.image && !image && <div className="news-image-row"><img src={editing.image.url_thumb} alt={t("campaign.current-image")} /></div>}
+        <input type="file" accept="image/jpeg,image/png,image/webp" aria-label={t("campaign.choose-an-image")} aria-invalid={errors.image ? true : undefined} onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
         {errors.image && <p className="ds-field__error" role="alert">{errors.image}</p>}
-        {image && <Checkbox label="We took this photo or have the right to share it." checked={rights} onChange={(e) => setRights(e.target.checked)} error={errors.rights} />}
+        {image && <Checkbox label={t("campaign.we-took-this-photo-or-have")} checked={rights} onChange={(e) => setRights(e.target.checked)} error={errors.rights} />}
       </fieldset>
       <div className="campaign-form__actions">
         <UploadProgress progress={progress} />
-        <Button type="submit" loading={busy} loadingLabel="Saving…">{editing ? "Save changes" : "Publish"}</Button>
-        <Button variant="secondary" onClick={onCancel}>Cancel</Button>
+        <Button type="submit" loading={busy} loadingLabel={t("campaign.saving")}>{editing ? t("campaign.save-changes") : t("campaign.publish")}</Button>
+        <Button variant="secondary" onClick={onCancel}>{t("campaign.cancel")}</Button>
       </div>
-      <Modal open={confirm} onClose={() => setConfirm(false)} title={editing ? "Save changes?" : "Publish now?"}
-        footer={<><Button variant="secondary" onClick={() => setConfirm(false)}>Go back</Button><Button onClick={() => void save()}>{editing ? "Save changes" : "Publish now"}</Button></>}>
+      <Modal open={confirm} onClose={() => setConfirm(false)} title={editing ? t("campaign.save-changes-2") : t("campaign.publish-now")}
+        footer={<><Button variant="secondary" onClick={() => setConfirm(false)}>{t("campaign.go-back")}</Button><Button onClick={() => void save()}>{editing ? t("campaign.save-changes") : t("campaign.publish-now-2")}</Button></>}>
         {editing ? (
-          <p>The post will show “Edited”. Followers won’t be notified again.</p>
+          <p>{t("campaign.the-post-will-show-edited-followers")}</p>
         ) : (
           <p>
-            It appears on {candidate.full_name}’s profile and in News straight away.{" "}
-            {candidate.notify_count.toLocaleString()} {candidate.notify_count === 1 ? "follower" : "followers"} with notifications on will be notified.
-          </p>
+            {t("campaign.it-appears-on-s-profile-and", { full_name: candidate.full_name, notify_count: candidate.notify_count.toLocaleString() })}</p>
         )}
       </Modal>
     </form>
@@ -137,7 +139,7 @@ export default function CampaignCandidatePage() {
   }, [api, candidateId]);
   useEffect(() => load(), [load]);
   useEffect(() => {
-    document.title = candidate ? `${candidate.full_name} — My campaign | NDCConnect` : "My campaign | NDCConnect";
+    document.title = candidate ? t("campaign.my-campaign-ndcconnect", { full_name: candidate.full_name }) : t("campaign.my-campaign-ndcconnect-2");
   }, [candidate]);
 
   const remove = async () => {
@@ -145,9 +147,9 @@ export default function CampaignCandidatePage() {
     try {
       await api(`/campaign/candidates/${candidateId}/posts/${deleting.id}/`, { method: "DELETE" });
       setPosts((xs) => xs?.filter((x) => x.id !== deleting.id) ?? null);
-      toast.show({ tone: "success", message: "Post deleted." });
+      toast.show({ tone: "success", message: t("campaign.post-deleted") });
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Couldn’t delete." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("campaign.couldn-t-delete") });
     } finally {
       setDeleting(null);
     }
@@ -156,9 +158,8 @@ export default function CampaignCandidatePage() {
   if (error?.status === 403 || error?.status === 404) {
     return (
       <div className="page-shell">
-        <EmptyState icon="shield" title="You don’t have access to this page" action={<Button href="/campaign">My campaign</Button>}>
-          You’re not linked to this candidate.
-        </EmptyState>
+        <EmptyState icon="shield" title={t("campaign.you-don-t-have-access-to")} action={<Button href="/campaign">{t("campaign.my-campaign")}</Button>}>
+          {t("campaign.you-re-not-linked-to-this")}</EmptyState>
       </div>
     );
   }
@@ -174,53 +175,51 @@ export default function CampaignCandidatePage() {
           <Avatar name={candidate.full_name} src={candidate.photo?.url_200 ?? undefined} size="md" />
           <div>
             <h1>{candidate.full_name}</h1>
-            <p className="news-meta">{candidate.position_label} · My campaign · {candidate.notify_count.toLocaleString()} {candidate.notify_count === 1 ? "follower" : "followers"} with notifications on</p>
+            <p className="news-meta">{t("campaign.my-campaign-other-with-notifications-on", { position_label: candidate.position_label, notify_count: candidate.notify_count.toLocaleString() })}</p>
           </div>
         </div>
-        {tab === "posts" && mode === "list" && canWrite && <Button onClick={() => setMode("new")}>New post</Button>}
+        {tab === "posts" && mode === "list" && canWrite && <Button onClick={() => setMode("new")}>{t("campaign.new-post")}</Button>}
       </header>
       {paused && (
-        <Banner tone="warning" title="Posting is paused">
-          Campaigning ends 24 hours before polls. Posting is paused until {formatDate(paused, { withTime: true })}. You can still delete posts.
-        </Banner>
+        <Banner tone="warning" title={t("campaign.posting-is-paused")}>
+          {t("campaign.campaigning-ends-24-hours-before-polls", { formatDate: formatDate(paused, { withTime: true }) })}</Banner>
       )}
-      {!candidate.published && <Banner tone="warning">This candidate isn’t published, so posts can’t go out right now.</Banner>}
+      {!candidate.published && <Banner tone="warning">{t("campaign.this-candidate-isn-t-published-so")}</Banner>}
 
-      <Tabs label="Campaign sections" value={tab} onChange={setTab} tabs={[
-        { id: "posts", label: "Posts", content: (<>
+      <Tabs label={t("campaign.campaign-sections")} value={tab} onChange={setTab} tabs={[
+        { id: "posts", label: t("campaign.posts"), content: (<>
       {mode !== "list" ? (
         <PostForm candidate={candidate} editing={mode === "new" ? null : mode} onCancel={() => setMode("list")}
           onSaved={(p) => { setPosts((xs) => [p, ...(xs ?? []).filter((x) => x.id !== p.id)]); setMode("list"); }} />
       ) : posts.length === 0 ? (
-        <EmptyState title="No posts yet" action={canWrite ? <Button onClick={() => setMode("new")}>New post</Button> : undefined}>
-          Posts appear on {candidate.full_name}’s profile and in News straight away.
-        </EmptyState>
+        <EmptyState title={t("campaign.no-posts-yet")} action={canWrite ? <Button onClick={() => setMode("new")}>{t("campaign.new-post")}</Button> : undefined}>
+          {t("campaign.posts-appear-on-s-profile-and", { full_name: candidate.full_name })}</EmptyState>
       ) : (
         <ul className="campaign-list">
           {posts.map((p) => (
             <li key={p.id} className="campaign-post">
               <span className="article-badges"><StatusBadge set="post" status={p.status} /><KindBadge kind={p.kind} label={p.kind_label} /></span>
               <h2>{p.status === "published" ? <Link to={postPath(candidate.slug, p.id)}>{p.title}</Link> : p.title}</h2>
-              <p className="news-meta">{formatDate(p.published_at, { withTime: true })}{p.edited_at ? ` · Edited ${formatDate(p.edited_at, { withTime: true })}` : ""}</p>
+              <p className="news-meta">{formatDate(p.published_at, { withTime: true })}{p.edited_at ? t("campaign.edited", { formatDate: formatDate(p.edited_at, { withTime: true }) }) : ""}</p>
               {p.status === "removed" && (
                 <RemovalNotice removal={standing.data?.removals.find((r) => r.target_id === p.id)} fallbackReason={p.removed_reason}
                   onChange={standing.retry} />
               )}
               <div className="campaign-post__actions">
-                {p.status === "published" && canWrite && <Button size="sm" variant="secondary" onClick={() => setMode(p)}>Edit</Button>}
-                {p.status !== "deleted" && <Button size="sm" variant="ghost" onClick={() => setDeleting(p)}>Delete</Button>}
+                {p.status === "published" && canWrite && <Button size="sm" variant="secondary" onClick={() => setMode(p)}>{t("campaign.edit")}</Button>}
+                {p.status !== "deleted" && <Button size="sm" variant="ghost" onClick={() => setDeleting(p)}>{t("campaign.delete")}</Button>}
               </div>
             </li>
           ))}
         </ul>
       )}
         </>) },
-        { id: "events", label: "Events", content: <OrganiserEvents base={`/campaign/${candidateId}/events/`} canWrite={candidate.published} /> },
-        { id: "volunteers", label: "Volunteers", content: <CampaignVolunteers candidateId={candidateId} /> },
+        { id: "events", label: t("campaign.events"), content: <OrganiserEvents base={`/campaign/${candidateId}/events/`} canWrite={candidate.published} /> },
+        { id: "volunteers", label: t("campaign.volunteers"), content: <CampaignVolunteers candidateId={candidateId} /> },
       ]} />
-      <Modal open={Boolean(deleting)} onClose={() => setDeleting(null)} title="Delete this post?"
-        footer={<><Button variant="secondary" onClick={() => setDeleting(null)}>Keep it</Button><Button variant="danger" onClick={() => void remove()}>Delete post</Button></>}>
-        <p>This removes it from NDCConnect and from followers’ notifications. You can’t undo this.</p>
+      <Modal open={Boolean(deleting)} onClose={() => setDeleting(null)} title={t("campaign.delete-this-post")}
+        footer={<><Button variant="secondary" onClick={() => setDeleting(null)}>{t("campaign.keep-it")}</Button><Button variant="danger" onClick={() => void remove()}>{t("campaign.delete-post")}</Button></>}>
+        <p>{t("campaign.this-removes-it-from-ndcconnect-and")}</p>
       </Modal>
     </div>
   );

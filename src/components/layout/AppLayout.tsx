@@ -17,14 +17,15 @@ import "../../moderation/moderation.css";
 import { Banner, Button, Icon, SiteHeader } from "../ui";
 import AccountPausedPage from "../../settings/AccountPausedPage";
 import { LanguageSwitch } from "../../settings/LanguageSwitch";
+import { t } from "../../i18n";
 
 export const NAV = [
-  { label: "Candidates", href: "/candidates" },
-  { label: "News", href: "/news" },
-  { label: "Communities", href: "/communities" },
-  { label: "Events", href: "/events" },  // spec 18
-  { label: "States", href: "/states" },
-  { label: "Finance", href: "/finance" },
+  { get label() { return t("layout.candidates"); }, href: "/candidates" },
+  { get label() { return t("layout.news"); }, href: "/news" },
+  { get label() { return t("layout.communities"); }, href: "/communities" },
+  { get label() { return t("layout.events"); }, href: "/events" },  // spec 18
+  { get label() { return t("layout.states"); }, href: "/states" },
+  { get label() { return t("layout.finance"); }, href: "/finance" },
   { label: "PVC", href: "/pvc" },
 ];
 
@@ -37,24 +38,23 @@ function AccountArea() {
     <>
       <Show when="signed-out">
         <Button variant="secondary" onClick={() => navigate(`/sign-in?redirect_url=${encodeURIComponent(location.pathname)}`)}>
-          Sign in
-        </Button>
+          {t("layout.sign-in")}</Button>
       </Show>
       <Show when="signed-in">
         <NotificationBell />
         <UserButton userProfileUrl="/settings/security">
           <UserButton.MenuItems>
-            <UserButton.Link label="Settings" labelIcon={<Icon name="user" size={16} />} href="/settings" />
-            <UserButton.Link label="Notifications" labelIcon={<Icon name="bell" size={16} />} href="/notifications" />
-            <UserButton.Link label="Following" labelIcon={<Icon name="heart" size={16} />} href="/following" />
-            <UserButton.Link label="My donations" labelIcon={<Icon name="inbox" size={16} />} href="/my-donations" />
-            <UserButton.Link label="My membership" labelIcon={<Icon name="user" size={16} />} href="/join" />
-            <UserButton.Link label="My news" labelIcon={<Icon name="inbox" size={16} />} href="/news/mine" />
-            <UserButton.Link label="My reports" labelIcon={<Icon name="shield" size={16} />} href="/reports" />
-            {isCampaignAccount(me) && <UserButton.Link label="My campaign" labelIcon={<Icon name="bell" size={16} />} href="/campaign" />}
-            {me?.home_state && <UserButton.Link label="Your state" labelIcon={<Icon name="mapPin" size={16} />} href={`/states/${me.home_state}`} />}
-            <UserButton.Link label={verified ? "Verified voter" : "Verify your PVC"} labelIcon={<Icon name={verified ? "verified" : "shield"} size={16} />} href="/pvc" />
-            <UserButton.Link label="Your data" labelIcon={<Icon name="lock" size={16} />} href="/settings/privacy/data" />
+            <UserButton.Link label={t("layout.settings")} labelIcon={<Icon name="user" size={16} />} href="/settings" />
+            <UserButton.Link label={t("layout.notifications")} labelIcon={<Icon name="bell" size={16} />} href="/notifications" />
+            <UserButton.Link label={t("layout.following")} labelIcon={<Icon name="heart" size={16} />} href="/following" />
+            <UserButton.Link label={t("layout.my-donations")} labelIcon={<Icon name="inbox" size={16} />} href="/my-donations" />
+            <UserButton.Link label={t("layout.my-membership")} labelIcon={<Icon name="user" size={16} />} href="/join" />
+            <UserButton.Link label={t("layout.my-news")} labelIcon={<Icon name="inbox" size={16} />} href="/news/mine" />
+            <UserButton.Link label={t("layout.my-reports")} labelIcon={<Icon name="shield" size={16} />} href="/reports" />
+            {isCampaignAccount(me) && <UserButton.Link label={t("layout.my-campaign")} labelIcon={<Icon name="bell" size={16} />} href="/campaign" />}
+            {me?.home_state && <UserButton.Link label={t("layout.your-state")} labelIcon={<Icon name="mapPin" size={16} />} href={`/states/${me.home_state}`} />}
+            <UserButton.Link label={verified ? t("layout.verified-voter") : t("layout.verify-your-pvc")} labelIcon={<Icon name={verified ? "verified" : "shield"} size={16} />} href="/pvc" />
+            <UserButton.Link label={t("layout.your-data")} labelIcon={<Icon name="lock" size={16} />} href="/settings/privacy/data" />
           </UserButton.MenuItems>
         </UserButton>
       </Show>
@@ -74,12 +74,10 @@ function SessionBanners() {
           onDismiss={clearIssue}
           action={
             <Button size="sm" onClick={() => { clearIssue(); navigate("/sign-in"); }}>
-              Sign in
-            </Button>
+              {t("layout.sign-in")}</Button>
           }
         >
-          Your session ended. Sign in again.
-        </Banner>
+          {t("layout.your-session-ended-sign-in-again")}</Banner>
       </div>
     );
   }
@@ -87,8 +85,7 @@ function SessionBanners() {
     return (
       <div className="app-banner">
         <Banner tone="warning" dismissible onDismiss={clearIssue}>
-          Sign-in is temporarily unavailable. Public pages still work; try signed-in actions again shortly.
-        </Banner>
+          {t("layout.sign-in-is-temporarily-unavailable-public")}</Banner>
       </div>
     );
   }
@@ -101,8 +98,8 @@ function Chrome() {
   const { config } = useDonationConfig();
   // Admin link: every admin role lands on the Admin home (spec 11 §4.1); the backend still enforces access.
   const adminHref = isAnyAdmin(me) ? "/admin" : null;
-  const base = isCampaignAccount(me) ? [...NAV, { label: "My campaign", href: "/campaign" }] : NAV;
-  const links = adminHref ? [...base, { label: "Admin", href: adminHref }] : base;
+  const base = isCampaignAccount(me) ? [...NAV, { label: t("layout.my-campaign"), href: "/campaign" }] : NAV;
+  const links = adminHref ? [...base, { label: t("layout.admin"), href: adminHref }] : base;
   return (
     <>
       <SiteHeader
@@ -121,13 +118,13 @@ function Chrome() {
       </main>
       <footer className="site-footer">
         <ul>
-          <li><Link to="/polling-units">Find a polling unit</Link></li>
-          <li><Link to="/rules">Community rules</Link></li>
-          <li><Link to="/reports/status">Check a report</Link></li>
-          <li><Link to="/report/copyright">Copyright notice</Link></li>
-          <li><Link to="/privacy">Privacy</Link></li>
-          <li><Link to="/security">Security</Link></li>
-          <li><Link to="/settings">Settings</Link></li>
+          <li><Link to="/polling-units">{t("layout.find-a-polling-unit")}</Link></li>
+          <li><Link to="/rules">{t("layout.community-rules")}</Link></li>
+          <li><Link to="/reports/status">{t("layout.check-a-report")}</Link></li>
+          <li><Link to="/report/copyright">{t("layout.copyright-notice")}</Link></li>
+          <li><Link to="/privacy">{t("layout.privacy")}</Link></li>
+          <li><Link to="/security">{t("layout.security")}</Link></li>
+          <li><Link to="/settings">{t("layout.settings")}</Link></li>
           <li><LanguageSwitch /></li>
         </ul>
       </footer>

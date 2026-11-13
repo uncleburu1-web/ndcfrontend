@@ -14,11 +14,12 @@ import { lgaWord, type GeoAbout, type GeoLga, type GeoUnit, type GeoUnitDetail, 
 import { STATES } from "../../lib/nigeria";
 import "../../geo/geo.css";
 import "../../search/search.css";
+import { t } from "../../i18n";
 
 const INEC_FALLBACK = "https://cvr.inecnigeria.org/pu";
 
 function CheckWithInec({ url }: { url: string }) {
-  return <a href={url} target="_blank" rel="noopener noreferrer">Check with INEC</a>;
+  return <a href={url} target="_blank" rel="noopener noreferrer">{t("geo.check-with-inec")}</a>;
 }
 
 export default function PollingUnitsPage() {
@@ -38,7 +39,7 @@ export default function PollingUnitsPage() {
   const wards = useGeoList<GeoWard>(lga ? (a) => geoApi.wards(a, lga) : null, `wards:${lga}`);
   const units = useGeoList<GeoUnit>(ward ? (a) => geoApi.units(a, ward) : null, `units:${ward}`);
   useEffect(() => {
-    document.title = "Find a polling unit | NDCConnect";
+    document.title = t("geo.find-a-polling-unit-ndcconnect");
   }, []);
   const shown = useMemo(() => {
     const f = fold(q);
@@ -57,14 +58,14 @@ export default function PollingUnitsPage() {
     setFound(null);
     setCodeErr("");
     if (!CODE_RE.test(code.trim())) {
-      setCodeErr("Codes look like 24-07-05-004 (state, LGA, ward, unit).");
+      setCodeErr(t("geo.codes-look-like-24-07-05-2"));
       return;
     }
     setBusy(true);
     try {
       setFound(await geoApi.byCode(api, code.trim()));
     } catch (err) {
-      setCodeErr(err instanceof ApiError && err.status === 404 ? "No polling unit has that code in our copy of INEC’s list." : "Couldn’t look that up. Try again.");
+      setCodeErr(err instanceof ApiError && err.status === 404 ? t("geo.no-polling-unit-has-that-code-2") : t("geo.couldn-t-look-that-up-try"));
     } finally {
       setBusy(false);
     }
@@ -75,57 +76,56 @@ export default function PollingUnitsPage() {
     <div className="states-page">
       <header className="state-head">
         <div>
-          <h1>Find a polling unit</h1>
-          <p className="news-meta">INEC’s names and codes. For where you vote, <CheckWithInec url={inec} /> — INEC is the official source.</p>
+          <h1>{t("geo.find-a-polling-unit")}</h1>
+          <p className="news-meta">{t.rich("geo.inec-s-names-and-codes-for", { checkwithinec: <CheckWithInec url={inec} /> })}</p>
         </div>
       </header>
 
       <section className="search-section geo-card" aria-labelledby="pu-code">
-        <h2 id="pu-code">By code</h2>
+        <h2 id="pu-code">{t("geo.by-code")}</h2>
         <form onSubmit={(e) => void lookUp(e)} className="geo-picker__code">
-          <TextField label="Polling-unit code" value={code} placeholder="24-07-05-004" inputMode="numeric" maxLength={12} error={codeErr}
+          <TextField label={t("geo.polling-unit-code")} value={code} placeholder="24-07-05-004" inputMode="numeric" maxLength={12} error={codeErr}
             onChange={(e) => setCode(e.target.value)} />
-          <Button type="submit" variant="secondary" loading={busy}>Look up</Button>
+          <Button type="submit" variant="secondary" loading={busy}>{t("geo.look-up")}</Button>
         </form>
         {found && (
           <div role="status">
             <p><strong>{found.name}</strong> · {found.delimitation}</p>
-            <p className="news-meta">Ward {found.ward.name} · {found.lga.name} · {found.state.name}
-              {found.active ? "" : " · No longer in INEC’s current list"}</p>
+            <p className="news-meta">{t("geo.ward-2", { name: found.ward.name, name2: found.lga.name, name3: found.state.name, v: found.active ? "" : t("geo.no-longer-in-inec-s-current-2") })}</p>
             <p><CheckWithInec url={found.inec_url} /></p>
           </div>
         )}
       </section>
 
       <section className="search-section geo-card" aria-labelledby="pu-browse">
-        <h2 id="pu-browse">By place</h2>
-        <Select label="State" value={state} placeholder="Choose a state" options={STATES} onChange={(e) => pick({ state: e.target.value, lga: "", ward: "" })} />
+        <h2 id="pu-browse">{t("geo.by-place")}</h2>
+        <Select label={t("geo.state")} value={state} placeholder={t("geo.choose-a-state")} options={STATES} onChange={(e) => pick({ state: e.target.value, lga: "", ward: "" })} />
         {state && lgas.loaded && lgas.data.length === 0 ? (
-          <p className="news-meta">This state’s polling units aren’t on NDCConnect yet. <CheckWithInec url={inec} /></p>
+          <p className="news-meta">{t.rich("geo.this-state-s-polling-units-aren", { checkwithinec: <CheckWithInec url={inec} /> })}</p>
         ) : state && (
-          <Select label={lgaWord(state)} value={lga ? String(lga) : ""} placeholder={lgas.loading ? "Loading…" : `Choose the ${lgaWord(state)}`}
-            error={lgas.error ? "Couldn’t load the list." : undefined}
+          <Select label={lgaWord(state)} value={lga ? String(lga) : ""} placeholder={lgas.loading ? t("geo.loading") : t("geo.choose-the-2", { lgaWord: lgaWord(state) })}
+            error={lgas.error ? t("geo.couldn-t-load-the-list") : undefined}
             options={lgas.data.map((l) => ({ value: String(l.id), label: `${l.name} · ${l.code}` }))} onChange={(e) => pick({ lga: e.target.value, ward: "" })} />
         )}
         {lga && (
-          <Select label="Ward (registration area)" value={ward ? String(ward) : ""} placeholder={wards.loading ? "Loading…" : "Choose the ward"}
+          <Select label={t("geo.ward-registration-area")} value={ward ? String(ward) : ""} placeholder={wards.loading ? t("geo.loading") : t("geo.choose-the-ward")}
             options={wards.data.map((w) => ({ value: String(w.id), label: `${w.name} · ${w.code}` }))} onChange={(e) => pick({ ward: e.target.value })} />
         )}
         {ward && (
           <>
-            <TextField label="Part of the name" value={q} onChange={(e) => setQ(e.target.value)} />
-            {units.error ? <Banner tone="error">Couldn’t load the list.</Banner> : (
+            <TextField label={t("geo.part-of-the-name")} value={q} onChange={(e) => setQ(e.target.value)} />
+            {units.error ? <Banner tone="error">{t("geo.couldn-t-load-the-list")}</Banner> : (
               <div className="geo-scroll">
                 <table className="geo-table">
-                  <caption className="visually-hidden">Polling units in this ward</caption>
-                  <thead><tr><th scope="col">Polling unit</th><th scope="col">Code</th><th scope="col"><span className="visually-hidden">INEC</span></th></tr></thead>
+                  <caption className="visually-hidden">{t("geo.polling-units-in-this-ward")}</caption>
+                  <thead><tr><th scope="col">{t("geo.polling-unit")}</th><th scope="col">{t("geo.code")}</th><th scope="col"><span className="visually-hidden">{t("geo.inec")}</span></th></tr></thead>
                   <tbody>
                     {shown.map((u) => (
                       <tr key={u.id}><td>{u.name}</td><td>{u.delimitation}</td><td><CheckWithInec url={inec} /></td></tr>
                     ))}
                   </tbody>
                 </table>
-                {!units.loading && shown.length === 0 && <p className="news-meta">No match in this ward.</p>}
+                {!units.loading && shown.length === 0 && <p className="news-meta">{t("geo.no-match-in-this-ward")}</p>}
               </div>
             )}
           </>

@@ -12,6 +12,8 @@ import { Banner, Button, Checkbox, EmptyState, RadioGroup, Select, Skeleton, Tex
 import { STATES } from "../../lib/nigeria";
 import type { MyArticle } from "../../news/types";
 import "../../news/news.css";
+import { getLanguage, t } from "../../i18n";
+import { defaultWritingLanguage, WrittenIn } from "../../i18n/ContentLanguage";
 
 export const TITLE_MAX = 150;
 export const BODY_MIN = 100;
@@ -44,7 +46,7 @@ export default function SubmitNewsPage() {
   const { me } = useMe();
   const [loaded, setLoaded] = useState<MyArticle | null>(null);
   const [loadError, setLoadError] = useState(false);
-  const [f, setF] = useState({ title: "", body: "", state: "", source_url: "", show_author_name: false });
+  const [f, setF] = useState({ title: "", body: "", state: "", source_url: "", show_author_name: false, language: defaultWritingLanguage(getLanguage()) as string });
   const [decl, setDecl] = useState<Record<string, boolean>>({ accurate: false, no_private_info: false, rules: false });
   const [image, setImage] = useState<File | null>(null);
   const [rights, setRights] = useState(false);
@@ -53,26 +55,26 @@ export default function SubmitNewsPage() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    document.title = editing ? "Edit your news | NDCConnect" : "Submit news | NDCConnect";
+    document.title = editing ? t("news.edit-your-news-ndcconnect") : t("news.submit-news-ndcconnect");
     if (!id) return;
     api<MyArticle>(`/me/news/${id}/`)
       .then((a) => {
         setLoaded(a);
-        setF({ title: a.title, body: a.body, state: a.state, source_url: a.source_url, show_author_name: a.show_author_name });
+        setF({ title: a.title, body: a.body, state: a.state, source_url: a.source_url, show_author_name: a.show_author_name, language: a.language ?? "und" });
       })
       .catch(() => setLoadError(true));
   }, [api, editing, id]);
 
   const validate = (): Errors => {
     const e: Errors = {};
-    if (!f.title.trim()) e.title = "Give it a title.";
-    if (f.body.trim().length < BODY_MIN) e.body = `Write at least ${BODY_MIN} characters.`;
-    if (f.body.length > BODY_MAX) e.body = `Keep it under ${BODY_MAX.toLocaleString()} characters.`;
-    if (f.source_url && !f.source_url.startsWith("https://")) e.source_url = "Use a link that starts with https://";
+    if (!f.title.trim()) e.title = t("news.give-it-a-title");
+    if (f.body.trim().length < BODY_MIN) e.body = t("news.write-at-least-characters", { BODY_MIN });
+    if (f.body.length > BODY_MAX) e.body = t("news.keep-it-under-characters", { BODY_MAX: BODY_MAX.toLocaleString() });
+    if (f.source_url && !f.source_url.startsWith("https://")) e.source_url = t("news.use-a-link-that-starts-with");
     if (!editing) for (const [k] of DECLARATIONS) if (!decl[k]) e[`declarations.${k}`] = "Tick this to continue.";
     const imageProblem = image ? checkImage(image) : null;  // type and size before anything is sent (spec 15 §15.4)
     if (imageProblem) e.image = imageProblem.message;
-    if (image && !rights) e.rights = "Confirm you took this photo or have the right to share it.";
+    if (image && !rights) e.rights = t("news.confirm-you-took-this-photo-or");
     return e;
   };
 
@@ -90,11 +92,11 @@ export default function SubmitNewsPage() {
         try {
           await uploadImage(image, { targetId: saved.id, url: `/me/news/${saved.id}/image/`, field: "image" });
         } catch (err) {
-          toast.show({ tone: "warning", message: `Your article was saved, but the image wasn’t: ${err instanceof ApiError ? err.message : "try again"}` });
+          toast.show({ tone: "warning", message: t("news.your-article-was-saved-but-the", { v: err instanceof ApiError ? err.message : t("news.try-again-2") }) });
         }
       }
       if (editing) {
-        toast.show({ tone: "success", message: saved.status === "pending" ? "Saved and sent for review." : "Saved." });
+        toast.show({ tone: "success", message: saved.status === "pending" ? t("news.saved-and-sent-for-review") : t("news.saved") });
         navigate("/news/mine");
       } else {
         setDone(true);
@@ -111,60 +113,60 @@ export default function SubmitNewsPage() {
   if (done) {
     return (
       <div className="news-form-page">
-        <EmptyState title="Thanks. A reviewer will check it." action={<Button href="/news/mine">See my submissions</Button>}>
-          Usually within a day. You’ll get a notification when it’s decided.
-        </EmptyState>
+        <EmptyState title={t("news.thanks-a-reviewer-will-check-it")} action={<Button href="/news/mine">{t("news.see-my-submissions")}</Button>}>
+          {t("news.usually-within-a-day-you-ll")}</EmptyState>
       </div>
     );
   }
-  if (loadError) return <div className="page-shell"><EmptyState title="Article not found" action={<Button href="/news/mine">My news</Button>} /></div>;
+  if (loadError) return <div className="page-shell"><EmptyState title={t("news.article-not-found")} action={<Button href="/news/mine">{t("news.my-news")}</Button>} /></div>;
   if (editing && !loaded) return <div className="news-form-page"><Skeleton width="100%" height={240} /></div>;
   if (loaded && !["pending", "rejected"].includes(loaded.status)) {
-    return <div className="page-shell"><EmptyState title="This article can’t be edited" action={<Button href="/news/mine">My news</Button>}>Only pending or rejected articles can be edited.</EmptyState></div>;
+    return <div className="page-shell"><EmptyState title={t("news.this-article-can-t-be-edited")} action={<Button href="/news/mine">{t("news.my-news")}</Button>}>{t("news.only-pending-or-rejected-articles-can")}</EmptyState></div>;
   }
 
   const over = f.body.length > BODY_MAX;
   return (
     <div className="news-form-page">
       <header>
-        <p className="article-back"><Link to={editing ? "/news/mine" : "/news"}>← {editing ? "My news" : "News"}</Link></p>
-        <h1>{editing ? (loaded?.status === "rejected" ? "Edit and resubmit" : "Edit your news") : "Submit news"}</h1>
-        <p className="news-note">Nothing you submit is public until a reviewer approves it.</p>
+        <p className="article-back"><Link to={editing ? "/news/mine" : "/news"}>← {editing ? t("news.my-news") : t("news.news-2")}</Link></p>
+        <h1>{editing ? (loaded?.status === "rejected" ? t("news.edit-and-resubmit") : t("news.edit-your-news")) : t("news.submit-news")}</h1>
+        <p className="news-note">{t("news.nothing-you-submit-is-public-until")}</p>
       </header>
-      {loaded?.status === "rejected" && <Banner tone="error" title="Why it wasn’t approved">{loaded.decision_reason}</Banner>}
-      <Banner tone="info">Results must come from INEC. Posts with other results will be rejected.</Banner>
+      {loaded?.status === "rejected" && <Banner tone="error" title={t("news.why-it-wasn-t-approved")}>{loaded.decision_reason}</Banner>}
+      <Banner tone="info">{t("news.results-must-come-from-inec-posts")}</Banner>
       <form className="news-form" onSubmit={submit} noValidate>
         {errors._form && <Banner tone="error">{errors._form}</Banner>}
-        <TextField label="Title" required maxLength={TITLE_MAX} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} error={errors.title} />
+        <TextField label={t("news.title")} required maxLength={TITLE_MAX} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} error={errors.title} />
         <p className="news-counter">{f.title.length} / {TITLE_MAX}</p>
-        <TextArea label="Your news" required rows={10} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} error={errors.body}
-          hint="Plain text. Leave a blank line between paragraphs." />
+        <TextArea label={t("news.your-news")} required rows={10} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} error={errors.body}
+          hint={t("news.plain-text-leave-a-blank-line")} />
+        <WrittenIn value={f.language} onChange={(language) => setF({ ...f, language })} />
         <p className={`news-counter${over ? " news-counter--over" : ""}`} aria-live="polite">{f.body.length.toLocaleString()} / {BODY_MAX.toLocaleString()}</p>
-        <Select label="Where is this about?" value={f.state} onChange={(e) => setF({ ...f, state: e.target.value })}
-          options={[{ value: "", label: "All of Nigeria" }, ...STATES]} />
-        <TextField label="Source link (optional)" inputMode="url" value={f.source_url} placeholder="https://"
-          onChange={(e) => setF({ ...f, source_url: e.target.value })} hint="Where can readers check this?" error={errors.source_url} />
+        <Select label={t("news.where-is-this-about")} value={f.state} onChange={(e) => setF({ ...f, state: e.target.value })}
+          options={[{ value: "", label: t("news.all-of-nigeria") }, ...STATES]} />
+        <TextField label={t("news.source-link-optional")} inputMode="url" value={f.source_url} placeholder="https://"
+          onChange={(e) => setF({ ...f, source_url: e.target.value })} hint={t("news.where-can-readers-check-this")} error={errors.source_url} />
         <fieldset>
-          <legend className="ds-field__label">Image (optional)</legend>
-          <p className="news-note">JPEG, PNG or WebP, up to 5 MB, at least 400 px on the short side. Location data is removed.</p>
-          {loaded?.image && !image && <div className="news-image-row"><img src={loaded.image.url_thumb} alt="Current image" /></div>}
-          <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choose an image" aria-invalid={errors.image ? true : undefined} onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
+          <legend className="ds-field__label">{t("news.image-optional")}</legend>
+          <p className="news-note">{t("news.jpeg-png-or-webp-up-to")}</p>
+          {loaded?.image && !image && <div className="news-image-row"><img src={loaded.image.url_thumb} alt={t("news.current-image")} /></div>}
+          <input type="file" accept="image/jpeg,image/png,image/webp" aria-label={t("news.choose-an-image")} aria-invalid={errors.image ? true : undefined} onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
           {errors.image && <p className="ds-field__error" role="alert">{errors.image}</p>}
-          {image && <Checkbox label="I took this photo or have the right to share it." checked={rights} onChange={(e) => setRights(e.target.checked)} error={errors.rights} />}
+          {image && <Checkbox label={t("news.i-took-this-photo-or-have")} checked={rights} onChange={(e) => setRights(e.target.checked)} error={errors.rights} />}
         </fieldset>
-        <RadioGroup legend="Byline" name="byline" value={f.show_author_name ? "name" : "member"}
+        <RadioGroup legend={t("news.byline")} name="byline" value={f.show_author_name ? "name" : "member"}
           onChange={(v) => setF({ ...f, show_author_name: v === "name" })}
-          options={[{ value: "member", label: "Show as “a member”" }, { value: "name", label: `Show my name (${me?.full_name || "your name"})` }]} />
+          options={[{ value: "member", label: t("news.show-as-a-member") }, { value: "name", label: t("news.show-my-name-2", { v: me?.full_name || t("news.your-name") }) }]} />
         {!editing && (
           <fieldset>
-            <legend className="ds-field__label">Please confirm</legend>
+            <legend className="ds-field__label">{t("news.please-confirm")}</legend>
             {DECLARATIONS.map(([k, label]) => (
               <Checkbox key={k} label={label} required checked={decl[k]} error={errors[`declarations.${k}`]} onChange={(e) => setDecl({ ...decl, [k]: e.target.checked })} />
             ))}
           </fieldset>
         )}
         <UploadProgress progress={progress} />
-        <Button type="submit" loading={busy} loadingLabel="Sending…">{editing ? (loaded?.status === "rejected" ? "Resubmit for review" : "Save changes") : "Submit for review"}</Button>
+        <Button type="submit" loading={busy} loadingLabel={t("news.sending")}>{editing ? (loaded?.status === "rejected" ? t("news.resubmit-for-review") : t("news.save-changes")) : t("news.submit-for-review")}</Button>
       </form>
     </div>
   );

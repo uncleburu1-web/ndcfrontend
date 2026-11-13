@@ -9,12 +9,13 @@ import { Banner, Button, Icon, Skeleton } from "../components/ui";
 import { SECTIONS } from "./constants";
 import { usePreferences } from "./PreferencesProvider";
 import "./settings.css";
+import { t } from "../i18n";
 
 export function SettingsNav({ showSignIn = true }: { showSignIn?: boolean }) {
   const { isSignedIn } = useAuth();
   const shown = isSignedIn ? SECTIONS : SECTIONS.filter((s) => s.guest);
   return (
-    <nav className="set-nav" aria-label="Settings sections">
+    <nav className="set-nav" aria-label={t("settings.settings-sections")}>
       <ul>
         {shown.map((s) => (
           <li key={s.path}>
@@ -38,9 +39,9 @@ export function SignInCard() {
   const { pathname } = useLocation();
   return (
     <div className="set-card set-signin">
-      <h2>Sign in to manage your account</h2>
-      <p>Your profile, notifications, privacy and security settings are available when you’re signed in.</p>
-      <Button href={`/sign-in?redirect_url=${encodeURIComponent(pathname)}`}>Sign in</Button>
+      <h2>{t("settings.sign-in-to-manage-your-account")}</h2>
+      <p>{t("settings.your-profile-notifications-privacy-and-security")}</p>
+      <Button href={`/sign-in?redirect_url=${encodeURIComponent(pathname)}`}>{t("settings.sign-in")}</Button>
     </div>
   );
 }
@@ -49,11 +50,11 @@ export default function SettingsLayout() {
   const { pathname } = useLocation();
   const atIndex = /^\/settings\/?$/.test(pathname);
   useEffect(() => {
-    if (atIndex) document.title = "Settings | NDCConnect";
+    if (atIndex) document.title = t("settings.settings-ndcconnect");
   }, [atIndex]);
   return (
     <div className={`set-page${atIndex ? " set-page--index" : ""}`}>
-      <h1 className="set-page__title">Settings</h1>
+      <h1 className="set-page__title">{t("settings.settings")}</h1>
       <div className="set-page__grid">
         <aside className="set-page__nav">
           <SettingsNav showSignIn={atIndex} />
@@ -61,12 +62,12 @@ export default function SettingsLayout() {
         <div className="set-page__section">
           {!atIndex && (
             <p className="set-back">
-              <Link to="/settings"><Icon name="chevronLeft" size={16} /> Settings</Link>
+              <Link to="/settings">{t.rich("settings.settings-2", { icon: <Icon name="chevronLeft" size={16} /> })}</Link>
             </p>
           )}
           {atIndex ? (
             <div className="set-card set-intro">
-              <p>Choose a section. Each one saves on its own: switches save as soon as you change them, text fields with a Save button.</p>
+              <p>{t("settings.choose-a-section-each-one-saves")}</p>
             </div>
           ) : (
             <Outlet />
@@ -90,7 +91,7 @@ export function SectionShell({ title, intro, children, guestOk = false }: { titl
   guestOk?: boolean }) {
   const { isSignedIn, isLoaded } = useAuth();
   useEffect(() => {
-    document.title = `${title} · Settings | NDCConnect`;
+    document.title = t("settings.settings-ndcconnect-2", { title });
   }, [title]);
   return (
     <section className="set-section" aria-labelledby="set-section-h">
@@ -104,7 +105,7 @@ export function SectionShell({ title, intro, children, guestOk = false }: { titl
 export function Loading({ error, retry }: { error: { message: string } | null; retry: () => void }) {
   if (error) {
     return (
-      <Banner tone="error" title="We couldn’t load your settings" action={<Button size="sm" variant="secondary" onClick={retry}>Try again</Button>}>
+      <Banner tone="error" title={t("settings.we-couldn-t-load-your-settings")} action={<Button size="sm" variant="secondary" onClick={retry}>{t("settings.try-again")}</Button>}>
         {error.message}
       </Banner>
     );

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { formatDate } from "../lib/format";
 import { CONSTITUENCY_LABEL } from "./types";
 import "./geo.css";
+import { t } from "../i18n";
 
 interface LgaRow { id: number; name: string; slug: string; candidates: number; events: number }
 interface ConRow { id: number; kind: string; code: string; name: string; candidates: number; lgas: string[] }
@@ -16,14 +17,14 @@ export function LgaList({ state, label, lgas, areaCouncils, constituencies }: {
   return (
     <>
       <section className="search-section" aria-labelledby="st-lga">
-        <div className="search-section__head"><h2 id="st-lga">{title}</h2><span className="news-meta">{lgas.length} in {label}</span></div>
-        {lgas.length === 0 ? <p className="news-meta">INEC’s list for {label} isn’t loaded yet.</p> : (
+        <div className="search-section__head"><h2 id="st-lga">{title}</h2><span className="news-meta">{t("geo.in", { length: lgas.length, label })}</span></div>
+        {lgas.length === 0 ? <p className="news-meta">{t("geo.inec-s-list-for-isn-t", { label })}</p> : (
           <ul className="geo-list">
             {lgas.map((l) => (
               <li key={l.id}>
                 <Link to={`/states/${state}/${l.slug}`}>{l.name}</Link>
                 <p className="news-meta">
-                  {l.candidates} candidate{l.candidates === 1 ? "" : "s"} · {l.events} upcoming event{l.events === 1 ? "" : "s"}
+                  {t("geo.candidate-upcoming-event", { candidates: l.candidates, v: l.candidates === 1 ? "" : "s", events: l.events, v2: l.events === 1 ? "" : "s" })}
                 </p>
               </li>
             ))}
@@ -32,14 +33,14 @@ export function LgaList({ state, label, lgas, areaCouncils, constituencies }: {
       </section>
       {kinds.length > 0 && (
         <section className="search-section" aria-labelledby="st-con">
-          <h2 id="st-con">Constituencies</h2>
+          <h2 id="st-con">{t("geo.constituencies")}</h2>
           {kinds.map((k) => {
             const list = (
               <ul className="geo-list">
                 {constituencies.filter((c) => c.kind === k).map((c) => (
                   <li key={c.id}>
                     {c.candidates > 0 ? <Link to={`/candidates?constituency=${c.id}`}>{c.name}</Link> : c.name}
-                    <p className="news-meta">{c.lgas.join(", ")}{c.candidates ? ` · ${c.candidates} candidate${c.candidates === 1 ? "" : "s"}` : ""}</p>
+                    <p className="news-meta">{c.lgas.join(", ")}{c.candidates ? t("geo.candidate", { candidates: c.candidates, v: c.candidates === 1 ? "" : "s" }) : ""}</p>
                   </li>
                 ))}
               </ul>
@@ -65,8 +66,6 @@ export function AboutData({ about, inecUrl }: {
   const when = about.published_on ? formatDate(about.published_on) : about.applied_at ? formatDate(about.applied_at) : "";
   return (
     <p className="geo-about">
-      About this data: from INEC’s polling-unit list{when ? ` published ${when}` : ""} ({about.source}; {about.polling_units.toLocaleString()} polling
-      units). {inecUrl ? <a href={inecUrl} target="_blank" rel="noopener noreferrer">INEC’s own portal</a> : "INEC’s own portal"} is the official source.
-    </p>
+      {t.rich("geo.about-this-data-from-inec-s", { v: when ? t("geo.published", { when }) : "", source: about.source, polling_units: about.polling_units.toLocaleString(), x4: inecUrl ? <a href={inecUrl} target="_blank" rel="noopener noreferrer">{t("geo.inec-s-own-portal")}</a> : "INEC’s own portal" })}</p>
   );
 }

@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useApi, useMe } from "../auth/session";
 import { Banner, Button, useToast } from "../components/ui";
+import { t } from "../i18n";
 
 const AGE_KEY = "ndc_age_prompted";
 const FREE_PATHS = ["/setup-profile", "/account/privacy", "/settings/privacy/data", "/settings/manage", "/account-deleted", "/privacy", "/security", "/sign-in", "/sign-up"];
@@ -49,10 +50,10 @@ function LegacyFollowsPrompt() {
     try {
       await api(`/me/consents/political_following/`, { method: "POST" });
       setHidden(true);
-      toast.show({ tone: "success", message: "Thanks. Your follows stay as they are." });
+      toast.show({ tone: "success", message: t("privacy.thanks-your-follows-stay-as-they") });
       void refresh();
     } catch {
-      toast.show({ tone: "error", message: "Couldn’t save that. Try again." });
+      toast.show({ tone: "error", message: t("privacy.couldn-t-save-that-try-again") });
     } finally {
       setBusy("");
     }
@@ -62,10 +63,10 @@ function LegacyFollowsPrompt() {
     try {
       const r = await api<{ effect: string }>(`/me/consents/political_following/`, { method: "DELETE" });
       setHidden(true);
-      toast.show({ tone: "success", message: r.effect || "Your follows were removed." });
+      toast.show({ tone: "success", message: r.effect || t("privacy.your-follows-were-removed") });
       void refresh();
     } catch {
-      toast.show({ tone: "error", message: "Couldn’t remove them. Try again." });
+      toast.show({ tone: "error", message: t("privacy.couldn-t-remove-them-try-again") });
     } finally {
       setBusy("");
     }
@@ -74,18 +75,17 @@ function LegacyFollowsPrompt() {
     <div className="app-banner">
       <Banner
         tone="info"
-        title="Confirm your follows"
+        title={t("privacy.confirm-your-follows")}
         dismissible
         onDismiss={() => setHidden(true)}
         action={
           <div className="privacy-inline-actions">
-            <Button size="sm" onClick={keep} loading={busy === "keep"}>Keep them</Button>
-            <Button size="sm" variant="secondary" onClick={remove} loading={busy === "remove"}>Remove all</Button>
+            <Button size="sm" onClick={keep} loading={busy === "keep"}>{t("privacy.keep-them")}</Button>
+            <Button size="sm" variant="secondary" onClick={remove} loading={busy === "remove"}>{t("privacy.remove-all")}</Button>
           </div>
         }
       >
-        Following candidates shows your political interest, so we now ask for your consent. Only you can see who you follow.{" "}
-        <Link to="/privacy#follows">How we use this</Link>
+        {t.rich("privacy.following-candidates-shows-your-political-interest", { link: (chunks) => <Link to="/privacy#follows">{chunks}</Link> })}
       </Banner>
     </div>
   );
@@ -99,8 +99,7 @@ function PrivacyUpdatedBanner() {
   return (
     <div className="app-banner">
       <Banner tone="info" dismissKey={`privacy-v${v}`}>
-        Our privacy notice was updated. <Link to="/privacy">Read what changed</Link>.
-      </Banner>
+        {t.rich("privacy.our-privacy-notice-was-updated-read", { link: (chunks) => <Link to="/privacy">{chunks}</Link> })}</Banner>
     </div>
   );
 }

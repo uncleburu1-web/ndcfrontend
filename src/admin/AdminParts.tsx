@@ -4,12 +4,13 @@ import { Icon } from "../components/ui";
 import { formatAge, formatDate, formatNaira } from "../lib/format";
 import type { AttentionCardData, AuditEntry, JobRow, ReadinessItem, StatData } from "./types";
 import "./admin-home.css";
+import { t } from "../i18n";
 
 const SEVERITY: Record<string, { words: string; icon: "checkCircle" | "alert" | "xCircle" | "info" }> = {
-  ok: { words: "On time", icon: "checkCircle" },
-  warning: { words: "Over target", icon: "alert" },
-  error: { words: "Needs action", icon: "xCircle" },
-  info: { words: "For information", icon: "info" },
+  ok: { get words() { return t("admin.on-time"); }, icon: "checkCircle" },
+  warning: { get words() { return t("admin.over-target"); }, icon: "alert" },
+  error: { get words() { return t("admin.needs-action"); }, icon: "xCircle" },
+  info: { get words() { return t("admin.for-information"); }, icon: "info" },
 };
 
 function target(c: AttentionCardData) {
@@ -20,7 +21,7 @@ function target(c: AttentionCardData) {
 }
 
 export function AttentionCard({ card }: { card: AttentionCardData }) {
-  const sev = card.any_is_warning && card.severity === "warning" ? { words: "Needs checking", icon: "alert" as const } : SEVERITY[card.severity];
+  const sev = card.any_is_warning && card.severity === "warning" ? { words: t("admin.needs-checking"), icon: "alert" as const } : SEVERITY[card.severity];
   return (
     <li className={`adm-attn adm-attn--${card.severity}`}>
       <p className="adm-attn__count" aria-hidden="true">{card.count.toLocaleString()}</p>
@@ -30,7 +31,7 @@ export function AttentionCard({ card }: { card: AttentionCardData }) {
           {card.label}
         </h3>
         <p className="adm-attn__meta">
-          {card.count > 0 && card.oldest_at && <>Oldest: {formatAge(card.oldest_at)} · </>}
+          {card.count > 0 && card.oldest_at && <>{t("admin.oldest", { formatAge: formatAge(card.oldest_at) })}</>}
           {target(card)}
         </p>
         {card.count > 0 && (
@@ -39,7 +40,7 @@ export function AttentionCard({ card }: { card: AttentionCardData }) {
           </p>
         )}
       </div>
-      <Link className="adm-attn__open" to={card.href} aria-label={`Open ${card.label}`}>Open</Link>
+      <Link className="adm-attn__open" to={card.href} aria-label={t("admin.open-2", { label: card.label })}>{t("admin.open")}</Link>
     </li>
   );
 }
@@ -52,7 +53,7 @@ function delta(s: StatData) {
   const words = dir === "same" ? `same as last week` : `${dir} from ${fmt(last)} last week`;
   return (
     <p className="adm-stat__delta">
-      <span>+{fmt(s.this_week)} this week</span>
+      <span>{t("admin.this-week", { fmt: fmt(s.this_week) })}</span>
       <span className={`adm-stat__dir adm-stat__dir--${dir}`}>
         <span aria-hidden="true">{dir === "up" ? "↑" : dir === "down" ? "↓" : "→"}</span> {words}
       </span>
@@ -71,10 +72,10 @@ export function StatTile({ stat }: { stat: StatData }) {
 }
 
 const READY: Record<string, { words: string; icon: "checkCircle" | "xCircle" | "alert" | "info" }> = {
-  ready: { words: "Ready", icon: "checkCircle" },
-  not_set: { words: "Not set", icon: "xCircle" },
-  warning: { words: "Check", icon: "alert" },
-  error: { words: "Problem", icon: "xCircle" },
+  ready: { get words() { return t("admin.ready"); }, icon: "checkCircle" },
+  not_set: { get words() { return t("admin.not-set"); }, icon: "xCircle" },
+  warning: { get words() { return t("admin.check"); }, icon: "alert" },
+  error: { get words() { return t("admin.problem"); }, icon: "xCircle" },
   info: { words: "", icon: "info" },
 };
 const READY_GROUPS: Record<string, string> = {
@@ -118,7 +119,7 @@ export function JobsList({ jobs }: { jobs: JobRow[] }) {
             <span>
               <strong>{j.label}</strong>: {j.state_label}
               {j.finished_at && <span className="adm-muted"> · {formatDate(j.finished_at, { withTime: true })}</span>}
-              {j.manual && j.state === "never" && <span className="adm-muted"> · run by hand</span>}
+              {j.manual && j.state === "never" && <span className="adm-muted"> {t("admin.run-by-hand")}</span>}
               {(j.error || j.summary) && <span className="adm-muted"> · {j.error || j.summary}</span>}
             </span>
           </li>
@@ -134,7 +135,7 @@ export function ActivityRow({ e }: { e: AuditEntry }) {
       <span className="adm-muted">{formatDate(e.created_at, { withTime: true })}</span>
       <span>
         <strong>{e.actor}</strong> {e.action_label}
-        {e.link ? <> · <Link to={e.link}>{e.target_label || "Open"}</Link></> : e.target_label ? <> · {e.target_label}</> : null}
+        {e.link ? <> · <Link to={e.link}>{e.target_label || t("admin.open")}</Link></> : e.target_label ? <> · {e.target_label}</> : null}
         {e.summary && <span className="adm-muted"> · {e.summary}</span>}
       </span>
     </li>

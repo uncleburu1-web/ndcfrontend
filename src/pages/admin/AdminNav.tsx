@@ -6,28 +6,30 @@ import { Link } from "react-router-dom";
 import { adminAreas } from "../../auth/guards";
 import { useMe } from "../../auth/session";
 import "./admin-nav.css";
+import { t as tr } from "../../i18n";
 
 export type AdminArea = "overview" | "candidates" | "donations" | "pvc" | "membership" | "moderation" | "news" | "announcements" | "posts" | "team"
-  | "audit" | "privacy" | "integrations" | "communities" | "events" | "geography" | "settings";
+  | "audit" | "privacy" | "integrations" | "communities" | "events" | "geography" | "settings" | "languages";
 
 const TABS: { id: AdminArea; label: string; href: string }[] = [
-  { id: "overview", label: "Overview", href: "/admin" },
-  { id: "candidates", label: "Candidates", href: "/admin/candidates" },
-  { id: "donations", label: "Donations", href: "/admin/donations" },
-  { id: "pvc", label: "PVC checks", href: "/admin/pvc" },
-  { id: "membership", label: "Membership", href: "/admin/membership" },
-  { id: "geography", label: "Geography", href: "/admin/geography" },  // spec 19
-  { id: "moderation", label: "Moderation", href: "/admin/moderation" },
-  { id: "news", label: "News review", href: "/admin/news" },
-  { id: "announcements", label: "Announcements", href: "/admin/announcements" },
-  { id: "posts", label: "Candidate posts", href: "/admin/posts" },
-  { id: "communities", label: "Communities", href: "/admin/communities" },
-  { id: "events", label: "Events", href: "/admin/events" },  // spec 18
-  { id: "privacy", label: "Privacy", href: "/admin/privacy" },
-  { id: "team", label: "Team", href: "/admin/team" },
-  { id: "audit", label: "Audit log", href: "/admin/audit" },
-  { id: "integrations", label: "Integrations", href: "/admin/integrations" },
-  { id: "settings", label: "Settings defaults", href: "/admin/settings/defaults" },  // spec 20 §14
+  { id: "overview", get label() { return tr("admin.overview"); }, href: "/admin" },
+  { id: "candidates", get label() { return tr("admin.candidates"); }, href: "/admin/candidates" },
+  { id: "donations", get label() { return tr("admin.donations"); }, href: "/admin/donations" },
+  { id: "pvc", get label() { return tr("admin.pvc-checks"); }, href: "/admin/pvc" },
+  { id: "membership", get label() { return tr("admin.membership"); }, href: "/admin/membership" },
+  { id: "geography", get label() { return tr("admin.geography"); }, href: "/admin/geography" },  // spec 19
+  { id: "moderation", get label() { return tr("admin.moderation"); }, href: "/admin/moderation" },
+  { id: "news", get label() { return tr("admin.news-review"); }, href: "/admin/news" },
+  { id: "announcements", get label() { return tr("admin.announcements"); }, href: "/admin/announcements" },
+  { id: "posts", get label() { return tr("admin.candidate-posts"); }, href: "/admin/posts" },
+  { id: "communities", get label() { return tr("admin.communities"); }, href: "/admin/communities" },
+  { id: "events", get label() { return tr("admin.events"); }, href: "/admin/events" },  // spec 18
+  { id: "privacy", get label() { return tr("admin.privacy"); }, href: "/admin/privacy" },
+  { id: "team", get label() { return tr("admin.team"); }, href: "/admin/team" },
+  { id: "audit", get label() { return tr("admin.audit-log"); }, href: "/admin/audit" },
+  { id: "integrations", get label() { return tr("admin.integrations"); }, href: "/admin/integrations" },
+  { id: "settings", get label() { return tr("admin.settings-defaults"); }, href: "/admin/settings/defaults" },  // spec 20 §14
+  { id: "languages", get label() { return tr("admin.languages"); }, href: "/admin/languages" },  // spec 21 §14
 ];
 
 export function AdminNav({ current }: { current: AdminArea }) {
@@ -36,7 +38,7 @@ export function AdminNav({ current }: { current: AdminArea }) {
   const links = TABS.filter((t) => areas.includes(t.id));
   if (links.length < 2) return null;
   return (
-    <nav className="adm-nav" aria-label="Admin sections">
+    <nav className="adm-nav" aria-label={tr("admin.admin-sections")}>
       {links.map((l) => (
         <Link key={l.id} to={l.href} aria-current={l.id === current ? "page" : undefined}>
           {l.label}

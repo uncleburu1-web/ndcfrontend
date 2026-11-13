@@ -28,6 +28,42 @@
   unicode-range: U+20A6;
 }
 
+/* Spec 21 §11: the letters Hausa, Igbo, Yoruba and Pidgin need. Each file has a unicode-range, so a browser downloads it
+   only when a page uses one of its characters (English pages download nothing extra). */
+@font-face {
+  font-family: "Archivo Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  src: url("@fontsource-variable/archivo/files/archivo-latin-ext-wdth-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0300-0303, U+0305-0307, U+0309-0328,
+    U+032A-036F, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20A5, U+20A7-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+@font-face {
+  font-family: "Archivo Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  src: url("@fontsource-variable/archivo/files/archivo-vietnamese-wdth-normal.woff2") format("woff2-variations");
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304,
+    U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* Archivo has no Hausa hooked letters (ɓ ɗ ƙ ƴ), no Igbo ṅ, no Yoruba ḿ ǹ, nor ɛ ɔ or the Hausa apostrophe ʼ: a 4 KB subset of Noto Sans (SIL Open
+   Font License, src/assets/fonts/NOTO-SANS-LICENSE.txt) supplies just those, under the same family name, like the ₦ file.
+   Declared last, so it wins for these code points. */
+@font-face {
+  font-family: "Archivo Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../assets/fonts/noto-sans-hausa-wght.woff2") format("woff2-variations");
+  unicode-range: U+0181, U+0186, U+018A, U+0190, U+0198, U+0199, U+01B3, U+01B4, U+01F8, U+01F9, U+0253, U+0254, U+0257, U+025B, U+02BC,
+    U+1E3E, U+1E3F, U+1E44, U+1E45, U+A78B, U+A78C;
+}
+
 /* ---- Reset ---------------------------------------------------------------- */
 *,
 *::before,

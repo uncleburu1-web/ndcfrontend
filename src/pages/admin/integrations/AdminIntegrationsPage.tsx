@@ -14,31 +14,32 @@ import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "../../../admin/admin-home.css";
 import "./admin-integrations.css";
+import { t } from "../../../i18n";
 
 type Service = Schema<"IntegrationService">;
 type Job = Schema<"OutboxJob">;
 
 const KIND_WORDS: Record<string, string> = {
-  notify_fanout: "Notification delivery", media_destroy: "Image clean-up", media_hide: "Hide a removed image",
-  media_show: "Restore an image", clerk_ban: "Block sign-in in Clerk", clerk_unban: "Allow sign-in in Clerk",
-  webhook_retry: "Webhook retry", email_send: "Email",
+  get notify_fanout() { return t("admin.notification-delivery"); }, get media_destroy() { return t("admin.image-clean-up"); }, get media_hide() { return t("admin.hide-a-removed-image"); },
+  get media_show() { return t("admin.restore-an-image"); }, get clerk_ban() { return t("admin.block-sign-in-in-clerk"); }, get clerk_unban() { return t("admin.allow-sign-in-in-clerk"); },
+  get webhook_retry() { return t("admin.webhook-retry"); }, get email_send() { return t("admin.email"); },
 };
-const PROVIDER_WORDS: Record<string, string> = { clerk: "Clerk", paystack: "Paystack", fake: "Test payments" };
+const PROVIDER_WORDS: Record<string, string> = { get clerk() { return t("admin.clerk"); }, get paystack() { return t("admin.paystack"); }, get fake() { return t("admin.test-payments"); } };
 
 /** "Paystack: working, last checked 2 min ago" / "Cloudinary: unavailable since 14:05". */
 export function serviceWords(s: Service, now = new Date()): { tone: "success" | "warning" | "error" | "info"; text: string } {
   const at = (v: string | null) => (v ? formatDate(v, { withTime: true }) : "");
   switch (s.state) {
     case "ok":
-      return { tone: "success", text: s.last_success ? `working, last checked ${formatAge(s.last_success, now)} ago` : "working (not called yet)" };
+      return { tone: "success", text: s.last_success ? t("admin.working-last-checked-ago", { formatAge: formatAge(s.last_success, now) }) : t("admin.working-not-called-yet") };
     case "failing":
-      return { tone: "warning", text: `the last call failed${s.last_failure ? ` at ${at(s.last_failure)}` : ""}${s.last_reason ? ` (${s.last_reason})` : ""}` };
+      return { tone: "warning", text: t("admin.the-last-call-failed", { v: s.last_failure ? t("admin.at", { at: at(s.last_failure) }) : "", v2: s.last_reason ? ` (${s.last_reason})` : "" }) };
     case "unavailable":
-      return { tone: "error", text: `unavailable since ${at(s.last_failure)}; NDCConnect is waiting before trying again` };
+      return { tone: "error", text: t("admin.unavailable-since-ndcconnect-is-waiting-before", { at: at(s.last_failure) }) };
     case "not_configured":
-      return { tone: "error", text: "not set up: its settings are missing" };
+      return { tone: "error", text: t("admin.not-set-up-its-settings-are") };
     default:
-      return { tone: "info", text: "not in use here" };
+      return { tone: "info", text: t("admin.not-in-use-here") };
   }
 }
 
@@ -50,9 +51,9 @@ function Services({ services }: { services: Service[] }) {
         return (
           <li key={s.key} className={`adm-int__service adm-int__service--${w.tone}`}>
             <p className="adm-int__service-line"><strong>{s.name}</strong>: {w.text}</p>
-            <p className="adm-muted">{s.purpose}. Sends: {s.data_sent}. Timeouts: {s.timeouts}.</p>
+            <p className="adm-muted">{t("admin.sends-timeouts", { purpose: s.purpose, data_sent: s.data_sent, timeouts: s.timeouts })}</p>
             <details>
-              <summary>Settings it needs</summary>
+              <summary>{t("admin.settings-it-needs")}</summary>
               <p className="adm-muted">{s.settings.join(", ")}</p>
             </details>
           </li>
@@ -83,27 +84,27 @@ function Webhooks() {
   };
   return (
     <section className="adm-panel" aria-labelledby="int-wh">
-      <h2 id="int-wh">Webhooks received</h2>
-      <p className="ds-field__hint">One line per event from Clerk or Paystack. Payloads are never stored, only a fingerprint.</p>
+      <h2 id="int-wh">{t("admin.webhooks-received")}</h2>
+      <p className="ds-field__hint">{t("admin.one-line-per-event-from-clerk")}</p>
       <div className="adm-int__filters">
-        <Select label="From" value={provider} onChange={(e) => set("provider", e.target.value)}
-          options={[{ value: "", label: "Any service" }, { value: "clerk", label: "Clerk" }, { value: "paystack", label: "Paystack" }, { value: "fake", label: "Test payments" }]} />
-        <Select label="Result" value={status} onChange={(e) => set("wstatus", e.target.value)}
-          options={[{ value: "", label: "Any result" }, { value: "processed", label: "Processed" }, { value: "ignored", label: "Ignored" }, { value: "failed", label: "Failed" }]} />
+        <Select label={t("admin.from-2")} value={provider} onChange={(e) => set("provider", e.target.value)}
+          options={[{ value: "", label: t("admin.any-service") }, { value: "clerk", label: t("admin.clerk") }, { value: "paystack", label: t("admin.paystack") }, { value: "fake", label: t("admin.test-payments") }]} />
+        <Select label={t("admin.result")} value={status} onChange={(e) => set("wstatus", e.target.value)}
+          options={[{ value: "", label: t("admin.any-result") }, { value: "processed", label: t("admin.processed") }, { value: "ignored", label: t("admin.ignored") }, { value: "failed", label: t("admin.failed") }]} />
       </div>
-      {res.error ? <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>{res.error.message}</Banner>
+      {res.error ? <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={res.retry}>{t("admin.try-again-2")}</Button>}>{res.error.message}</Banner>
         : !res.data ? <Skeleton width="100%" height={120} />
-        : res.data.count === 0 ? <EmptyState title="No webhooks match" />
+        : res.data.count === 0 ? <EmptyState title={t("admin.no-webhooks-match")} />
         : (
           <>
             <ul className="adm-int__list">
               {res.data.results.map((r) => (
                 <li key={r.id}>
-                  <span><strong>{PROVIDER_WORDS[r.provider] ?? r.provider}</strong> · {r.event_type || "event"}</span>
+                  <span><strong>{PROVIDER_WORDS[r.provider] ?? r.provider}</strong> · {r.event_type || t("admin.event-2")}</span>
                   <span className={`adm-int__result adm-int__result--${r.status}`}>
-                    {r.status === "processed" ? "Processed" : r.status === "ignored" ? "Ignored" : "Failed"}
-                    {!r.signature_valid && " · signature didn’t verify"}
-                    {r.attempts > 1 && ` · ${r.attempts} tries`}
+                    {r.status === "processed" ? t("admin.processed") : r.status === "ignored" ? t("admin.ignored") : t("admin.failed")}
+                    {!r.signature_valid && t("admin.signature-didn-t-verify")}
+                    {r.attempts > 1 && t("admin.tries", { attempts: r.attempts })}
                   </span>
                   <span className="adm-muted">{formatDate(r.received_at, { withTime: true })}{r.error && ` · ${r.error}`}</span>
                 </li>
@@ -128,7 +129,7 @@ function Tasks({ onChanged }: { onChanged: () => void }) {
     setBusy(j.id);
     try {
       await apiPost(api, "/admin/integrations/outbox/{id}/retry/", undefined, { id: j.id });
-      toast.show({ tone: "success", message: `${KIND_WORDS[j.kind] ?? j.kind}: queued to run again.` });
+      toast.show({ tone: "success", message: t("admin.queued-to-run-again", { v: KIND_WORDS[j.kind] ?? j.kind }) });
       res.retry();
       onChanged();
     } catch (err) {
@@ -140,28 +141,28 @@ function Tasks({ onChanged }: { onChanged: () => void }) {
   };
   return (
     <section className="adm-panel" aria-labelledby="int-jobs">
-      <h2 id="int-jobs">Background tasks</h2>
-      <p className="ds-field__hint">Work that runs after a change is saved: notifications, image clean-up, retries. Failed tasks were tried 6 times.</p>
+      <h2 id="int-jobs">{t("admin.background-tasks")}</h2>
+      <p className="ds-field__hint">{t("admin.work-that-runs-after-a-change")}</p>
       <div className="adm-int__filters">
-        <Select label="Show" value={status} onChange={(e) => setStatus(e.target.value as typeof status)}
-          options={[{ value: "failed", label: "Failed" }, { value: "stuck", label: "Waiting too long" }, { value: "pending", label: "Waiting" }, { value: "done", label: "Done" }]} />
+        <Select label={t("admin.show")} value={status} onChange={(e) => setStatus(e.target.value as typeof status)}
+          options={[{ value: "failed", label: t("admin.failed") }, { value: "stuck", label: t("admin.waiting-too-long") }, { value: "pending", label: t("admin.waiting-2") }, { value: "done", label: t("admin.done") }]} />
       </div>
-      {res.error ? <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>{res.error.message}</Banner>
+      {res.error ? <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={res.retry}>{t("admin.try-again-2")}</Button>}>{res.error.message}</Banner>
         : !res.data ? <Skeleton width="100%" height={120} />
-        : res.data.count === 0 ? <EmptyState title={status === "failed" ? "No failed tasks" : "Nothing here"}>{status === "failed" ? "Everything that ran has finished." : ""}</EmptyState>
+        : res.data.count === 0 ? <EmptyState title={status === "failed" ? t("admin.no-failed-tasks") : t("admin.nothing-here")}>{status === "failed" ? t("admin.everything-that-ran-has-finished") : ""}</EmptyState>
         : (
           <ul className="adm-int__list">
             {res.data.results.map((j) => (
               <li key={j.id}>
-                <span><strong>{KIND_WORDS[j.kind] ?? j.kind}</strong> · {j.status === "failed" ? "failed" : j.stuck ? "waiting too long" : j.status}
-                  {` · ${j.attempts} of ${j.max_attempts} tries`}</span>
+                <span><strong>{KIND_WORDS[j.kind] ?? j.kind}</strong> · {j.status === "failed" ? t("admin.failed-2") : j.stuck ? t("admin.waiting-too-long-2") : j.status}
+                  {t("admin.of-tries", { attempts: j.attempts, max_attempts: j.max_attempts })}</span>
                 <span className="adm-muted">
-                  {j.status === "failed" && j.finished_at ? `Gave up ${formatDate(j.finished_at, { withTime: true })}` : `Next try ${formatDate(j.next_attempt_at, { withTime: true })}`}
+                  {j.status === "failed" && j.finished_at ? t("admin.gave-up", { formatDate: formatDate(j.finished_at, { withTime: true }) }) : t("admin.next-try", { formatDate: formatDate(j.next_attempt_at, { withTime: true }) })}
                   {j.last_error && ` · ${j.last_error}`}
-                  {j.request_id && ` · reference ${j.request_id.slice(0, 8)}`}
+                  {j.request_id && t("admin.reference-2", { slice: j.request_id.slice(0, 8) })}
                 </span>
                 {(j.status === "failed" || j.status === "pending") && (
-                  <span><Button size="sm" variant="secondary" loading={busy === j.id} loadingLabel="Retrying…" onClick={() => void retry(j)}>Retry</Button></span>
+                  <span><Button size="sm" variant="secondary" loading={busy === j.id} loadingLabel={t("admin.retrying")} onClick={() => void retry(j)}>{t("admin.retry")}</Button></span>
                 )}
               </li>
             ))}
@@ -175,7 +176,7 @@ export default function AdminIntegrationsPage() {
   const api = useApi();
   const res = useRequest("admin-integrations", (signal) => apiGet(api, "/admin/integrations/", undefined, { signal }));
   useEffect(() => {
-    document.title = "Integrations | NDCConnect admin";
+    document.title = t("admin.integrations-ndcconnect-admin");
   }, []);
   const o = res.data?.outbox;
   return (
@@ -183,35 +184,34 @@ export default function AdminIntegrationsPage() {
       <AdminNav current="integrations" />
       <header className="adm-page__head">
         <div>
-          <h1>Integrations</h1>
-          <p className="ds-field__hint">The outside services NDCConnect relies on, and the background work that connects to them.</p>
+          <h1>{t("admin.integrations")}</h1>
+          <p className="ds-field__hint">{t("admin.the-outside-services-ndcconnect-relies-on")}</p>
         </div>
       </header>
       {res.error ? (
-        <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>{res.error.message}</Banner>
+        <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={res.retry}>{t("admin.try-again-2")}</Button>}>{res.error.message}</Banner>
       ) : !res.data ? (
         <Skeleton width="100%" height={200} />
       ) : (
         <>
           {o && (o.failed > 0 || o.stuck) && (
-            <Banner tone={o.stuck ? "error" : "warning"} title={o.stuck ? "Background tasks are waiting too long" : "Some background tasks failed"}>
-              {o.stuck ? `The oldest has waited ${Math.round(o.oldest_due_age_s / 60)} minutes. Check that process_outbox is running.`
-                : `${o.failed} failed after every retry. Retry them below once the cause is fixed.`}
+            <Banner tone={o.stuck ? "error" : "warning"} title={o.stuck ? t("admin.background-tasks-are-waiting-too-long") : t("admin.some-background-tasks-failed")}>
+              {o.stuck ? t("admin.the-oldest-has-waited-minutes-check", { round: Math.round(o.oldest_due_age_s / 60) }) : t("admin.failed-after-every-retry-retry-them", { failed: o.failed })}
             </Banner>
           )}
           <section className="adm-panel" aria-labelledby="int-svc">
-            <h2 id="int-svc">Services</h2>
+            <h2 id="int-svc">{t("admin.services")}</h2>
             <Services services={res.data.services} />
-            <p className="adm-muted">Updated {formatDate(res.data.generated_at, { withTime: true })} · {o?.pending ?? 0} background {o?.pending === 1 ? "task" : "tasks"} waiting.</p>
+            <p className="adm-muted">{t("admin.updated-background-other-waiting", { formatDate: formatDate(res.data.generated_at, { withTime: true }), v: o?.pending ?? 0, pending: o?.pending })}</p>
           </section>
           {res.data.webhooks.length > 0 && (
             <section className="adm-panel" aria-labelledby="int-24">
-              <h2 id="int-24">Last 24 hours</h2>
+              <h2 id="int-24">{t("admin.last-24-hours")}</h2>
               <ul className="adm-int__list">
                 {res.data.webhooks.map((w) => (
                   <li key={w.provider}>
                     <span><strong>{PROVIDER_WORDS[w.provider] ?? w.provider}</strong></span>
-                    <span>{w.processed} processed · {w.ignored} ignored · {w.failed} failed{w.bad_signatures ? ` · ${w.bad_signatures} with a bad signature` : ""}</span>
+                    <span>{t("admin.processed-ignored-failed", { processed: w.processed, ignored: w.ignored, failed: w.failed, v: w.bad_signatures ? t("admin.with-a-bad-signature", { bad_signatures: w.bad_signatures }) : "" })}</span>
                   </li>
                 ))}
               </ul>

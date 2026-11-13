@@ -17,6 +17,7 @@ import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "../donations/admin-donations.css";
 import "./admin-pvc.css";
+import { t as tr } from "../../../i18n";
 
 export const REJECT_REASONS = [
   "The details don’t match INEC’s record.",
@@ -33,14 +34,14 @@ export function waitText(from: string, now = new Date()) {
 }
 
 const EVENT_LABELS: Record<string, string> = {
-  submitted: "Submitted", details_changed: "Details changed", withdrawn: "Withdrawn", verified: "Verified", rejected: "Rejected",
-  vin_revealed: "VIN revealed", vin_pruned: "VIN deleted (retention)", badge_changed: "Badge setting changed",
+  get submitted() { return tr("admin.submitted"); }, get details_changed() { return tr("admin.details-changed"); }, get withdrawn() { return tr("admin.withdrawn"); }, get verified() { return tr("admin.verified"); }, get rejected() { return tr("admin.rejected"); },
+  get vin_revealed() { return tr("admin.vin-revealed"); }, get vin_pruned() { return tr("admin.vin-deleted-retention"); }, get badge_changed() { return tr("admin.badge-setting-changed"); },
 };
 
 const TABS = [
-  { id: "pending", label: "Pending" },
-  { id: "successful", label: "Verified" },
-  { id: "rejected", label: "Rejected" },
+  { id: "pending", get label() { return tr("admin.pending"); } },
+  { id: "successful", get label() { return tr("admin.verified"); } },
+  { id: "rejected", get label() { return tr("admin.rejected"); } },
 ];
 
 export default function AdminPvcPage() {
@@ -65,7 +66,7 @@ export default function AdminPvcPage() {
   const [busy, setBusy] = useState("");
 
   useEffect(() => {
-    document.title = "PVC checks | NDCConnect admin";
+    document.title = tr("admin.pvc-checks-ndcconnect-admin");
   }, []);
 
   // Spec 19 §8.2: the officer confirms the polling unit INEC's checker shows; pre-filled with the link or the best match
@@ -81,10 +82,10 @@ export default function AdminPvcPage() {
     const g = geoFor(r);
     try {
       await api(`/admin/pvc/${r.id}/verify/`, { method: "POST", body: g.polling_unit_id ? geoBody(g, false) : {} });
-      toast.show({ tone: "success", message: `${r.user_name}’s PVC marked verified.` });
+      toast.show({ tone: "success", message: tr("admin.s-pvc-marked-verified", { user_name: r.user_name }) });
       res.retry();
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Couldn’t verify." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : tr("admin.couldn-t-verify") });
     } finally {
       setBusy("");
     }
@@ -95,12 +96,12 @@ export default function AdminPvcPage() {
     setBusy(rejecting.id);
     try {
       await api(`/admin/pvc/${rejecting.id}/reject/`, { method: "POST", body: { reason } });
-      toast.show({ tone: "success", message: "PVC rejected. The voter sees your reason." });
+      toast.show({ tone: "success", message: tr("admin.pvc-rejected-the-voter-sees-your") });
       setRejecting(null);
       setDetail("");
       res.retry();
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Couldn’t reject." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : tr("admin.couldn-t-reject") });
     } finally {
       setBusy("");
     }
@@ -111,35 +112,33 @@ export default function AdminPvcPage() {
       <AdminNav current="pvc" />
       <header className="adm-page__head">
         <div>
-          <h1>PVC checks</h1>
-          <p className="ds-field__hint">Private. Reveal the VIN, check it on INEC’s voter checker, then mark the result. Reveals are audited.</p>
+          <h1>{tr("admin.pvc-checks")}</h1>
+          <p className="ds-field__hint">{tr("admin.private-reveal-the-vin-check-it")}</p>
         </div>
-        <Button variant="ghost" href="/admin/pvc/settings">Guidance settings</Button>
+        <Button variant="ghost" href="/admin/pvc/settings">{tr("admin.guidance-settings")}</Button>
         {res.data?.lookup_url && (
-          <Button variant="secondary" href={res.data.lookup_url} target="_blank" rel="noopener noreferrer">Open INEC voter checker</Button>
+          <Button variant="secondary" href={res.data.lookup_url} target="_blank" rel="noopener noreferrer">{tr("admin.open-inec-voter-checker")}</Button>
         )}
       </header>
       <div className="adm-pvc-filters">
-        <Select label="Show" value={status} onChange={(e) => setFilter({ status: e.target.value })}
+        <Select label={tr("admin.show")} value={status} onChange={(e) => setFilter({ status: e.target.value })}
           options={TABS.map((t) => ({ value: t.id, label: t.id === "pending" && res.data ? `${t.label} (${res.data.pending_count})` : t.label }))} />
-        <Select label="State" value={state} onChange={(e) => setFilter({ state: e.target.value })}
-          options={[{ value: "", label: "All states" }, ...STATES]} />
+        <Select label={tr("admin.state")} value={state} onChange={(e) => setFilter({ state: e.target.value })}
+          options={[{ value: "", label: tr("admin.all-states") }, ...STATES]} />
       </div>
       {status === "pending" && res.data?.oldest_pending_at && (
         <Banner tone={workingDaysSince(new Date(res.data.oldest_pending_at)) > 3 ? "warning" : "info"}
-          title={`Oldest pending: ${waitText(res.data.oldest_pending_at)}`}>
-          {workingDaysSince(new Date(res.data.oldest_pending_at)) > 3
-            ? "Past the 3 working days we promise voters. Please clear the oldest checks first."
-            : "Voters are told checks take up to 3 working days."}
+          title={tr("admin.oldest-pending", { waitText: waitText(res.data.oldest_pending_at) })}>
+          {workingDaysSince(new Date(res.data.oldest_pending_at)) > 3 ? tr("admin.past-the-3-working-days-we") : tr("admin.voters-are-told-checks-take-up")}
         </Banner>
       )}
 
       {res.error ? (
-        <Banner tone="error" title="We couldn’t load PVC checks" action={<Button variant="secondary" size="sm" onClick={res.retry}>Try again</Button>}>{res.error.message}</Banner>
+        <Banner tone="error" title={tr("admin.we-couldn-t-load-pvc-checks")} action={<Button variant="secondary" size="sm" onClick={res.retry}>{tr("admin.try-again-2")}</Button>}>{res.error.message}</Banner>
       ) : res.loading && !res.data ? (
         <Skeleton width="100%" height={160} />
       ) : res.data && res.data.count === 0 ? (
-        <EmptyState title={status === "pending" ? "No PVCs waiting" : "Nothing here yet"}>{status === "pending" ? "New submissions appear here, oldest first." : ""}</EmptyState>
+        <EmptyState title={status === "pending" ? tr("admin.no-pvcs-waiting") : tr("admin.nothing-here-yet")}>{status === "pending" ? tr("admin.new-submissions-appear-here-oldest-first") : ""}</EmptyState>
       ) : res.data ? (
         <>
           <ul className="adm-pvc-list">
@@ -148,22 +147,22 @@ export default function AdminPvcPage() {
                 <div className="adm-pvc__head">
                   <div>
                     <h2>{r.user_name || r.user_email}</h2>
-                    <p className="ds-field__hint">{r.user_email} · submitted {r.created_at ? formatDate(r.created_at, { withTime: true }) : ""}</p>
+                    <p className="ds-field__hint">{tr("admin.submitted-2", { user_email: r.user_email, v: r.created_at ? formatDate(r.created_at, { withTime: true }) : "" })}</p>
                   </div>
                   <StatusBadge set="pvc" status={r.status} />
                 </div>
                 <dl className="adm-dl">
-                  <div><dt>VIN</dt><dd><MaskedValue masked={r.vin_masked ?? ""} label="VIN"
+                  <div><dt>{tr("admin.vin")}</dt><dd><MaskedValue masked={r.vin_masked ?? ""} label="VIN"
                     onReveal={async () => (await api<{ vin: string }>(`/admin/pvc/${r.id}/reveal/`, { method: "POST" })).vin} /></dd></div>
-                  <div><dt>Surname</dt><dd>{r.surname}</dd></div>
-                  <div><dt>State / LGA</dt><dd>{r.state_label}, {r.lga}</dd></div>
-                  {r.polling_unit && <div><dt>Polling unit</dt><dd>{r.polling_unit}</dd></div>}
-                  {r.reviewed_at && <div><dt>Decided</dt><dd>{formatDate(r.reviewed_at, { withTime: true })}{r.reviewed_by_email ? ` by ${r.reviewed_by_email}` : ""}</dd></div>}
-                  {r.reason && <div><dt>Reason</dt><dd>{r.reason}</dd></div>}
+                  <div><dt>{tr("admin.surname")}</dt><dd>{r.surname}</dd></div>
+                  <div><dt>{tr("admin.state-lga")}</dt><dd>{r.state_label}, {r.lga}</dd></div>
+                  {r.polling_unit && <div><dt>{tr("admin.polling-unit")}</dt><dd>{r.polling_unit}</dd></div>}
+                  {r.reviewed_at && <div><dt>{tr("admin.decided-2")}</dt><dd>{formatDate(r.reviewed_at, { withTime: true })}{r.reviewed_by_email ? tr("admin.by-5", { reviewed_by_email: r.reviewed_by_email }) : ""}</dd></div>}
+                  {r.reason && <div><dt>{tr("admin.reason")}</dt><dd>{r.reason}</dd></div>}
                 </dl>
                 {r.events?.length > 0 && (
                   <details className="adm-pvc__history">
-                    <summary>History ({r.events.length})</summary>
+                    <summary>{tr("admin.history-2", { length: r.events.length })}</summary>
                     <ol className="adm-history">
                       {r.events.map((e, i) => (
                         <li key={i}>{EVENT_LABELS[e.kind] ?? e.kind} · {formatDate(e.created_at, { withTime: true })}{e.actor_email ? ` · ${e.actor_email}` : ""}{e.note ? ` — ${e.note}` : ""}</li>
@@ -171,34 +170,34 @@ export default function AdminPvcPage() {
                     </ol>
                   </details>
                 )}
-                {r.status === "pending" && r.is_own && <Banner tone="info">This is your own check. Another officer has to decide it.</Banner>}
+                {r.status === "pending" && r.is_own && <Banner tone="info">{tr("admin.this-is-your-own-check-another")}</Banner>}
                 {r.status === "pending" && !r.is_own && (
                   <details className="adm-pvc__history" open>
-                    <summary>Polling unit from INEC’s checker</summary>
+                    <summary>{tr("admin.polling-unit-from-inec-s-checker")}</summary>
                     <GeoPicker state={r.state ?? ""} value={geoFor(r)} onChange={(v) => setGeo((m) => ({ ...m, [r.id]: v }))} allowNotListed={false}
-                      hint="Choose the polling unit the checker shows. Communities use this link." />
+                      hint={tr("admin.choose-the-polling-unit-the-checker")} />
                   </details>
                 )}
                 {r.status === "pending" && !r.is_own && (
                   <div className="adm-actions">
-                    <Button size="sm" onClick={() => void verify(r)} loading={busy === r.id} loadingLabel="Saving…">Mark verified</Button>
-                    <Button size="sm" variant="secondary" onClick={() => { setRejecting(r); setPreset(REJECT_REASONS[0]); setDetail(""); }}>Reject</Button>
+                    <Button size="sm" onClick={() => void verify(r)} loading={busy === r.id} loadingLabel={tr("admin.saving")}>{tr("admin.mark-verified")}</Button>
+                    <Button size="sm" variant="secondary" onClick={() => { setRejecting(r); setPreset(REJECT_REASONS[0]); setDetail(""); }}>{tr("admin.reject")}</Button>
                   </div>
                 )}
               </li>
             ))}
           </ul>
-          <Pagination page={page} pageCount={Math.ceil(res.data.count / 20)} label="PVC pages"
+          <Pagination page={page} pageCount={Math.ceil(res.data.count / 20)} label={tr("admin.pvc-pages")}
             onChange={(p) => setParams({ ...(status !== "pending" ? { status } : {}), ...(p > 1 ? { page: String(p) } : {}) })} />
         </>
       ) : null}
 
-      <Modal open={Boolean(rejecting)} onClose={() => setRejecting(null)} title={`Reject ${rejecting?.user_name ?? ""}’s PVC?`}
-        footer={<><Button variant="secondary" onClick={() => setRejecting(null)}>Keep pending</Button>
-          <Button variant="danger" onClick={() => void reject()} disabled={preset === "Other" && !detail.trim()} loading={busy === rejecting?.id}>Reject PVC</Button></>}>
-        <p>The voter sees this reason and can try again.</p>
-        <Select label="Reason" value={preset} onChange={(e) => setPreset(e.target.value)} options={REJECT_REASONS.map((r) => ({ value: r, label: r }))} />
-        <TextArea label={preset === "Other" ? "Reason" : "More detail (optional)"} required={preset === "Other"} rows={2} value={detail} onChange={(e) => setDetail(e.target.value)} />
+      <Modal open={Boolean(rejecting)} onClose={() => setRejecting(null)} title={tr("admin.reject-s-pvc", { v: rejecting?.user_name ?? "" })}
+        footer={<><Button variant="secondary" onClick={() => setRejecting(null)}>{tr("admin.keep-pending")}</Button>
+          <Button variant="danger" onClick={() => void reject()} disabled={preset === "Other" && !detail.trim()} loading={busy === rejecting?.id}>{tr("admin.reject-pvc")}</Button></>}>
+        <p>{tr("admin.the-voter-sees-this-reason-and")}</p>
+        <Select label={tr("admin.reason")} value={preset} onChange={(e) => setPreset(e.target.value)} options={REJECT_REASONS.map((r) => ({ value: r, label: r }))} />
+        <TextArea label={preset === "Other" ? tr("admin.reason") : tr("admin.more-detail-optional")} required={preset === "Other"} rows={2} value={detail} onChange={(e) => setDetail(e.target.value)} />
       </Modal>
     </div>
   );

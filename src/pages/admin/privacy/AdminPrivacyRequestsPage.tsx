@@ -11,6 +11,7 @@ import { AdminNav } from "../AdminNav";
 import { PrivacyNav } from "./PrivacyNav";
 import "../candidates/admin.css";
 import "../../../privacy/privacy.css";
+import { t } from "../../../i18n";
 
 type Tab = "open" | "waiting" | "closed";
 const TABS: [Tab, string][] = [["open", "Open"], ["waiting", "Waiting for the person"], ["closed", "Closed"]];
@@ -22,7 +23,7 @@ export default function AdminPrivacyRequestsPage() {
   const res = useRequest(`privacy-requests-${tab}`, (signal) =>
     api<{ count: number; counts: Record<Tab, number>; results: PrivacyRequest[] }>(`/admin/privacy/requests/?tab=${tab}`, { signal }));
   useEffect(() => {
-    document.title = "Privacy requests | NDCConnect admin";
+    document.title = t("admin.privacy-requests-ndcconnect-admin");
   }, []);
   const rows = res.data?.results ?? [];
   return (
@@ -31,11 +32,11 @@ export default function AdminPrivacyRequestsPage() {
       <PrivacyNav current="requests" />
       <header className="adm-page__head">
         <div>
-          <h1>Privacy requests</h1>
-          <p className="ds-field__hint">Answer within 30 days (NDPA, GAID 2025). Asking the person for more information pauses the clock.</p>
+          <h1>{t("admin.privacy-requests")}</h1>
+          <p className="ds-field__hint">{t("admin.answer-within-30-days-ndpa-gaid")}</p>
         </div>
       </header>
-      <div className="adm-subnav" role="tablist" aria-label="Request status">
+      <div className="adm-subnav" role="tablist" aria-label={t("admin.request-status")}>
         {TABS.map(([id, label]) => (
           <button key={id} type="button" role="tab" aria-selected={tab === id} className={tab === id ? "active" : ""}
                   onClick={() => setParams(id === "open" ? {} : { tab: id })}>
@@ -44,15 +45,15 @@ export default function AdminPrivacyRequestsPage() {
         ))}
       </div>
       {res.error ? (
-        <Banner tone="error" title="We couldn’t load requests" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>{res.error.message}</Banner>
+        <Banner tone="error" title={t("admin.we-couldn-t-load-requests")} action={<Button size="sm" variant="secondary" onClick={res.retry}>{t("admin.try-again-2")}</Button>}>{res.error.message}</Banner>
       ) : !res.data ? (
         <Skeleton width="100%" height={160} />
       ) : rows.length === 0 ? (
-        <EmptyState title={tab === "closed" ? "No closed requests" : "No requests waiting"} />
+        <EmptyState title={tab === "closed" ? t("admin.no-closed-requests") : t("admin.no-requests-waiting")} />
       ) : (
         <div className="adm-table-wrap">
           <table className="adm-table">
-            <thead><tr><th>Request</th><th>Person</th><th>Received</th><th>Due</th><th>Status</th></tr></thead>
+            <thead><tr><th>{t("admin.request")}</th><th>{t("admin.person")}</th><th>{t("admin.received")}</th><th>{t("admin.due-2")}</th><th>{t("admin.status")}</th></tr></thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id}>

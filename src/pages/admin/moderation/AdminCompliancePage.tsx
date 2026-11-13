@@ -11,6 +11,7 @@ import { AdminNav } from "../AdminNav";
 import { ModerationNav } from "./ModerationNav";
 import "../candidates/admin.css";
 import "../../../moderation/moderation.css";
+import { t } from "../../../i18n";
 
 export default function AdminCompliancePage() {
   const api = useApi();
@@ -19,16 +20,16 @@ export default function AdminCompliancePage() {
   const res = useRequest(`compliance:${year}`, (signal) => api<ComplianceReport>(`/admin/moderation/compliance/?year=${year}`, { signal }));
   const [busy, setBusy] = useState(false);
   useEffect(() => {
-    document.title = "Compliance report | NDCConnect admin";
+    document.title = t("admin.compliance-report-ndcconnect-admin");
   }, []);
   const download = async () => {
     setBusy(true);
     try {
       const blob = await api<Blob>(`/admin/moderation/compliance/?year=${year}&format=csv`, { responseType: "blob" });
       saveBlob(blob, `ndcconnect-nitda-compliance-${year}.csv`);
-      toast.show({ tone: "success", message: "Downloaded. Downloads are recorded in the audit log." });
+      toast.show({ tone: "success", message: t("admin.downloaded-downloads-are-recorded-in-the") });
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Download failed." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("admin.download-failed") });
     } finally {
       setBusy(false);
     }
@@ -40,41 +41,41 @@ export default function AdminCompliancePage() {
       <ModerationNav current="compliance" />
       <header className="adm-page__head">
         <div>
-          <h1>Compliance report</h1>
-          <p className="ds-field__hint">Figures for the NITDA Code of Practice annual report: counts for 1 January to 31 December, Lagos time. No personal data.</p>
+          <h1>{t("admin.compliance-report")}</h1>
+          <p className="ds-field__hint">{t("admin.figures-for-the-nitda-code-of")}</p>
         </div>
         <div className="adm-actions">
-          <Select label="Year" value={String(year)} onChange={(e) => setYear(Number(e.target.value))}
+          <Select label={t("admin.year")} value={String(year)} onChange={(e) => setYear(Number(e.target.value))}
             options={years.map((y) => ({ value: String(y), label: String(y) }))} />
-          <Button variant="secondary" onClick={() => void download()} loading={busy} loadingLabel="Preparing…">Download CSV</Button>
+          <Button variant="secondary" onClick={() => void download()} loading={busy} loadingLabel={t("admin.preparing")}>{t("admin.download-csv")}</Button>
         </div>
       </header>
       {res.error ? (
-        <Banner tone="error" title="We couldn’t load the figures" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>{res.error.message}</Banner>
+        <Banner tone="error" title={t("admin.we-couldn-t-load-the-figures")} action={<Button size="sm" variant="secondary" onClick={res.retry}>{t("admin.try-again-2")}</Button>}>{res.error.message}</Banner>
       ) : !res.data ? (
         <Skeleton width="100%" height={240} />
       ) : (
         <>
-          {res.data.frozen && <Banner tone="info">These figures were frozen when old case records were cleared.</Banner>}
+          {res.data.frozen && <Banner tone="info">{t("admin.these-figures-were-frozen-when-old")}</Banner>}
           <div className="adm-table-wrap">
             <table className="mod-figures">
-              <caption className="visually-hidden">NITDA annual report figures for {res.data.year}</caption>
-              <thead><tr><th scope="col">Item</th><th scope="col">Figure</th><th scope="col">How it’s counted</th></tr></thead>
+              <caption className="visually-hidden">{t("admin.nitda-annual-report-figures-for", { year: res.data.year })}</caption>
+              <thead><tr><th scope="col">{t("admin.item-2")}</th><th scope="col">{t("admin.figure")}</th><th scope="col">{t("admin.how-it-s-counted")}</th></tr></thead>
               <tbody>
                 {res.data.items.map((i) => (
                   <tr key={i.key}>
                     <th scope="row">{i.label}</th>
-                    <td>{typeof i.value === "number" ? i.value.toLocaleString() : i.value}{i.key === "large_platform" ? ` (${res.data!.registered_users.toLocaleString()} accounts)` : ""}</td>
+                    <td>{typeof i.value === "number" ? i.value.toLocaleString() : i.value}{i.key === "large_platform" ? t("admin.accounts", { registered_users: res.data!.registered_users.toLocaleString() }) : ""}</td>
                     <td className="mod-meta">{i.definition}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <h2>Protecting people from harmful content</h2>
+          <h2>{t("admin.protecting-people-from-harmful-content")}</h2>
           <p>{res.data.safety_statement}</p>
           <ul>
-            {Object.entries(res.data.harmful_by_rule).map(([r, n]) => <li key={r}>{r} {RULE_TITLES[r]}: {n} removals</li>)}
+            {Object.entries(res.data.harmful_by_rule).map(([r, n]) => <li key={r}>{t("admin.removals", { r, RULE_TITLES: RULE_TITLES[r], n })}</li>)}
           </ul>
         </>
       )}

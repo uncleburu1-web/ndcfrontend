@@ -1,6 +1,7 @@
 import { useId, type ReactNode } from "react";
 import { FieldError } from "./Field";
 import "./fields.css";
+import { t } from "../../../i18n";
 
 interface RadioGroupProps {
   legend: ReactNode;
@@ -25,7 +26,7 @@ export function RadioGroup({ legend, name, options, value, onChange, hint, error
     >
       <legend className="ds-field__label">
         {legend}
-        {required && <span className="ds-field__required"> (required)</span>}
+        {required && <span className="ds-field__required"> {t("ui.required")}</span>}
       </legend>
       {hint && (
         <p id={hintId} className="ds-field__hint">

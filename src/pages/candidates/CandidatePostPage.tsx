@@ -15,6 +15,8 @@ import { RemovedNotice, removalFromError } from "../../moderation/RemovedNotice"
 import type { PostDetail } from "../../posts/types";
 import "../../news/news.css";
 import "../../posts/posts.css";
+import { t } from "../../i18n";
+import { InLanguage } from "../../i18n/ContentLanguage";
 
 export default function CandidatePostPage() {
   const { slug = "", id = "" } = useParams();
@@ -29,17 +31,16 @@ export default function CandidatePostPage() {
     if (p) loadStates([p.candidate.slug]);
   }, [p, loadStates]);
   useEffect(() => {
-    document.title = p ? `${p.title} — ${p.candidate.full_name} | NDCConnect` : "Post | NDCConnect";
+    document.title = p ? t("candidates.ndcconnect", { title: p.title, full_name: p.candidate.full_name }) : t("candidates.post-ndcconnect");
   }, [p]);
 
   const removed = removalFromError(res.error);
-  if (removed) return <RemovedNotice notice={removed} back={{ href: `/candidates/${encodeURIComponent(slug)}`, label: "Back to the profile" }} />;
+  if (removed) return <RemovedNotice notice={removed} back={{ href: `/candidates/${encodeURIComponent(slug)}`, label: t("candidates.back-to-the-profile") }} />;
   if (res.error) {
     return (
       <div className="page-shell">
-        <EmptyState title="Post not found" action={<Button href={`/candidates/${encodeURIComponent(slug)}`}>Back to the profile</Button>}>
-          It may have been removed, or the link is wrong.
-        </EmptyState>
+        <EmptyState title={t("candidates.post-not-found")} action={<Button href={`/candidates/${encodeURIComponent(slug)}`}>{t("candidates.back-to-the-profile")}</Button>}>
+          {t("candidates.it-may-have-been-removed-or")}</EmptyState>
       </div>
     );
   }
@@ -54,16 +55,16 @@ export default function CandidatePostPage() {
         <KindBadge kind={p.kind} label={p.kind_label} />
       </span>
       <h1>{p.title}</h1>
-      <p className="news-meta">{formatDate(p.published_at)}{p.edited_at ? ` · Edited ${formatDate(p.edited_at)}` : ""}</p>
+      <p className="news-meta">{formatDate(p.published_at)}{p.edited_at ? t("candidates.edited", { formatDate: formatDate(p.edited_at) }) : ""}</p>
       {p.image && <ArticleImage image={p.image} />}
-      <ArticleBody body={p.body} />
-      <p className="post-campaign-line">Campaign content from {c.full_name}. NDCConnect doesn’t write or endorse candidate posts.</p>
+      <InLanguage language={p.language}><ArticleBody body={p.body} /></InLanguage>
+      <p className="post-campaign-line">{t("candidates.campaign-content-from-ndcconnect-doesn-t", { full_name: c.full_name })}</p>
       <div className="article-actions">
         <CandidateVote slug={c.slug} name={c.full_name} variant="profile" />
-        <Button variant="ghost" size="sm" onClick={() => setReporting(true)}>Report</Button>
-        <Link to={`/candidates/${encodeURIComponent(c.slug)}`}>Back to the profile</Link>
+        <Button variant="ghost" size="sm" onClick={() => setReporting(true)}>{t("candidates.report")}</Button>
+        <Link to={`/candidates/${encodeURIComponent(c.slug)}`}>{t("candidates.back-to-the-profile")}</Link>
       </div>
-      <ReportDialog path={`/candidates/${encodeURIComponent(c.slug)}/posts/${p.id}/report/`} title="Report this post" open={reporting}
+      <ReportDialog path={`/candidates/${encodeURIComponent(c.slug)}/posts/${p.id}/report/`} title={t("candidates.report-this-post")} open={reporting}
         onClose={() => setReporting(false)} />
     </article>
   );

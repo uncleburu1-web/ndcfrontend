@@ -16,6 +16,7 @@ import { useCallback, useState } from "react";
 import { ApiError, newRequestId, type ApiRequest } from "../auth/api";
 import { apiPost } from "../api/typed";
 import { useApi } from "../auth/session";
+import { t } from "../i18n";
 
 export type ImagePurpose = "candidate_photo" | "post_image" | "news_image" | "announcement_image" | "event_image";  // event_image: spec 18
 
@@ -66,7 +67,7 @@ export function sendToCloudinary(sig: DirectSignature, file: File, onProgress: (
     const xhr = new XMLHttpRequest();
     const rid = newRequestId();
     const fail = (message: string, code = "media_unavailable") =>
-      reject(new ApiError({ status: 0, code, request_id: rid, message: `${message} Reference: ${rid.slice(0, 8)}.` }));
+      reject(new ApiError({ status: 0, code, request_id: rid, message: t("media.reference", { message, slice: rid.slice(0, 8) }) }));
     xhr.open("POST", sig.upload_url);
     xhr.timeout = timeoutMs;
     xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100)); };

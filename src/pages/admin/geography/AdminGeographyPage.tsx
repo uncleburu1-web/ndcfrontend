@@ -16,13 +16,14 @@ import { formatDate } from "../../../lib/format";
 import { STATES, stateLabel } from "../../../lib/nigeria";
 import { AdminNav } from "../AdminNav";
 import "../../../geo/geo.css";
+import { t } from "../../../i18n";
 
 const KIND_LABEL: Record<string, string> = {
-  polling_units: "Polling units", senatorial_districts: "Senatorial districts", federal_constituencies: "Federal constituencies",
-  state_constituencies: "State constituencies",
+  get polling_units() { return t("admin.polling-units"); }, get senatorial_districts() { return t("admin.senatorial-districts"); }, get federal_constituencies() { return t("admin.federal-constituencies"); },
+  get state_constituencies() { return t("admin.state-constituencies"); },
 };
 const WHY: Record<string, string> = {
-  unlinked: "Typed, not linked", not_listed: "“Not listed”", retired: "Unit retired by INEC", person_choice: "Person’s choice waiting",
+  get unlinked() { return t("admin.typed-not-linked"); }, get not_listed() { return t("admin.not-listed"); }, get retired() { return t("admin.unit-retired-by-inec"); }, get person_choice() { return t("admin.person-s-choice-waiting"); },
 };
 
 const fmtCounts = (d: Record<string, number> | undefined) =>
@@ -39,39 +40,38 @@ function Preview({ d }: { d: DatasetDetail }) {
   return (
     <div className="geo-card">
       <h3>{KIND_LABEL[d.kind]} · {d.source}</h3>
-      <p className="news-meta">{(p.rows ?? 0).toLocaleString()} rows · checksum {d.checksum.slice(0, 12)}{d.notes ? ` · ${d.notes}` : ""}</p>
+      <p className="news-meta">{t("admin.rows-checksum", { v: (p.rows ?? 0).toLocaleString(), slice: d.checksum.slice(0, 12), v2: d.notes ? ` · ${d.notes}` : "" })}</p>
       {(p.error_count ?? 0) > 0 && (
-        <Banner tone="error" title={`${p.error_count} problem${p.error_count === 1 ? "" : "s"}: this file can’t be applied`}>
+        <Banner tone="error" title={t("admin.problem-this-file-can-t-be", { error_count: p.error_count, v: p.error_count === 1 ? "" : "s" })}>
           <ul className="geo-errors">{(p.errors ?? []).map((e) => <li key={e}>{e}</li>)}</ul>
         </Banner>
       )}
       <dl>
-        <dt>Added</dt><dd>{fmtCounts(c.added as Record<string, number>)}</dd>
-        <dt>Renamed</dt><dd>{fmtCounts(c.renamed as Record<string, number>)}</dd>
-        <dt>Back in the list</dt><dd>{fmtCounts(c.restored as Record<string, number>)}</dd>
-        <dt>Retired</dt><dd>{fmtCounts(c.retired as Record<string, number>)}</dd>
-        <dt>Moved</dt><dd>{String(c.moved ?? 0)}</dd>
-        {d.kind === "polling_units" && <><dt>People affected</dt><dd>{p.affected?.memberships ?? 0} memberships and {p.affected?.pvc_records ?? 0} PVC
-          checks point at retired or moved units</dd></>}
-        {d.kind === "polling_units" && <><dt>Active units</dt><dd>{(p.active_units ?? 0).toLocaleString()} in the file, {(p.current_units ?? 0).toLocaleString()} now</dd></>}
+        <dt>{t("admin.added")}</dt><dd>{fmtCounts(c.added as Record<string, number>)}</dd>
+        <dt>{t("admin.renamed")}</dt><dd>{fmtCounts(c.renamed as Record<string, number>)}</dd>
+        <dt>{t("admin.back-in-the-list")}</dt><dd>{fmtCounts(c.restored as Record<string, number>)}</dd>
+        <dt>{t("admin.retired")}</dt><dd>{fmtCounts(c.retired as Record<string, number>)}</dd>
+        <dt>{t("admin.moved")}</dt><dd>{String(c.moved ?? 0)}</dd>
+        {d.kind === "polling_units" && <><dt>{t("admin.people-affected")}</dt><dd>{t("admin.memberships-and-pvc-checks-point-at", { v: p.affected?.memberships ?? 0, v2: p.affected?.pvc_records ?? 0 })}</dd></>}
+        {d.kind === "polling_units" && <><dt>{t("admin.active-units")}</dt><dd>{t("admin.in-the-file-now", { v: (p.active_units ?? 0).toLocaleString(), v2: (p.current_units ?? 0).toLocaleString() })}</dd></>}
       </dl>
       {p.per_state && Object.keys(p.per_state).length > 0 && (
-        <details className="geo-details"><summary>Per state</summary>
+        <details className="geo-details"><summary>{t("admin.per-state")}</summary>
           <p className="news-meta">{Object.entries(p.per_state).map(([s, n]) => `${stateLabel(s) || s}: ${n.toLocaleString()}`).join(" · ")}</p>
         </details>
       )}
       {p.renamed && Object.values(p.renamed).some((v) => v.length) && (
-        <details className="geo-details"><summary>Renamed (first 500 of each)</summary>
+        <details className="geo-details"><summary>{t("admin.renamed-first-500-of-each")}</summary>
           <ul>{Object.entries(p.renamed).flatMap(([lvl, v]) => v.map((x) => <li key={`${lvl}${x.code}`}>{x.code}: {x.old} → {x.new}</li>))}</ul>
         </details>
       )}
       {p.retired && Object.values(p.retired).some((v) => v.length) && (
-        <details className="geo-details"><summary>Retired (first 500 of each)</summary>
+        <details className="geo-details"><summary>{t("admin.retired-first-500-of-each")}</summary>
           <ul>{Object.entries(p.retired).flatMap(([lvl, v]) => v.map((x) => <li key={`${lvl}${x.code}`}>{x.code}: {x.name}</li>))}</ul>
         </details>
       )}
       {p.moved && p.moved.length > 0 && (
-        <details className="geo-details"><summary>Moved</summary>
+        <details className="geo-details"><summary>{t("admin.moved")}</summary>
           <ul>{p.moved.map((m) => <li key={m.from}>{m.name}: {m.from} → {m.to}</li>)}</ul>
         </details>
       )}
@@ -109,9 +109,9 @@ function Datasets() {
       setOpen(d);
       setChanges(null);
       setNonce((n) => n + 1);
-      toast.show({ tone: "success", message: "Previewed. Nothing has changed yet." });
+      toast.show({ tone: "success", message: t("admin.previewed-nothing-has-changed-yet") });
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Upload failed." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("admin.upload-failed") });
     } finally {
       setBusy(false);
     }
@@ -127,12 +127,12 @@ function Datasets() {
       const d = await api<DatasetDetail>(`/admin/geography/datasets/${open.id}/apply/`, { method: "POST", body: second ? { confirm_second: true } : {} });
       setOpen(d);
       setNonce((n) => n + 1);
-      toast.show({ tone: "success", message: "Applied. Communities, search and notices update in the background." });
+      toast.show({ tone: "success", message: t("admin.applied-communities-search-and-notices-update") });
     } catch (err) {
       if (err instanceof ApiError && err.code === "geo_second_admin_required") {
         await view(open.id);
         toast.show({ tone: "info", message: err.message });
-      } else toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "That didn’t apply." });
+      } else toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("admin.that-didn-t-apply") });
     } finally {
       setBusy(false);
     }
@@ -145,61 +145,60 @@ function Datasets() {
   return (
     <div className="geo-stack">
       <form className="geo-card" onSubmit={(e) => void upload(e)}>
-        <h2>Upload a file</h2>
-        <p className="news-meta">CSV from INEC (UTF-8, up to 50 MB). It’s checked and previewed first; nothing changes until you apply it.</p>
-        <label className="ds-field__label" htmlFor="geo-file">File</label>
+        <h2>{t("admin.upload-a-file")}</h2>
+        <p className="news-meta">{t("admin.csv-from-inec-utf-8-up")}</p>
+        <label className="ds-field__label" htmlFor="geo-file">{t("admin.file")}</label>
         <input id="geo-file" type="file" accept=".csv,text/csv" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-        <Select label="What’s in it" value={kind} onChange={(e) => setKind(e.target.value)}
+        <Select label={t("admin.what-s-in-it")} value={kind} onChange={(e) => setKind(e.target.value)}
           options={Object.entries(KIND_LABEL).map(([value, label]) => ({ value, label }))} />
-        <TextField label="Source" value={source} maxLength={300} onChange={(e) => setSource(e.target.value)} hint="INEC’s page or how the file was obtained" />
-        <TextField label="INEC’s publication date" value={publishedOn} placeholder="YYYY-MM-DD" maxLength={10} onChange={(e) => setPublishedOn(e.target.value)} />
-        <TextArea label="Notes" value={notes} maxLength={2000} onChange={(e) => setNotes(e.target.value)} hint="Who checked the file, and how" />
-        <div className="geo-actions"><Button type="submit" loading={busy} disabled={!file}>Preview</Button></div>
+        <TextField label={t("admin.source")} value={source} maxLength={300} onChange={(e) => setSource(e.target.value)} hint={t("admin.inec-s-page-or-how-the")} />
+        <TextField label={t("admin.inec-s-publication-date")} value={publishedOn} placeholder="YYYY-MM-DD" maxLength={10} onChange={(e) => setPublishedOn(e.target.value)} />
+        <TextArea label={t("admin.notes")} value={notes} maxLength={2000} onChange={(e) => setNotes(e.target.value)} hint={t("admin.who-checked-the-file-and-how")} />
+        <div className="geo-actions"><Button type="submit" loading={busy} disabled={!file}>{t("admin.preview")}</Button></div>
       </form>
 
       {open && (
-        <section aria-label="Selected file">
+        <section aria-label={t("admin.selected-file")}>
           <Preview d={open} />
           <div className="geo-actions">
             {open.status === "previewed" && open.error_count === 0 && (waitingForMe
-              ? <Button loading={busy} onClick={() => void apply(true)}>Apply as the second admin</Button>
-              : <Button loading={busy} onClick={() => void apply(false)}>Apply</Button>)}
-            {open.status === "applied" && <Button variant="secondary" onClick={() => void loadChanges(1)}>What changed</Button>}
+              ? <Button loading={busy} onClick={() => void apply(true)}>{t("admin.apply-as-the-second-admin")}</Button>
+              : <Button loading={busy} onClick={() => void apply(false)}>{t("admin.apply")}</Button>)}
+            {open.status === "applied" && <Button variant="secondary" onClick={() => void loadChanges(1)}>{t("admin.what-changed")}</Button>}
           </div>
           {open.needs_second_admin && (
-            <Banner tone="warning">This file has fewer than 95% of the active polling units.
-              {open.first_approval_by ? ` ${open.first_approval_by} approved it; a different system admin must apply it too.` : " Two system admins must apply it."}</Banner>
+            <Banner tone="warning">{t("admin.this-file-has-fewer-than-95", { v: open.first_approval_by ? t("admin.approved-it-a-different-system-admin", { first_approval_by: open.first_approval_by }) : t("admin.two-system-admins-must-apply-it") })}</Banner>
           )}
           {changes && (
             <div className="geo-scroll">
               <table className="geo-table">
-                <caption className="visually-hidden">Changes</caption>
-                <thead><tr><th scope="col">Level</th><th scope="col">Change</th><th scope="col">Code</th><th scope="col">Before</th><th scope="col">After</th></tr></thead>
+                <caption className="visually-hidden">{t("admin.changes")}</caption>
+                <thead><tr><th scope="col">{t("admin.level")}</th><th scope="col">{t("admin.change")}</th><th scope="col">{t("admin.code")}</th><th scope="col">{t("admin.before")}</th><th scope="col">{t("admin.after")}</th></tr></thead>
                 <tbody>{changes.results.map((c, i) => (
                   <tr key={`${c.code}${i}`}><td>{c.level.replace("_", " ")}</td><td>{c.action}</td><td>{c.code}</td><td>{c.old_value}</td><td>{c.new_value}</td></tr>
                 ))}</tbody>
               </table>
-              <p className="news-meta">{changes.count.toLocaleString()} changes</p>
-              {changes.next && <Button variant="secondary" size="sm" onClick={() => void loadChanges(changes.next!)}>Next page</Button>}
+              <p className="news-meta">{t("admin.changes-2", { count: changes.count.toLocaleString() })}</p>
+              {changes.next && <Button variant="secondary" size="sm" onClick={() => void loadChanges(changes.next!)}>{t("admin.next-page")}</Button>}
             </div>
           )}
         </section>
       )}
 
       <section aria-labelledby="geo-files">
-        <h2 id="geo-files">Files</h2>
+        <h2 id="geo-files">{t("admin.files")}</h2>
         {list.error ? <Banner tone="error">{list.error.message}</Banner> : !list.data ? <Skeleton width="100%" height={120} /> : list.data.results.length === 0
-          ? <p className="news-meta">No files yet. Load INEC’s list with <code>load_geography</code> or upload it here.</p> : (
+          ? <p className="news-meta">{t.rich("admin.no-files-yet-load-inec-s", { code: (chunks) => <code>{chunks}</code> })}</p> : (
             <div className="geo-scroll">
               <table className="geo-table">
-                <caption className="visually-hidden">Geography files</caption>
-                <thead><tr><th scope="col">File</th><th scope="col">Status</th><th scope="col">Counts</th><th scope="col"><span className="visually-hidden">Open</span></th></tr></thead>
+                <caption className="visually-hidden">{t("admin.geography-files")}</caption>
+                <thead><tr><th scope="col">{t("admin.file")}</th><th scope="col">{t("admin.status")}</th><th scope="col">{t("admin.counts")}</th><th scope="col"><span className="visually-hidden">{t("admin.open")}</span></th></tr></thead>
                 <tbody>{list.data.results.map((d) => (
                   <tr key={d.id}>
                     <td>{KIND_LABEL[d.kind]}<br /><span className="news-meta">{d.source} · {formatDate(d.loaded_at)}</span></td>
-                    <td>{d.status === "applied" ? `Applied ${d.applied_at ? formatDate(d.applied_at) : ""}` : d.error_count ? `${d.error_count} problems` : "Previewed"}</td>
-                    <td>{d.status === "applied" ? (d.kind === "polling_units" ? `${d.polling_units.toLocaleString()} units` : `${d.constituencies} constituencies`) : `${d.changes} changes`}</td>
-                    <td><Button size="sm" variant="ghost" onClick={() => void view(d.id)}>Open</Button></td>
+                    <td>{d.status === "applied" ? t("admin.applied", { v: d.applied_at ? formatDate(d.applied_at) : "" }) : d.error_count ? t("admin.problems", { error_count: d.error_count }) : t("admin.previewed")}</td>
+                    <td>{d.status === "applied" ? (d.kind === "polling_units" ? t("admin.units", { polling_units: d.polling_units.toLocaleString() }) : t("admin.constituencies", { constituencies: d.constituencies })) : t("admin.changes-3", { changes: d.changes })}</td>
+                    <td><Button size="sm" variant="ghost" onClick={() => void view(d.id)}>{t("admin.open")}</Button></td>
                   </tr>
                 ))}</tbody>
               </table>
@@ -221,10 +220,10 @@ function ReviewRow({ item, onDone }: { item: ReviewItem; onDone: () => void }) {
     setBusy(true);
     try {
       await api(`/admin/geography/review/${item.kind}/${item.id}/`, { method: "POST", body: { action, ...(action === "link" ? geoBody(value, false) : {}) } });
-      toast.show({ tone: "success", message: action === "ask" ? "Asked. They’ll get a notice." : "Saved." });
+      toast.show({ tone: "success", message: action === "ask" ? t("admin.asked-they-ll-get-a-notice") : t("admin.saved") });
       onDone();
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "That didn’t save." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("admin.that-didn-t-save") });
     } finally {
       setBusy(false);
     }
@@ -233,20 +232,20 @@ function ReviewRow({ item, onDone }: { item: ReviewItem; onDone: () => void }) {
     p?.lga ? [p.lga.name, p.ward?.name, p.polling_unit ? `${p.polling_unit.name} (${p.polling_unit.code})` : ""].filter(Boolean).join(" · ") : "—";
   return (
     <li className="geo-card">
-      <p><strong>{item.kind === "pvc" ? "PVC check" : "Membership"}</strong> · {stateLabel(item.state)} · {WHY[item.why]}</p>
-      <p className="news-meta">Typed: {[item.typed.lga, item.typed.ward, item.typed.polling_unit].filter(Boolean).join(" · ") || "—"}</p>
-      <p className="news-meta">Linked: {fmt(item.current)}{item.pending ? ` · Their choice: ${fmt(item.pending)}` : ""}</p>
-      {s.lga && <p className="news-meta">Suggestion: {[s.lga.name, s.ward?.name, s.polling_unit?.name].filter(Boolean).join(" · ")} ({Math.round(s.lga.score * 100)}%)</p>}
+      <p><strong>{item.kind === "pvc" ? t("admin.pvc-check") : t("admin.membership")}</strong> · {stateLabel(item.state)} · {WHY[item.why]}</p>
+      <p className="news-meta">{t("admin.typed", { v: [item.typed.lga, item.typed.ward, item.typed.polling_unit].filter(Boolean).join(" · ") || "—" })}</p>
+      <p className="news-meta">{t("admin.linked-2", { fmt: fmt(item.current), v: item.pending ? t("admin.their-choice", { fmt: fmt(item.pending) }) : "" })}</p>
+      {s.lga && <p className="news-meta">{t("admin.suggestion", { join: [s.lga.name, s.ward?.name, s.polling_unit?.name].filter(Boolean).join(" · "), round: Math.round(s.lga.score * 100) })}</p>}
       <div className="geo-actions">
-        {item.pending && <Button size="sm" loading={busy} onClick={() => void act("accept")}>Accept their choice</Button>}
-        <Button size="sm" variant="secondary" aria-expanded={open} onClick={() => setOpen((o) => !o)}>Link</Button>
-        <Button size="sm" variant="ghost" loading={busy} onClick={() => void act("ask")}>Ask them</Button>
-        <Link to={item.record_url}>Open the record</Link>
+        {item.pending && <Button size="sm" loading={busy} onClick={() => void act("accept")}>{t("admin.accept-their-choice")}</Button>}
+        <Button size="sm" variant="secondary" aria-expanded={open} onClick={() => setOpen((o) => !o)}>{t("admin.link-2")}</Button>
+        <Button size="sm" variant="ghost" loading={busy} onClick={() => void act("ask")}>{t("admin.ask-them")}</Button>
+        <Link to={item.record_url}>{t("admin.open-the-record")}</Link>
       </div>
       {open && (
         <div className="geo-card">
           <GeoPicker state={item.state} value={value} onChange={setValue} allowNotListed={false} required={item.kind === "pvc" ? ["lga", "ward", "polling_unit"] : ["lga"]} />
-          <div className="geo-actions"><Button size="sm" loading={busy} onClick={() => void act("link")}>Save link</Button></div>
+          <div className="geo-actions"><Button size="sm" loading={busy} onClick={() => void act("link")}>{t("admin.save-link")}</Button></div>
         </div>
       )}
     </li>
@@ -273,17 +272,17 @@ function Review() {
   return (
     <div className="geo-stack">
       <div className="geo-actions">
-        {d && d.kinds.length > 1 && <Select label="Records" value={kind} onChange={(e) => set("kind", e.target.value)}
-          options={[{ value: "", label: "All" }, { value: "membership", label: "Memberships" }, { value: "pvc", label: "PVC checks" }]} />}
-        <Select label="State" value={state} onChange={(e) => set("state", e.target.value)} options={[{ value: "", label: "All states" }, ...STATES]} />
-        <Select label="Why" value={why} onChange={(e) => set("why", e.target.value)}
-          options={[{ value: "", label: "Any reason" }, ...Object.entries(WHY).map(([value, label]) => ({ value, label }))]} />
+        {d && d.kinds.length > 1 && <Select label={t("admin.records")} value={kind} onChange={(e) => set("kind", e.target.value)}
+          options={[{ value: "", label: t("admin.all") }, { value: "membership", label: t("admin.memberships") }, { value: "pvc", label: t("admin.pvc-checks") }]} />}
+        <Select label={t("admin.state")} value={state} onChange={(e) => set("state", e.target.value)} options={[{ value: "", label: t("admin.all-states") }, ...STATES]} />
+        <Select label={t("admin.why")} value={why} onChange={(e) => set("why", e.target.value)}
+          options={[{ value: "", label: t("admin.any-reason") }, ...Object.entries(WHY).map(([value, label]) => ({ value, label }))]} />
       </div>
       {res.error ? <Banner tone="error">{res.error.message}</Banner> : !d ? <Skeleton width="100%" height={160} /> : (
         <>
-          <p className="news-meta">{d.count} waiting{d.groups.length ? ` · ${d.groups.slice(0, 8).map((g) => `${stateLabel(g.state) || "—"}${g.lga ? `/${g.lga}` : ""}: ${g.count}`).join(" · ")}` : ""}</p>
-          {d.results.length === 0 ? <p className="news-meta">Nothing to review.</p>
-            : <ul className="geo-stack" aria-label="Records to review">{d.results.map((i) => <ReviewRow key={`${i.kind}${i.id}`} item={i} onDone={() => setNonce((n) => n + 1)} />)}</ul>}
+          <p className="news-meta">{t("admin.waiting", { count: d.count, v: d.groups.length ? ` · ${d.groups.slice(0, 8).map((g) => `${stateLabel(g.state) || "—"}${g.lga ? `/${g.lga}` : ""}: ${g.count}`).join(" · ")}` : "" })}</p>
+          {d.results.length === 0 ? <p className="news-meta">{t("admin.nothing-to-review")}</p>
+            : <ul className="geo-stack" aria-label={t("admin.records-to-review")}>{d.results.map((i) => <ReviewRow key={`${i.kind}${i.id}`} item={i} onDone={() => setNonce((n) => n + 1)} />)}</ul>}
           <Pagination page={page} pageCount={Math.max(1, Math.ceil(d.count / 20))} onChange={(p) => set("page", String(p))} />
         </>
       )}
@@ -308,9 +307,9 @@ function Aliases() {
       await api("/admin/geography/aliases/", { method: "POST", body: { level, target_id: target, name } });
       setName("");
       setNonce((n) => n + 1);
-      toast.show({ tone: "success", message: "Added." });
+      toast.show({ tone: "success", message: t("admin.added-2") });
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "That didn’t save." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("admin.that-didn-t-save") });
     }
   };
   const remove = async (id: number) => {
@@ -320,22 +319,22 @@ function Aliases() {
   return (
     <div className="geo-stack">
       <form className="geo-card" onSubmit={(e) => void add(e)}>
-        <h2>Add another name</h2>
-        <p className="news-meta">Old or local names help people find a place. They’re used for type-ahead and suggestions only, never to link records.</p>
-        <Select label="State" value={state} placeholder="Choose a state" options={STATES} onChange={(e) => { setState(e.target.value); setValue(EMPTY_GEO); }} />
-        {state && <GeoPicker state={state} value={value} onChange={setValue} allowNotListed={false} hint="Stop at the level the name belongs to." />}
-        <TextField label="Other name" value={name} maxLength={200} onChange={(e) => setName(e.target.value)} />
-        <div className="geo-actions"><Button type="submit" disabled={!target || !name.trim()}>Add</Button></div>
+        <h2>{t("admin.add-another-name")}</h2>
+        <p className="news-meta">{t("admin.old-or-local-names-help-people")}</p>
+        <Select label={t("admin.state")} value={state} placeholder={t("admin.choose-a-state")} options={STATES} onChange={(e) => { setState(e.target.value); setValue(EMPTY_GEO); }} />
+        {state && <GeoPicker state={state} value={value} onChange={setValue} allowNotListed={false} hint={t("admin.stop-at-the-level-the-name")} />}
+        <TextField label={t("admin.other-name")} value={name} maxLength={200} onChange={(e) => setName(e.target.value)} />
+        <div className="geo-actions"><Button type="submit" disabled={!target || !name.trim()}>{t("admin.add")}</Button></div>
       </form>
-      <TextField label="Search names" value={q} onChange={(e) => setQ(e.target.value)} />
-      {res.data && (res.data.results.length === 0 ? <p className="news-meta">No other names yet.</p> : (
+      <TextField label={t("admin.search-names")} value={q} onChange={(e) => setQ(e.target.value)} />
+      {res.data && (res.data.results.length === 0 ? <p className="news-meta">{t("admin.no-other-names-yet")}</p> : (
         <div className="geo-scroll">
           <table className="geo-table">
-            <caption className="visually-hidden">Other names</caption>
-            <thead><tr><th scope="col">Name</th><th scope="col">For</th><th scope="col">Source</th><th scope="col"><span className="visually-hidden">Remove</span></th></tr></thead>
+            <caption className="visually-hidden">{t("admin.other-names")}</caption>
+            <thead><tr><th scope="col">{t("admin.name")}</th><th scope="col">{t("admin.for")}</th><th scope="col">{t("admin.source")}</th><th scope="col"><span className="visually-hidden">{t("admin.remove-2")}</span></th></tr></thead>
             <tbody>{res.data.results.map((a) => (
-              <tr key={a.id}><td>{a.name}</td><td>{a.target_name} ({a.target_code})</td><td>{a.source === "rename" ? "INEC rename" : "Admin"}</td>
-                <td><Button size="sm" variant="ghost" onClick={() => void remove(a.id)}>Remove</Button></td></tr>
+              <tr key={a.id}><td>{a.name}</td><td>{a.target_name} ({a.target_code})</td><td>{a.source === "rename" ? t("admin.inec-rename") : t("admin.admin")}</td>
+                <td><Button size="sm" variant="ghost" onClick={() => void remove(a.id)}>{t("admin.remove-2")}</Button></td></tr>
             ))}</tbody>
           </table>
         </div>
@@ -350,14 +349,14 @@ export default function AdminGeographyPage() {
   const [params, setParams] = useSearchParams();
   const tab = sa ? params.get("tab") ?? (params.get("why") || params.get("kind") ? "review" : "files") : "review";
   const tabs = sa
-    ? [{ id: "files", label: "Files", content: <Datasets /> }, { id: "review", label: "Review", content: <Review /> }, { id: "aliases", label: "Other names", content: <Aliases /> }]
-    : [{ id: "review", label: "Review", content: <Review /> }];
+    ? [{ id: "files", label: t("admin.files"), content: <Datasets /> }, { id: "review", label: t("admin.review"), content: <Review /> }, { id: "aliases", label: t("admin.other-names"), content: <Aliases /> }]
+    : [{ id: "review", label: t("admin.review"), content: <Review /> }];
   return (
     <div className="adm-page">
       <AdminNav current="geography" />
-      <header className="adm-page__head"><div><h1>Geography</h1>
-        <p className="news-meta">INEC’s states, LGAs, wards, polling units and constituencies, and the records waiting for a location.</p></div></header>
-      <Tabs label="Geography" tabs={tabs} value={tab} onChange={(id) => setParams(new URLSearchParams({ tab: id }), { replace: true })} />
+      <header className="adm-page__head"><div><h1>{t("admin.geography")}</h1>
+        <p className="news-meta">{t("admin.inec-s-states-lgas-wards-polling")}</p></div></header>
+      <Tabs label={t("admin.geography")} tabs={tabs} value={tab} onChange={(id) => setParams(new URLSearchParams({ tab: id }), { replace: true })} />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { useAutoRefresh } from "../../../admin/useAutoRefresh";
 import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "../../../admin/admin-home.css";
+import { t } from "../../../i18n";
 
 const offices = (b: Blackout) => b.offices.join(", ");
 
@@ -36,7 +37,7 @@ export default function AdminHomePage() {
   useEffect(() => load(), [load]);
   useAutoRefresh(load);
   useEffect(() => {
-    document.title = "Admin | NDCConnect";
+    document.title = t("admin.admin-ndcconnect");
   }, []);
 
   if (!data) {
@@ -44,7 +45,7 @@ export default function AdminHomePage() {
       <div className="adm-page">
         <AdminNav current="overview" />
         {error ? (
-          <Banner tone="error" title="We couldn’t load the admin home" action={<Button size="sm" variant="secondary" onClick={load}>Try again</Button>}>
+          <Banner tone="error" title={t("admin.we-couldn-t-load-the-admin")} action={<Button size="sm" variant="secondary" onClick={load}>{t("admin.try-again-2")}</Button>}>
             {error.message}
           </Banner>
         ) : <Skeleton width="100%" height={240} />}
@@ -59,45 +60,41 @@ export default function AdminHomePage() {
       <AdminNav current="overview" />
       <header className="adm-home__head">
         <div>
-          <h1>Admin</h1>
+          <h1>{t("admin.admin")}</h1>
           <p className="adm-muted">{data.roles.map((r) => r.label).join(" · ")}</p>
         </div>
         <div className="adm-home__updated">
-          <span aria-live="polite">{refreshing ? "Refreshing…" : `Updated ${formatDate(data.generated_at, { withTime: true }).split(", ").pop()}`}</span>
-          <Button size="sm" variant="secondary" onClick={load} disabled={refreshing}>Refresh</Button>
+          <span aria-live="polite">{refreshing ? t("admin.refreshing") : t("admin.updated-4", { pop: formatDate(data.generated_at, { withTime: true }).split(", ").pop() })}</span>
+          <Button size="sm" variant="secondary" onClick={load} disabled={refreshing}>{t("admin.refresh")}</Button>
         </div>
       </header>
 
       <div className="adm-home__banners">
-        {error && <Banner tone="warning">Couldn’t refresh just now. Showing the last numbers.</Banner>}
+        {error && <Banner tone="warning">{t("admin.couldn-t-refresh-just-now-showing")}</Banner>}
         {data.blackouts.active.map((b) => (
-          <Banner key={b.end + offices(b)} tone="warning" title="Campaign blackout">
-            Campaign blackout for {offices(b)} until {formatDate(b.end, { withTime: true })}. Announcements, approvals and candidate posts for that office are paused.
-          </Banner>
+          <Banner key={b.end + offices(b)} tone="warning" title={t("admin.campaign-blackout")}>
+            {t("admin.campaign-blackout-for-until-announcements-approvals", { offices: offices(b), formatDate: formatDate(b.end, { withTime: true }) })}</Banner>
         ))}
         {data.blackouts.next && (
           <Banner tone="info">
-            Next campaign blackout: {offices(data.blackouts.next)} from {formatDate(data.blackouts.next.start, { withTime: true })}.
-          </Banner>
+            {t("admin.next-campaign-blackout-from", { offices: offices(data.blackouts.next), formatDate: formatDate(data.blackouts.next.start, { withTime: true }) })}</Banner>
         )}
         {failedJob && (
-          <Banner tone="error" title="A background job failed">
-            {failedJob.label} failed in its last run. <a href="#jobs-title">See background jobs</a>.
-          </Banner>
+          <Banner tone="error" title={t("admin.a-background-job-failed")}>
+            {t.rich("admin.failed-in-its-last-run-see", { label: failedJob.label, a: (chunks) => <a href="#jobs-title">{chunks}</a> })}</Banner>
         )}
         {data.failed.map((f) => (
-          <Banner key={f.app} tone="error" action={<Button size="sm" variant="secondary" onClick={load}>Try again</Button>}>
-            Couldn’t load {f.label}.
-          </Banner>
+          <Banner key={f.app} tone="error" action={<Button size="sm" variant="secondary" onClick={load}>{t("admin.try-again-2")}</Button>}>
+            {t("admin.couldn-t-load", { label: f.label })}</Banner>
         ))}
       </div>
 
       <div className="adm-home__grid">
         <div className="adm-home__col">
           <section className="adm-panel" aria-labelledby="attn-title">
-            <h2 id="attn-title">Needs your attention</h2>
+            <h2 id="attn-title">{t("admin.needs-your-attention")}</h2>
             {data.attention.length === 0 || allClear ? (
-              <EmptyState icon="checkCircle" title="Nothing waiting">You’re all caught up.</EmptyState>
+              <EmptyState icon="checkCircle" title={t("admin.nothing-waiting")}>{t("admin.you-re-all-caught-up")}</EmptyState>
             ) : null}
             {data.attention.length > 0 && !allClear && (
               <ul className="adm-attn-list">
@@ -107,18 +104,18 @@ export default function AdminHomePage() {
           </section>
           {data.activity && (
             <section className="adm-panel" aria-labelledby="activity-title">
-              <h2 id="activity-title">Recent activity</h2>
+              <h2 id="activity-title">{t("admin.recent-activity")}</h2>
               {data.activity.length ? (
                 <ul className="adm-activity">{data.activity.map((e) => <ActivityRow key={e.id} e={e} />)}</ul>
-              ) : <p className="adm-muted">Nothing yet.</p>}
-              <p><Link to="/admin/audit">See the full audit log</Link></p>
+              ) : <p className="adm-muted">{t("admin.nothing-yet")}</p>}
+              <p><Link to="/admin/audit">{t("admin.see-the-full-audit-log")}</Link></p>
             </section>
           )}
         </div>
         <div className="adm-home__col">
           {data.stats.length > 0 && (
             <section className="adm-panel" aria-labelledby="glance-title">
-              <h2 id="glance-title">At a glance</h2>
+              <h2 id="glance-title">{t("admin.at-a-glance")}</h2>
               {data.stats.map((g) => (
                 <div key={g.group} className="adm-stat-group">
                   <h3>{g.label}</h3>
@@ -129,11 +126,11 @@ export default function AdminHomePage() {
           )}
           {data.readiness && (
             <section className="adm-panel" aria-labelledby="ready-title">
-              <h2 id="ready-title">Readiness</h2>
+              <h2 id="ready-title">{t("admin.readiness")}</h2>
               <ReadinessList items={data.readiness.items} />
               {data.readiness.blackouts.length > 0 && (
                 <>
-                  <h3 className="adm-subhead">Blackout windows</h3>
+                  <h3 className="adm-subhead">{t("admin.blackout-windows")}</h3>
                   <ul className="adm-activity">
                     {data.readiness.blackouts.map((b) => (
                       <li key={b.start + offices(b)} className="adm-activity__item">
@@ -148,7 +145,7 @@ export default function AdminHomePage() {
           )}
           {data.jobs && (
             <section className="adm-panel" aria-labelledby="jobs-title">
-              <h2 id="jobs-title">Background jobs</h2>
+              <h2 id="jobs-title">{t("admin.background-jobs")}</h2>
               <JobsList jobs={data.jobs} />
             </section>
           )}

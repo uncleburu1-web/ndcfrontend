@@ -1,6 +1,7 @@
 /** Sub-navigation for /admin/privacy (spec 14 §8.2): Requests · Incidents · Data register. */
 import { NavLink } from "react-router-dom";
 import "../membership/admin-membership.css";
+import { t } from "../../../i18n";
 
 export function PrivacyNav({ current }: { current: "requests" | "incidents" | "register" }) {
   const tabs: [string, string, string][] = [
@@ -9,7 +10,7 @@ export function PrivacyNav({ current }: { current: "requests" | "incidents" | "r
     ["register", "Data register", "/admin/privacy/register"],
   ];
   return (
-    <nav className="adm-subnav" aria-label="Privacy">
+    <nav className="adm-subnav" aria-label={t("admin.privacy")}>
       {tabs.map(([id, label, href]) => (
         <NavLink key={id} to={href} end className={() => (current === id ? "active" : "")} aria-current={current === id ? "page" : undefined}>
           {label}

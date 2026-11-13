@@ -8,6 +8,7 @@ import { Highlight } from "./Highlight";
 import type { ArticleHit, PostHit } from "./types";
 import "../news/news.css";
 import "./search.css";
+import { t } from "../i18n";
 
 export function ArticleResult({ a }: { a: ArticleHit }) {
   return (
@@ -17,8 +18,8 @@ export function ArticleResult({ a }: { a: ArticleHit }) {
         <h3><Link to={a.url}><Highlight text={a.title} ranges={a.title_matches} /></Link></h3>
         <p className="news-meta">
           {a.published_at ? formatDate(a.published_at) : ""}
-          {a.state_label ? ` · ${a.state_label}` : " · All of Nigeria"}
-          {a.source === "community" ? ` · by ${a.byline ?? "a member"}` : ""}
+          {a.state_label ? ` · ${a.state_label}` : t("search.all-of-nigeria")}
+          {a.source === "community" ? t("search.by", { v: a.byline ?? t("search.a-member") }) : ""}
         </p>
         <p className="search-snippet"><Highlight text={a.snippet || a.excerpt} ranges={a.snippet ? a.matches : []} /></p>
       </div>

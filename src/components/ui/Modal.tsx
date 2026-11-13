@@ -10,6 +10,7 @@ import { createPortal } from "react-dom";
 import { Icon } from "./Icon";
 import { useFocusTrap } from "./useFocusTrap";
 import "./Modal.css";
+import { t } from "../../i18n";
 
 interface OverlayProps {
   open: boolean;
@@ -36,7 +37,7 @@ function Overlay({ open, onClose, title, children, footer, variant }: OverlayPro
           <h2 id={titleId} className="ds-overlay__title">
             {title}
           </h2>
-          <button type="button" className="ds-overlay__close" onClick={close} aria-label="Close">
+          <button type="button" className="ds-overlay__close" onClick={close} aria-label={t("ui.close")}>
             <Icon name="close" />
           </button>
         </header>

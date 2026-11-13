@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 export interface MembershipConfig {
   open: boolean;
   fee_kobo: number;
@@ -95,16 +96,16 @@ export interface MembershipCard {
 }
 
 export const DISPLAY_LABELS: Record<DisplayStatus, string> = {
-  not_joined: "Not joined",
-  pvc_required: "PVC verification required",
-  pvc_pending: "PVC verification pending",
-  pvc_rejected: "PVC verification rejected",
-  pvc_verified: "PVC verified",
-  draft: "Details in progress",
-  payment_pending: "Payment pending",
-  pending_approval: "Payment successful: pending approval",
-  active: "Active member",
-  rejected: "Rejected",
-  cancelled: "Cancelled",
-  refunded: "Refunded",
+  get not_joined() { return t("membership.not-joined"); },
+  get pvc_required() { return t("membership.pvc-verification-required"); },
+  get pvc_pending() { return t("membership.pvc-verification-pending"); },
+  get pvc_rejected() { return t("membership.pvc-verification-rejected"); },
+  get pvc_verified() { return t("membership.pvc-verified"); },
+  get draft() { return t("membership.details-in-progress"); },
+  get payment_pending() { return t("membership.payment-pending"); },
+  get pending_approval() { return t("membership.payment-successful-pending-approval"); },
+  get active() { return t("membership.active-member"); },
+  get rejected() { return t("membership.rejected"); },
+  get cancelled() { return t("membership.cancelled"); },
+  get refunded() { return t("membership.refunded"); },
 };

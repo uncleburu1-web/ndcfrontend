@@ -284,3 +284,11 @@
   margin: 0;
   font-size: var(--text-sm);
 }
+
+/* Spec 21 §10: published versions of an announcement in other languages */
+.news-versions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block: var(--space-2);
+}

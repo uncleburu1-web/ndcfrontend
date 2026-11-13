@@ -9,6 +9,7 @@ import { useApi } from "../auth/session";
 import { Avatar, Icon } from "../components/ui";
 import { Q_MIN, type Suggestions } from "./types";
 import "./search.css";
+import { t as tr } from "../i18n";
 
 const WIDE = "(min-width: 1280px)";
 
@@ -110,10 +111,10 @@ export function HeaderSearch() {
   return (
     <div className="hs" ref={root}>
       <button ref={button} type="button" className="hs__button hs__button--wide" aria-expanded={expanded} aria-controls={panelId}
-        aria-label="Search" onClick={() => setExpanded((x) => !x)}>
+        aria-label={tr("search.search")} onClick={() => setExpanded((x) => !x)}>
         <Icon name="search" size={20} />
       </button>
-      <Link to="/search" className="hs__button hs__button--narrow" aria-label="Search">
+      <Link to="/search" className="hs__button hs__button--narrow" aria-label={tr("search.search")}>
         <Icon name="search" size={20} />
       </Link>
       {expanded && (
@@ -124,8 +125,8 @@ export function HeaderSearch() {
               ref={input}
               type="search"
               className="hs__input"
-              placeholder="Search candidates, news, posts"
-              aria-label="Search NDCConnect"
+              placeholder={tr("search.search-candidates-news-posts")}
+              aria-label={tr("search.search-ndcconnect")}
               role="combobox"
               aria-autocomplete="list"
               aria-expanded={showList}
@@ -137,10 +138,10 @@ export function HeaderSearch() {
             />
           </div>
           <span className="visually-hidden" aria-live="polite">
-            {showList ? `${items.length} suggestion${items.length === 1 ? "" : "s"}` : ""}
+            {showList ? tr("search.suggestion", { length: items.length, v: items.length === 1 ? "" : "s" }) : ""}
           </span>
           {showList && (
-            <ul id={listId} role="listbox" className="hs__list" aria-label="Suggestions">
+            <ul id={listId} role="listbox" className="hs__list" aria-label={tr("search.suggestions")}>
               {items.map((it, i) => (
                 <li key={it.key} id={`${listId}-${i}`} role="option" aria-selected={i === active}
                   className={i === active ? "hs__opt hs__opt--active" : "hs__opt"}
@@ -153,7 +154,7 @@ export function HeaderSearch() {
                   ) : (
                     <>
                       <Icon name={it.kind === "news" ? "inbox" : it.kind === "place" ? "mapPin" : "bell"} size={16} />
-                      <span>{it.t.title}<span className="hs__meta">{it.kind === "news" ? "News" : it.kind === "place" ? "Place" : `Post by ${it.t.candidate}`}</span></span>
+                      <span>{it.t.title}<span className="hs__meta">{it.kind === "news" ? tr("search.news") : it.kind === "place" ? tr("search.place") : tr("search.post-by", { candidate: it.t.candidate })}</span></span>
                     </>
                   )}
                 </li>
@@ -161,8 +162,8 @@ export function HeaderSearch() {
             </ul>
           )}
           <p className="hs__foot">
-            <button type="button" className="home-chip__clear" onClick={submit} disabled={q.trim().length < Q_MIN}>See all results</button>
-            <Link to="/states" onClick={() => close()}>Browse by state</Link>
+            <button type="button" className="home-chip__clear" onClick={submit} disabled={q.trim().length < Q_MIN}>{tr("search.see-all-results")}</button>
+            <Link to="/states" onClick={() => close()}>{tr("search.browse-by-state")}</Link>
           </p>
         </div>
       )}

@@ -2,17 +2,11 @@
  * Content conventions — feature-specs/01-design-system.md §5.
  */
 
-const LAGOS = "Africa/Lagos";
+import { format, t } from "../i18n";
 
-/** ₦20,000 — symbol, thousands separator, decimals only when non-zero (§5.1). */
+/** ₦20,000 — symbol, thousands separator, decimals only when non-zero (§5.1); in the current language's format (spec 21 §4). */
 export function formatNaira(amount: number): string {
-  const hasKobo = !Number.isInteger(amount);
-  return new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: hasKobo ? 2 : 0,
-    maximumFractionDigits: 2,
-  }).format(amount);
+  return format.naira(amount);
 }
 
 /** Parse user-typed naira ("20,000", "₦5000", "1500.50") into a number, or null. */
@@ -37,36 +31,19 @@ interface DateOptions {
   showZone?: boolean;
 }
 
-/** 31 Oct 2026 · or · 31 Oct 2026, 2:45 pm (WAT) — always in Africa/Lagos (§5.2). */
-export function formatDate(value: Date | string | number, { withTime = false, showZone = false }: DateOptions = {}): string {
-  const date = value instanceof Date ? value : new Date(value);
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: LAGOS,
-  }).formatToParts(date);
-  const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
-
-  let text = `${get("day")} ${get("month")} ${get("year")}`;
-  if (withTime) {
-    text += `, ${get("hour")}:${get("minute")} ${get("dayPeriod").toLowerCase()}`;
-    if (showZone) text += " WAT";
-  }
-  return text;
+/** 31 Oct 2026 · or · 31 Oct 2026, 2:45 pm (WAT) — always in Africa/Lagos (§5.2), in the current language (spec 21 §4). */
+export function formatDate(value: Date | string | number, opts: DateOptions = {}): string {
+  return format.date(value, opts);
 }
 
 /** "3 min", "5 h", "2 days" — how long something has waited (spec 11 §8.1). */
 export function formatAge(value: Date | string | number, now: Date = new Date()): string {
   const ms = Math.max(0, now.getTime() - new Date(value).getTime());
   const min = Math.floor(ms / 60_000);
-  if (min < 60) return `${Math.max(1, min)} min`;
+  if (min < 60) return t("format.age.minutes", { n: Math.max(1, min) });
   const h = Math.floor(min / 60);
-  if (h < 48) return `${h} h`;
-  return `${Math.floor(h / 24)} days`;
+  if (h < 48) return t("format.age.hours", { n: h });
+  return t("format.age.days", { n: Math.floor(h / 24) });
 }
 
 /** Working days between `from` and now (Mon–Fri): PVC and membership turnaround (specs 08 and 11). */

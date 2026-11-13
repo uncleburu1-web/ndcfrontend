@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { BottomSheet, Button } from "../components/ui";
+import { t } from "../i18n";
 
 export interface ConsentAsk {
   purpose: string;
@@ -31,7 +32,7 @@ export function ConsentDialog({ ask, onAgree, onDecline }: Props) {
     try {
       await onAgree();
     } catch {
-      setError("We couldn't record that. Try again.");
+      setError(t("privacy.we-couldn-t-record-that-try"));
     } finally {
       setBusy(false);
     }
@@ -43,16 +44,14 @@ export function ConsentDialog({ ask, onAgree, onDecline }: Props) {
       title={ask?.label ?? ""}
       footer={
         <div className="consent-dialog__actions">
-          <Button onClick={agree} loading={busy}>Agree</Button>
-          <Button variant="ghost" onClick={onDecline} disabled={busy}>Not now</Button>
+          <Button onClick={agree} loading={busy}>{t("privacy.agree")}</Button>
+          <Button variant="ghost" onClick={onDecline} disabled={busy}>{t("privacy.not-now")}</Button>
         </div>
       }
     >
       <p className="consent-dialog__text">{ask?.text}</p>
       <p className="consent-dialog__meta">
-        Consent version {ask?.version}. You can withdraw it at any time from <Link to="/settings/privacy/data" onClick={onDecline}>Your data</Link>.
-        {" "}
-        <Link to={`/privacy#${ANCHOR[ask?.purpose ?? ""] ?? ""}`} onClick={onDecline}>How we use this</Link>
+        {t.rich("privacy.consent-version-you-can-withdraw-it", { version: ask?.version, link: (chunks) => <Link to="/settings/privacy/data" onClick={onDecline}>{chunks}</Link>, link2: (chunks) => <Link to={`/privacy#${ANCHOR[ask?.purpose ?? ""] ?? ""}`} onClick={onDecline}>{chunks}</Link> })}
       </p>
       {error && <p className="consent-dialog__error" role="alert">{error}</p>}
     </BottomSheet>

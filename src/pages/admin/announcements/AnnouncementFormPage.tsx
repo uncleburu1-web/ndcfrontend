@@ -12,9 +12,12 @@ import { CATEGORIES, articlePath, type AdminArticle } from "../../../news/types"
 import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "../../../news/news.css";
+import { t as tr } from "../../../i18n";
+import { WrittenIn } from "../../../i18n/ContentLanguage";
+import { AnnouncementTranslations } from "./AnnouncementTranslations";
 
 type Errors = Record<string, string>;
-const EMPTY = { category: "", title: "", body: "", state: "", source_name: "", source_url: "", audience_community: "" };
+const EMPTY = { category: "", title: "", body: "", state: "", source_name: "", source_url: "", audience_community: "", language: "en" };
 
 export default function AnnouncementFormPage() {
   const { id } = useParams();
@@ -50,30 +53,30 @@ export default function AnnouncementFormPage() {
   }, [api, top, tops]);
 
   useEffect(() => {
-    document.title = id ? "Edit announcement | NDCConnect admin" : "New announcement | NDCConnect admin";
+    document.title = id ? tr("admin.edit-announcement-ndcconnect-admin") : tr("admin.new-announcement-ndcconnect-admin");
     if (!id) return;
     api<AdminArticle>(`/admin/announcements/${id}/`).then((x) => {
       setA(x);
       setF({ category: x.category, title: x.title, body: x.body, state: x.state, source_name: x.source_name, source_url: x.source_url,
-        audience_community: x.audience?.id ?? "" });
+        audience_community: x.audience?.id ?? "", language: x.language ?? "und" });
       if (x.audience) setCurrentAudience(x.audience);
     }).catch(() => setNotFound(true));
   }, [api, id]);
 
   const validate = () => {
     const e: Errors = {};
-    if (!f.category) e.category = "Choose a category.";
-    if (!f.title.trim()) e.title = "Give it a title.";
-    if (!f.body.trim()) e.body = "Write the announcement.";
-    if (f.category === "community" && !f.audience_community && !id) e.audience_community = "Community Announcements need a community to show in.";
-    if (f.source_url && !f.source_url.startsWith("https://")) e.source_url = "Use a link that starts with https://";
+    if (!f.category) e.category = tr("admin.choose-a-category");
+    if (!f.title.trim()) e.title = tr("admin.give-it-a-title");
+    if (!f.body.trim()) e.body = tr("admin.write-the-announcement");
+    if (f.category === "community" && !f.audience_community && !id) e.audience_community = tr("admin.community-announcements-need-a-community-to");
+    if (f.source_url && !f.source_url.startsWith("https://")) e.source_url = tr("admin.use-a-link-that-starts-with");
     if (f.category === "election_updates" && !(f.source_name.trim() && f.source_url)) {
-      e.source_name = "Official Election Updates need a source (e.g. INEC).";
-      if (!f.source_url) e.source_url = "Add the link to the source.";
+      e.source_name = tr("admin.official-election-updates-need-a-source");
+      if (!f.source_url) e.source_url = tr("admin.add-the-link-to-the-source");
     }
     const imageProblem = image ? checkImage(image) : null;  // type and size before anything is sent (spec 15 §15.4)
     if (imageProblem) e.image = imageProblem.message;
-    if (image && !rights) e.rights = "Confirm NDCConnect may publish this image.";
+    if (image && !rights) e.rights = tr("admin.confirm-ndcconnect-may-publish-this-image");
     return e;
   };
 
@@ -89,10 +92,10 @@ export default function AnnouncementFormPage() {
         try {
           final = await uploadImage<AdminArticle>(image, { targetId: saved.id, url: `/admin/announcements/${saved.id}/image/`, field: "image" });
         } catch (err) {
-          toast.show({ tone: "warning", message: `Saved without the image: ${err instanceof ApiError ? err.message : "try again"}` });
+          toast.show({ tone: "warning", message: tr("admin.saved-without-the-image", { v: err instanceof ApiError ? err.message : tr("admin.try-again") }) });
         }
       }
-      toast.show({ tone: "success", message: id ? "Updated." : notify ? "Published. Everyone is being notified." : "Published." });
+      toast.show({ tone: "success", message: id ? tr("admin.updated") : notify ? tr("admin.published-everyone-is-being-notified") : tr("admin.published-2") });
       if (id) setA(final);
       else navigate(`/admin/announcements/${saved.id}`);
     } catch (err) {
@@ -130,7 +133,7 @@ export default function AnnouncementFormPage() {
         setPinPrompt(list.results.filter((x) => x.pinned));
         return;
       }
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "That didn’t work." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : tr("admin.that-didn-t-work") });
     }
   };
   const swapPin = async (unpinId: string) => {
@@ -140,84 +143,86 @@ export default function AnnouncementFormPage() {
   };
 
   if (notFound) {
-    return <div className="adm-page"><AdminNav current="announcements" /><EmptyState title="Announcement not found" action={<Button href="/admin/announcements">Back to announcements</Button>} /></div>;
+    return <div className="adm-page"><AdminNav current="announcements" /><EmptyState title={tr("admin.announcement-not-found")} action={<Button href="/admin/announcements">{tr("admin.back-to-announcements")}</Button>} /></div>;
   }
   if (id && !a) return <div className="adm-page"><AdminNav current="announcements" /><Skeleton width="100%" height={240} /></div>;
   return (
     <div className="adm-page">
       <AdminNav current="announcements" />
-      <p className="adm-back"><Link to="/admin/announcements">← Announcements</Link></p>
+      <p className="adm-back"><Link to="/admin/announcements">{tr("admin.announcements-2")}</Link></p>
       <header className="adm-page__head">
         <div>
-          <h1>{id ? "Edit announcement" : "New announcement"}</h1>
-          {a && <p className="ds-field__hint">Published {a.published_at ? formatDate(a.published_at, { withTime: true }) : ""}{a.edited_at ? ` · Updated ${formatDate(a.edited_at, { withTime: true })}` : ""}</p>}
+          <h1>{id ? tr("admin.edit-announcement") : tr("admin.new-announcement")}</h1>
+          {a && <p className="ds-field__hint">{tr("admin.published-3", { v: a.published_at ? formatDate(a.published_at, { withTime: true }) : "", v2: a.edited_at ? tr("admin.updated-2", { formatDate: formatDate(a.edited_at, { withTime: true }) }) : "" })}</p>}
         </div>
         {a && (
           <div className="adm-actions">
-            {a.status === "successful" && <Button variant="secondary" href={articlePath(a)}>View on News</Button>}
-            {a.status === "successful" && (a.pinned ? <Button variant="secondary" onClick={() => void action("unpin")}>Unpin</Button>
-              : <Button variant="secondary" onClick={() => void action("pin")}>Pin to the top of News</Button>)}
-            {a.status === "successful" && <Button variant="ghost" onClick={() => setUnpublishing(true)}>Unpublish</Button>}
-            {a.status === "removed" && <Button variant="secondary" onClick={() => void action("restore")}>Restore</Button>}
+            {a.status === "successful" && <Button variant="secondary" href={articlePath(a)}>{tr("admin.view-on-news")}</Button>}
+            {a.status === "successful" && (a.pinned ? <Button variant="secondary" onClick={() => void action("unpin")}>{tr("admin.unpin")}</Button>
+              : <Button variant="secondary" onClick={() => void action("pin")}>{tr("admin.pin-to-the-top-of-news")}</Button>)}
+            {a.status === "successful" && <Button variant="ghost" onClick={() => setUnpublishing(true)}>{tr("admin.unpublish")}</Button>}
+            {a.status === "removed" && <Button variant="secondary" onClick={() => void action("restore")}>{tr("admin.restore")}</Button>}
           </div>
         )}
       </header>
-      {a?.status === "removed" && <Banner tone="warning" title="Unpublished">{a.removed_reason}</Banner>}
+      {a?.status === "removed" && <Banner tone="warning" title={tr("admin.unpublished")}>{a.removed_reason}</Banner>}
       <form className="news-form adm-panel" onSubmit={onSubmit} noValidate>
         {errors._form && <Banner tone="error">{errors._form}</Banner>}
-        <Select label="Category" required value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} error={errors.category}
-          options={[{ value: "", label: "Choose a category" }, ...CATEGORIES.map(([value, label]) => ({ value, label }))]} />
-        <TextField label="Title" required maxLength={150} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} error={errors.title} />
-        <TextArea label="Announcement" required rows={10} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} error={errors.body}
-          hint="Plain text. Leave a blank line between paragraphs." />
+        <Select label={tr("admin.category")} required value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} error={errors.category}
+          options={[{ value: "", label: tr("admin.choose-a-category-2") }, ...CATEGORIES.map(([value, label]) => ({ value, label }))]} />
+        <TextField label={tr("admin.title")} required maxLength={150} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} error={errors.title} />
+        <TextArea label={tr("admin.announcement")} required rows={10} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} error={errors.body}
+          hint={tr("admin.plain-text-leave-a-blank-line")} />
         <p className="news-counter">{f.body.length.toLocaleString()} / 20,000</p>
-        <Select label={f.category === "community" ? "Show pinned in" : "Show pinned in a community (optional)"} required={f.category === "community"}
+        <WrittenIn value={f.language} onChange={(language) => setF({ ...f, language })} label={tr("admin.original-language")} />
+        <Select label={f.category === "community" ? tr("admin.show-pinned-in") : tr("admin.show-pinned-in-a-community-optional")} required={f.category === "community"}
           value={top || (currentAudience && f.audience_community === currentAudience.id ? currentAudience.id : "")}
           onChange={(e) => { setTop(e.target.value); setF({ ...f, audience_community: e.target.value }); }} error={errors.audience_community}
-          options={[{ value: "", label: "No community (the News page only)" },
-            ...(currentAudience && !tops.some((t) => t.id === currentAudience.id) ? [{ value: currentAudience.id, label: `${currentAudience.name} (current)` }] : []),
+          options={[{ value: "", label: tr("admin.no-community-the-news-page-only") },
+            ...(currentAudience && !tops.some((t) => t.id === currentAudience.id) ? [{ value: currentAudience.id, label: tr("admin.current", { name: currentAudience.name }) }] : []),
             ...tops.map((t) => ({ value: t.id, label: t.name }))]}
-          hint="Pinned for 30 days in this community and every level below it; its members with announcements on are notified." />
+          hint={tr("admin.pinned-for-30-days-in-this")} />
         {lgas.length > 0 && (
-          <Select label="LGA (optional)" value={lgas.some((l) => l.id === f.audience_community) ? f.audience_community : ""}
+          <Select label={tr("admin.lga-optional")} value={lgas.some((l) => l.id === f.audience_community) ? f.audience_community : ""}
             onChange={(e) => setF({ ...f, audience_community: e.target.value || top })}
-            options={[{ value: "", label: "The whole state" }, ...lgas.map((l) => ({ value: l.id, label: l.name }))]} />
+            options={[{ value: "", label: tr("admin.the-whole-state") }, ...lgas.map((l) => ({ value: l.id, label: l.name }))]} />
         )}
-        <Select label="State (optional)" value={f.state} onChange={(e) => setF({ ...f, state: e.target.value })}
-          options={[{ value: "", label: "All of Nigeria" }, ...STATES]} hint="Only filters the News page; everyone can read it." />
-        <TextField label={f.category === "election_updates" ? "Source name" : "Source name (optional)"} required={f.category === "election_updates"}
-          value={f.source_name} onChange={(e) => setF({ ...f, source_name: e.target.value })} error={errors.source_name} placeholder="e.g. INEC" />
-        <TextField label={f.category === "election_updates" ? "Source link" : "Source link (optional)"} required={f.category === "election_updates"}
+        <Select label={tr("admin.state-optional")} value={f.state} onChange={(e) => setF({ ...f, state: e.target.value })}
+          options={[{ value: "", label: tr("admin.all-of-nigeria") }, ...STATES]} hint={tr("admin.only-filters-the-news-page-everyone")} />
+        <TextField label={f.category === "election_updates" ? tr("admin.source-name") : tr("admin.source-name-optional")} required={f.category === "election_updates"}
+          value={f.source_name} onChange={(e) => setF({ ...f, source_name: e.target.value })} error={errors.source_name} placeholder={tr("admin.e-g-inec")} />
+        <TextField label={f.category === "election_updates" ? tr("admin.source-link") : tr("admin.source-link-optional")} required={f.category === "election_updates"}
           inputMode="url" value={f.source_url} onChange={(e) => setF({ ...f, source_url: e.target.value })} error={errors.source_url} placeholder="https://" />
         <fieldset>
-          <legend className="ds-field__label">Image (optional)</legend>
-          {a?.image && !image && <div className="news-image-row"><img src={a.image.url_thumb} alt="Current image" /></div>}
-          <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choose an image" aria-invalid={errors.image ? true : undefined} onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
+          <legend className="ds-field__label">{tr("admin.image-optional")}</legend>
+          {a?.image && !image && <div className="news-image-row"><img src={a.image.url_thumb} alt={tr("admin.current-image")} /></div>}
+          <input type="file" accept="image/jpeg,image/png,image/webp" aria-label={tr("admin.choose-an-image")} aria-invalid={errors.image ? true : undefined} onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
           {errors.image && <p className="ds-field__error" role="alert">{errors.image}</p>}
-          {image && <Checkbox label="NDCConnect has the right to publish this image." checked={rights} onChange={(e) => setRights(e.target.checked)} error={errors.rights} />}
+          {image && <Checkbox label={tr("admin.ndcconnect-has-the-right-to-publish")} checked={rights} onChange={(e) => setRights(e.target.checked)} error={errors.rights} />}
         </fieldset>
         {!id && (
-          <Checkbox label="Notify everyone" checked={notify} onChange={(e) => setNotify(e.target.checked)}
-            hint="Send an in-app notification to all users who haven’t turned announcements off. Use it for important announcements only." />
+          <Checkbox label={tr("admin.notify-everyone")} checked={notify} onChange={(e) => setNotify(e.target.checked)}
+            hint={tr("admin.send-an-in-app-notification-to")} />
         )}
         <UploadProgress progress={progress} />
-        <Button type="submit" loading={busy} loadingLabel="Saving…">{id ? "Save changes" : "Publish now"}</Button>
+        <Button type="submit" loading={busy} loadingLabel={tr("admin.saving")}>{id ? tr("admin.save-changes") : tr("admin.publish-now")}</Button>
       </form>
+      {id && a && <AnnouncementTranslations articleId={id} original={f.language} />}
 
-      <Modal open={confirm !== null} onClose={() => setConfirm(null)} title="Publish and notify everyone?"
-        footer={<><Button variant="secondary" onClick={() => setConfirm(null)}>Go back</Button><Button onClick={() => void save()}>Publish and notify</Button></>}>
-        <p>{confirm?.toLocaleString()} users will get an in-app notification. Edits later won’t notify again.</p>
+      <Modal open={confirm !== null} onClose={() => setConfirm(null)} title={tr("admin.publish-and-notify-everyone")}
+        footer={<><Button variant="secondary" onClick={() => setConfirm(null)}>{tr("admin.go-back")}</Button><Button onClick={() => void save()}>{tr("admin.publish-and-notify")}</Button></>}>
+        <p>{tr("admin.users-will-get-an-in-app", { confirm: confirm?.toLocaleString() })}</p>
       </Modal>
-      <Modal open={unpublishing} onClose={() => setUnpublishing(false)} title="Unpublish this announcement?"
-        footer={<><Button variant="secondary" onClick={() => setUnpublishing(false)}>Go back</Button><Button variant="danger" disabled={!reason.trim()} onClick={() => void action("unpublish", { reason })}>Unpublish</Button></>}>
-        <p>It disappears from News. You can restore it later.</p>
-        <TextArea label="Reason" required rows={2} value={reason} onChange={(e) => setReason(e.target.value)} />
+      <Modal open={unpublishing} onClose={() => setUnpublishing(false)} title={tr("admin.unpublish-this-announcement")}
+        footer={<><Button variant="secondary" onClick={() => setUnpublishing(false)}>{tr("admin.go-back")}</Button><Button variant="danger" disabled={!reason.trim()} onClick={() => void action("unpublish", { reason })}>{tr("admin.unpublish")}</Button></>}>
+        <p>{tr("admin.it-disappears-from-news-you-can")}</p>
+        <TextArea label={tr("admin.reason")} required rows={2} value={reason} onChange={(e) => setReason(e.target.value)} />
       </Modal>
-      <Modal open={Boolean(pinPrompt)} onClose={() => setPinPrompt(null)} title="Three announcements are already pinned"
-        footer={<Button variant="secondary" onClick={() => setPinPrompt(null)}>Cancel</Button>}>
-        <p>Choose one to unpin:</p>
+      <Modal open={Boolean(pinPrompt)} onClose={() => setPinPrompt(null)} title={tr("admin.three-announcements-are-already-pinned")}
+        footer={<Button variant="secondary" onClick={() => setPinPrompt(null)}>{tr("admin.cancel")}</Button>}>
+        <p>{tr("admin.choose-one-to-unpin")}</p>
         <div className="adm-actions">
-          {pinPrompt?.map((p) => <Button key={p.id} variant="secondary" size="sm" onClick={() => void swapPin(p.id)}>Unpin “{p.title}”</Button>)}
+          {pinPrompt?.map((p) => <Button key={p.id} variant="secondary" size="sm" onClick={() => void swapPin(p.id)}>{tr("admin.unpin-2", { title: p.title })}</Button>)}
         </div>
       </Modal>
     </div>

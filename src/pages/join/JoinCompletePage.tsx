@@ -6,6 +6,7 @@ import { useApi } from "../../auth/session";
 import { Button, EmptyState, Skeleton } from "../../components/ui";
 import { formatKobo } from "../../donations/money";
 import "./join.css";
+import { t } from "../../i18n";
 
 export const POLL_MS = 3000;
 export const POLL_LIMIT_MS = 30000;
@@ -26,7 +27,7 @@ export default function JoinCompletePage() {
   const started = useRef(Date.now());
 
   useEffect(() => {
-    document.title = "Membership payment | NDCConnect";
+    document.title = t("join.membership-payment-ndcconnect");
   }, []);
   useEffect(() => {
     if (!reference) return;
@@ -53,51 +54,51 @@ export default function JoinCompletePage() {
   }, [api, reference]);
 
   if (!reference || error) {
-    return <div className="page-shell"><EmptyState title="We couldn’t find that payment" action={<Button href="/join">Back to Join NDC</Button>} /></div>;
+    return <div className="page-shell"><EmptyState title={t("join.we-couldn-t-find-that-payment")} action={<Button href="/join">{t("join.back-to-join-ndc")}</Button>} /></div>;
   }
   if (!d) return <div className="join-result" aria-busy="true"><Skeleton width="60%" height={32} /></div>;
 
   if (d.status === "successful" && d.membership_status === "active") {
     return (
       <div className="join-result">
-        <h1>Welcome to the NDC.</h1>
-        <p className="join-result__lead">Your {formatKobo(d.amount_kobo)} membership fee is confirmed and you’re now a member.</p>
-        <Button href="/membership/card">See my membership card</Button>
+        <h1>{t("join.welcome-to-the-ndc")}</h1>
+        <p className="join-result__lead">{t("join.your-membership-fee-is-confirmed-and", { formatKobo: formatKobo(d.amount_kobo) })}</p>
+        <Button href="/membership/card">{t("join.see-my-membership-card")}</Button>
       </div>
     );
   }
   if (d.status === "successful") {
     return (
       <div className="join-result">
-        <h1>Payment received.</h1>
-        <p className="join-result__lead">Your application is with the membership team. We’ll update your membership page when it’s decided.</p>
-        <Button href="/join">Go to my membership</Button>
+        <h1>{t("join.payment-received")}</h1>
+        <p className="join-result__lead">{t("join.your-application-is-with-the-membership")}</p>
+        <Button href="/join">{t("join.go-to-my-membership")}</Button>
       </div>
     );
   }
   if (d.status === "failed" || d.status === "abandoned") {
     return (
       <div className="join-result">
-        <h1>Your payment didn’t go through.</h1>
-        <p className="join-result__lead">No money was taken.</p>
-        <Button href="/join">Try again</Button>
+        <h1>{t("join.your-payment-didn-t-go-through")}</h1>
+        <p className="join-result__lead">{t("join.no-money-was-taken")}</p>
+        <Button href="/join">{t("join.try-again")}</Button>
       </div>
     );
   }
   if (d.status === "review") {
     return (
       <div className="join-result">
-        <h1>We’re checking your payment.</h1>
-        <p className="join-result__lead">The membership team is confirming it with the bank.</p>
-        <Button variant="secondary" href="/join">Go to my membership</Button>
+        <h1>{t("join.we-re-checking-your-payment")}</h1>
+        <p className="join-result__lead">{t("join.the-membership-team-is-confirming-it")}</p>
+        <Button variant="secondary" href="/join">{t("join.go-to-my-membership")}</Button>
       </div>
     );
   }
   return (
     <div className="join-result" aria-live="polite">
-      <h1>{timedOut ? "This is taking longer than usual." : "We’re confirming your payment with the bank…"}</h1>
-      <p className="join-result__lead">{timedOut ? "We’ll update your membership as soon as the bank confirms. You can close this page." : "Please don’t pay again."}</p>
-      <Button variant="secondary" href="/join">Go to my membership</Button>
+      <h1>{timedOut ? t("join.this-is-taking-longer-than-usual") : t("join.we-re-confirming-your-payment-with")}</h1>
+      <p className="join-result__lead">{timedOut ? t("join.we-ll-update-your-membership-as") : t("join.please-don-t-pay-again")}</p>
+      <Button variant="secondary" href="/join">{t("join.go-to-my-membership")}</Button>
     </div>
   );
 }

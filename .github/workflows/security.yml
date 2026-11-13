@@ -19,6 +19,8 @@ jobs:
       - run: npm run typecheck
       - run: npm run check:tokens
       - run: npm run check:contrast  # spec 20 §10.3
+      - run: npm run check:i18n  # spec 21 §5.6: no hard-coded text, catalogues consistent
+      - run: npm run check:fonts  # spec 21 §11: every letter in the site font
       - run: npx vitest run
       - name: build with dummy public values, then check the generated headers
         env:

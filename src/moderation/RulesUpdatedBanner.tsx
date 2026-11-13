@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Banner } from "../components/ui";
 import { formatDate } from "../lib/format";
 import { useRules } from "./rules";
+import { t } from "../i18n";
 
 function Inner() {
   const { rules } = useRules();
@@ -12,8 +13,7 @@ function Inner() {
   return (
     <div className="app-banner">
       <Banner tone="info" dismissKey={`rules-v${rules.version}`}>
-        Our community rules were updated on {formatDate(rules.updated)}. <Link to="/rules">Read what changed</Link>.
-      </Banner>
+        {t.rich("moderation.our-community-rules-were-updated-on", { formatDate: formatDate(rules.updated), link: (chunks) => <Link to="/rules">{chunks}</Link> })}</Banner>
     </div>
   );
 }

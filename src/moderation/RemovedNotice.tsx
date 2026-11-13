@@ -5,6 +5,7 @@ import { ApiError } from "../auth/api";
 import { Icon } from "../components/ui";
 import type { RemovalNotice } from "./types";
 import "./moderation.css";
+import { t } from "../i18n";
 
 export function removalFromError(err: unknown): RemovalNotice | null {
   if (!(err instanceof ApiError) || err.status !== 410 || err.code !== "removed") return null;
@@ -15,21 +16,21 @@ export function removalFromError(err: unknown): RemovalNotice | null {
 export function RemovedNotice({ notice, back }: { notice: RemovalNotice; back?: { href: string; label: string } }) {
   const what = notice.kind === "official announcement" ? "announcement" : notice.kind;
   let text: ReactNode;
-  if (notice.source === "copyright") text = <>This {what} was removed after a copyright notice.</>;
-  else if (notice.source === "legal") text = <>This {what} was removed after a legal notice.</>;
+  if (notice.source === "copyright") text = <>{t("moderation.this-was-removed-after-a-copyright", { what })}</>;
+  else if (notice.source === "legal") text = <>{t("moderation.this-was-removed-after-a-legal", { what })}</>;
   else if (notice.rule) {
     text = (
-      <>This {what} broke rule <Link to={`/rules#${notice.rule}`}>{notice.rule}: {notice.rule_title}</Link>.</>
+      <>{t.rich("moderation.this-broke-rule", { what, rule: notice.rule, rule_title: notice.rule_title, link: (chunks) => <Link to={`/rules#${notice.rule}`}>{chunks}</Link> })}</>
     );
-  } else text = <>This {what} broke our community rules.</>;
+  } else text = <>{t("moderation.this-broke-our-community-rules", { what })}</>;
   return (
     <div className="page-shell">
       <section className="mod-removed" aria-labelledby="removed-h">
         <Icon name="shield" size={28} />
         <div>
-          <h1 id="removed-h">Removed by NDCConnect</h1>
+          <h1 id="removed-h">{t("moderation.removed-by-ndcconnect")}</h1>
           <p>{text}</p>
-          <p><Link to="/rules">See our community rules</Link>{back && <> · <Link to={back.href}>{back.label}</Link></>}</p>
+          <p><Link to="/rules">{t("moderation.see-our-community-rules")}</Link>{back && <> · <Link to={back.href}>{back.label}</Link></>}</p>
         </div>
       </section>
     </div>

@@ -15,6 +15,7 @@ import { ApiError } from "../auth/api";
 import { useApi, useMe } from "../auth/session";
 import { useToast } from "../components/ui";
 import { getPrefs, setPrefs, subscribe, type DevicePrefs, type DisplayPrefs } from "./prefsStore";
+import { t } from "../i18n";
 
 export type Settings = Schema<"Settings">;
 const REFRESH_MS = 5 * 60 * 1000;
@@ -66,7 +67,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
       api<Schema<"SettingsDeviceImport">>("/me/settings/import-device/", { method: "POST", body })
         .then((r) => {
           setPrefs({ ...fromServer({ ...r.accessibility, language: r.language.language }) });
-          toast.show({ tone: "success", message: "We kept your display settings." });
+          toast.show({ tone: "success", message: t("settings.we-kept-your-display-settings") });
         })
         .catch(() => setPrefs(fromServer(server)));
     } else {

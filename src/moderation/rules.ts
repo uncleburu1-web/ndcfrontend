@@ -2,44 +2,52 @@
 import { useEffect, useState } from "react";
 import { useApi } from "../auth/session";
 import type { RulesPayload } from "./types";
+import { getLanguage, t, useLanguage } from "../i18n";
 
-let cached: Promise<RulesPayload> | null = null;
+/** One fetch per language: `?lang=` is part of the cached URL (spec 21 rule 7). */
+const cache = new Map<string, Promise<RulesPayload>>();
 
 /** Used where the rules list isn't loaded (e.g. tests); the server's list is the source of truth. */
 export const RULE_TITLES: Record<string, string> = {
-  R1: "No threats or incitement to violence",
-  R2: "No abusive or hateful language about religion, ethnicity, tribe or section",
-  R3: "Election results only from INEC; no false results",
-  R4: "No knowingly false or misleading information",
-  R5: "No one’s private information without consent",
-  R6: "No intimate images shared without consent",
-  R7: "Respect copyright",
-  R8: "No spam, scams or advertising",
-  R9: "No impersonation",
-  R10: "Stay on topic and follow the news rules",
+  get R1() { return t("moderation.no-threats-or-incitement-to-violence"); },
+  get R2() { return t("moderation.no-abusive-or-hateful-language-about"); },
+  get R3() { return t("moderation.election-results-only-from-inec-no"); },
+  get R4() { return t("moderation.no-knowingly-false-or-misleading-information"); },
+  get R5() { return t("moderation.no-one-s-private-information-without"); },
+  get R6() { return t("moderation.no-intimate-images-shared-without-consent"); },
+  get R7() { return t("moderation.respect-copyright"); },
+  get R8() { return t("moderation.no-spam-scams-or-advertising"); },
+  get R9() { return t("moderation.no-impersonation"); },
+  get R10() { return t("moderation.stay-on-topic-and-follow-the"); },
 };
 
 export function useRules() {
   const api = useApi();
   const [rules, setRules] = useState<RulesPayload | null>(null);
   const [error, setError] = useState(false);
+  const lang = useLanguage();
   useEffect(() => {
     let live = true;
-    cached ??= api<RulesPayload>("/rules/", { anonymous: true });
-    cached.then((r) => live && setRules(r)).catch(() => {
-      cached = null;
+    const code = getLanguage() === "qps" ? "en" : getLanguage();
+    let p = cache.get(code);
+    if (!p) {
+      p = api<RulesPayload>(`/rules/?lang=${code}`, { anonymous: true });
+      cache.set(code, p);
+    }
+    p.then((r) => live && setRules(r)).catch(() => {
+      cache.delete(code);
       if (live) setError(true);
     });
     return () => {
       live = false;
     };
-  }, [api]);
+  }, [api, lang]);
   return { rules, error };
 }
 
 /** Test hook: forget the cached rules. */
 export function resetRulesCache() {
-  cached = null;
+  cache.clear();
 }
 
 export function ruleOptions(rules: { id: string; title: string }[] | null | undefined) {

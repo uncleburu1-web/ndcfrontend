@@ -9,6 +9,7 @@ import { formatDate } from "../../lib/format";
 import type { MyVolunteering } from "../../events/types";
 import { VOLUNTEER_ROLE_WORDS } from "../../events/types";
 import "../../events/events.css";
+import { t } from "../../i18n";
 
 export default function AccountVolunteeringPage() {
   const api = useApi();
@@ -16,15 +17,15 @@ export default function AccountVolunteeringPage() {
   const res = useRequest("my-volunteering", (signal) => api<MyVolunteering>("/me/volunteering/", { signal }));
   const [data, setData] = useState<MyVolunteering | null>(null);
   useEffect(() => { setData(res.data); }, [res.data]);
-  useEffect(() => { document.title = "Volunteering | NDCConnect"; }, []);
+  useEffect(() => { document.title = t("events.volunteering-ndcconnect"); }, []);
   const withdraw = async (id: string) => {
-    if (!window.confirm("Withdraw your application? The campaign stops seeing your details.")) return;
+    if (!window.confirm(t("events.withdraw-your-application-the-campaign-stops"))) return;
     try {
       const a = await api<MyVolunteering["results"][number]>(`/me/volunteering/${id}/withdraw/`, { method: "POST" });
       setData((d) => d && { ...d, results: d.results.map((x) => (x.id === id ? a : x)) });
-      toast.show({ tone: "success", message: "Withdrawn." });
+      toast.show({ tone: "success", message: t("events.withdrawn") });
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "That didn’t work." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("events.that-didn-t-work") });
     }
   };
   if (res.error) return <div className="ev-page ev-narrow"><Banner tone="error">{res.error.message}</Banner></div>;
@@ -32,26 +33,25 @@ export default function AccountVolunteeringPage() {
   return (
     <div className="ev-page ev-narrow">
       <header>
-        <p className="article-back"><Link to="/settings/account">← My account</Link></p>
-        <h1>Volunteering</h1>
-        <p>Only you and the campaign you applied to can see this.</p>
+        <p className="article-back"><Link to="/settings/account">{t("events.my-account")}</Link></p>
+        <h1>{t("events.volunteering")}</h1>
+        <p>{t("events.only-you-and-the-campaign-you")}</p>
       </header>
-      {data.results.length === 0 ? <EmptyState title="You haven’t applied to volunteer" action={<Button href="/candidates">Find a candidate</Button>} /> : (
+      {data.results.length === 0 ? <EmptyState title={t("events.you-haven-t-applied-to-volunteer")} action={<Button href="/candidates">{t("events.find-a-candidate")}</Button>} /> : (
         <ul className="ev-cards">
           {data.results.map((a) => (
             <li key={a.id} className="ev-box">
               <h2 className="ev-card__title"><Link to={`/candidates/${String(a.candidate.slug)}`}>{String(a.candidate.full_name)}</Link></h2>
-              <p className="ev-meta"><span className="ev-chip">{a.status_label}</span> {a.roles.map((r) => VOLUNTEER_ROLE_WORDS[r] ?? r).join(", ")}
-                · applied {formatDate(a.created_at)}</p>
+              <p className="ev-meta">{t.rich("events.applied", { status_label: a.status_label, span: (chunks) => <span className="ev-chip">{chunks}</span>, join: a.roles.map((r) => VOLUNTEER_ROLE_WORDS[r] ?? r).join(", "), formatDate: formatDate(a.created_at) })}</p>
               {a.decline_reason && <p>{a.decline_reason}</p>}
-              {(a.status === "pending" || a.status === "accepted") && <div><Button size="sm" variant="ghost" onClick={() => void withdraw(a.id)}>Withdraw</Button></div>}
+              {(a.status === "pending" || a.status === "accepted") && <div><Button size="sm" variant="ghost" onClick={() => void withdraw(a.id)}>{t("events.withdraw")}</Button></div>}
             </li>
           ))}
         </ul>
       )}
       {data.updates.length > 0 && (
         <section aria-labelledby="vu-h">
-          <h2 id="vu-h">Updates from campaigns</h2>
+          <h2 id="vu-h">{t("events.updates-from-campaigns")}</h2>
           <ul className="ev-updates">{data.updates.map((u, i) => <li key={i}><p>{String(u.text)}</p>
             <p className="ev-meta">{String(u.candidate)} · {formatDate(String(u.created_at), { withTime: true })}</p></li>)}</ul>
         </section>

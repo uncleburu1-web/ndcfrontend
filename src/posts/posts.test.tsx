@@ -189,7 +189,7 @@ describe("/campaign", () => {
     expect(within(dialog).getByText(/312 followers with notifications on will be notified/)).toBeTruthy();
     fireEvent.click(within(dialog).getByRole("button", { name: "Publish now" }));
     expect(await screen.findByRole("link", { name: "Rally Saturday" })).toBeTruthy();
-    expect(sent).toEqual({ kind: "news", title: "Rally Saturday", body: "Come out." });
+    expect(sent).toEqual({ kind: "news", title: "Rally Saturday", body: "Come out.", language: "en" });
   });
 
   it("edit says followers won't be notified again; delete asks first", async () => {

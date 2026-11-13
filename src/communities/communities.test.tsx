@@ -257,7 +257,7 @@ describe("/communities/<path>", () => {
     expect(send.disabled).toBe(true);
     fireEvent.change(screen.getByLabelText(/Posting for/), { target: { value: "k2" } });
     fireEvent.click(send);
-    await waitFor(() => expect(body).toEqual({ body: "Rally at Ikeja on Saturday.", campaign_candidate: "k2" }));
+    await waitFor(() => expect(body).toEqual({ body: "Rally at Ikeja on Saturday.", language: "en", campaign_candidate: "k2" }));
     await waitFor(() => expect(document.querySelector(".comm-post__campaign")?.textContent).toBe("Campaign team · Musa Ali"));
   });
 

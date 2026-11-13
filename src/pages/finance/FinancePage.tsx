@@ -14,10 +14,11 @@ import { formatKobo } from "../../donations/money";
 import type { FinanceSummary, PublicDonation } from "../../donations/types";
 import { formatDate } from "../../lib/format";
 import "./finance.css";
+import { t } from "../../i18n";
 
 function Recipient({ d }: { d: PublicDonation }) {
-  if (d.designation !== "candidate" || !d.candidate) return <>NDC general fund</>;
-  if (!d.candidate.is_public) return <>Former candidate: {d.candidate.full_name}</>;
+  if (d.designation !== "candidate" || !d.candidate) return <>{t("finance.ndc-general-fund")}</>;
+  if (!d.candidate.is_public) return <>{t("finance.former-candidate", { full_name: d.candidate.full_name })}</>;
   return <Link to={`/candidates/${d.candidate.slug}`}>{d.candidate.full_name}</Link>;
 }
 
@@ -41,7 +42,7 @@ export default function FinancePage() {
   const candidateName = [...(summary.data?.candidates ?? []), ...(demo?.candidates ?? [])].find((c) => c.slug === candidate)?.full_name;
 
   useEffect(() => {
-    document.title = "Finance | NDCConnect";
+    document.title = t("finance.finance-ndcconnect");
   }, []);
 
   const set = (changes: Record<string, string>) => {
@@ -54,66 +55,61 @@ export default function FinancePage() {
   return (
     <div className="finance-page">
       <header className="finance-page__head">
-        <h1>Finance</h1>
+        <h1>{t("finance.finance")}</h1>
         <p className="finance-page__lead">
-          Every successful donation to the NDC and its candidates on NDCConnect. Only successful payments are listed; pending, failed and
-          refunded payments aren’t shown. Donor contact details are never published.
-        </p>
+          {t("finance.every-successful-donation-to-the-ndc")}</p>
       </header>
 
-      {!configLoading && !config.open && <Banner tone="info">Donations aren’t open yet.</Banner>}
+      {!configLoading && !config.open && <Banner tone="info">{t("finance.donations-aren-t-open-yet")}</Banner>}
       {demo && demo.overall.count > 0 && (
-        <Banner tone="warning" title="DEMO DATA — not real donations">
-          This page includes {demo.overall.count.toLocaleString("en-NG")} simulated donations ({formatKobo(demo.overall.total_kobo)}) for a
-          preview. They are marked DEMO, were never paid, and are not counted in Total raised.
-        </Banner>
+        <Banner tone="warning" title={t("finance.demo-data-not-real-donations")}>
+          {t("finance.this-page-includes-simulated-donations-for", { count: demo.overall.count.toLocaleString("en-NG"), formatKobo: formatKobo(demo.overall.total_kobo) })}</Banner>
       )}
 
-      <section className="finance-totals" aria-label="Totals">
+      <section className="finance-totals" aria-label={t("finance.totals")}>
         <div className="finance-total">
-          <p className="finance-total__label">Total raised</p>
+          <p className="finance-total__label">{t("finance.total-raised")}</p>
           <p className="finance-total__value">{summary.data ? formatKobo(summary.data.overall.total_kobo) : "…"}</p>
-          <p className="finance-total__sub">{summary.data ? `${summary.data.overall.count.toLocaleString("en-NG")} donations` : ""}</p>
+          <p className="finance-total__sub">{summary.data ? t("finance.donations", { count: summary.data.overall.count.toLocaleString("en-NG") }) : ""}</p>
         </div>
         {demo && demo.overall.count > 0 && (
           <div className="finance-total finance-total--demo">
-            <p className="finance-total__label"><DemoBadge /> Demo donations (not real)</p>
+            <p className="finance-total__label">{t.rich("finance.demo-donations-not-real", { demobadge: <DemoBadge /> })}</p>
             <p className="finance-total__value">{formatKobo((designation || candidate ? demo.filtered : demo.overall).total_kobo)}</p>
-            <p className="finance-total__sub">{(designation || candidate ? demo.filtered : demo.overall).count.toLocaleString("en-NG")} simulated donations{designation || candidate ? " in this view" : ""}</p>
+            <p className="finance-total__sub">{t("finance.simulated-donations", { count: (designation || candidate ? demo.filtered : demo.overall).count.toLocaleString("en-NG"), v: designation || candidate ? t("finance.in-this-view") : "" })}</p>
           </div>
         )}
         {(designation || candidate) && summary.data && (
           <div className="finance-total">
-            <p className="finance-total__label">{candidateName ?? (designation === "party" ? "NDC general fund" : designation === "candidate" ? "All candidates" : "Filtered")}</p>
+            <p className="finance-total__label">{candidateName ?? (designation === "party" ? t("finance.ndc-general-fund") : designation === "candidate" ? t("finance.all-candidates") : t("finance.filtered"))}</p>
             <p className="finance-total__value">{formatKobo(summary.data.filtered.total_kobo)}</p>
-            <p className="finance-total__sub">{summary.data.filtered.count.toLocaleString("en-NG")} donations</p>
+            <p className="finance-total__sub">{t("finance.donations", { count: summary.data.filtered.count.toLocaleString("en-NG") })}</p>
           </div>
         )}
       </section>
 
       <div className="finance-filters">
-        <Select label="Show" value={candidate ? "candidate" : designation} onChange={(e) => set({ designation: e.target.value, candidate: "" })}
-          options={[{ value: "", label: "All donations" }, { value: "party", label: "NDC general fund" }, { value: "candidate", label: "Candidates" }]} />
+        <Select label={t("finance.show")} value={candidate ? "candidate" : designation} onChange={(e) => set({ designation: e.target.value, candidate: "" })}
+          options={[{ value: "", label: t("finance.all-donations") }, { value: "party", label: t("finance.ndc-general-fund") }, { value: "candidate", label: t("finance.candidates") }]} />
         {candidate && (
           <p className="finance-filters__chip">
-            Showing donations to <strong>{candidateName ?? candidate}</strong>{" "}
-            <Button variant="ghost" size="sm" onClick={() => set({ candidate: "" })}>Clear</Button>
+            {t.rich("finance.showing-donations-to-clear", { v: candidateName ?? candidate, strong: (chunks) => <strong>{chunks}</strong>, button: (chunks) => <Button variant="ghost" size="sm" onClick={() => set({ candidate: "" })}>{chunks}</Button> })}
           </p>
         )}
       </div>
 
       {list.error ? (
-        <Banner tone="error" title="We couldn’t load donations" action={<Button variant="secondary" size="sm" onClick={list.retry}>Try again</Button>}>{list.error.message}</Banner>
+        <Banner tone="error" title={t("finance.we-couldn-t-load-donations")} action={<Button variant="secondary" size="sm" onClick={list.retry}>{t("finance.try-again")}</Button>}>{list.error.message}</Banner>
       ) : list.loading && !list.data ? (
         <Skeleton width="100%" height={120} />
       ) : list.data && list.data.count === 0 ? (
-        <EmptyState title="No donations to show yet">Successful donations appear here.</EmptyState>
+        <EmptyState title={t("finance.no-donations-to-show-yet")}>{t("finance.successful-donations-appear-here")}</EmptyState>
       ) : list.data ? (
         <>
           <table className="finance-table">
-            <caption className="visually-hidden">Successful donations, newest first</caption>
+            <caption className="visually-hidden">{t("finance.successful-donations-newest-first")}</caption>
             <thead>
-              <tr><th scope="col">Donor</th><th scope="col">Amount</th><th scope="col">Given to</th><th scope="col">Date</th></tr>
+              <tr><th scope="col">{t("finance.donor")}</th><th scope="col">{t("finance.amount")}</th><th scope="col">{t("finance.given-to")}</th><th scope="col">{t("finance.date")}</th></tr>
             </thead>
             <tbody>
               {list.data.results.map((d, i) => (
@@ -126,7 +122,7 @@ export default function FinancePage() {
               ))}
             </tbody>
           </table>
-          <Pagination page={page} pageCount={Math.ceil(list.data.count / 20)} onChange={(p) => set({ page: p > 1 ? String(p) : "" })} label="Donation pages" />
+          <Pagination page={page} pageCount={Math.ceil(list.data.count / 20)} onChange={(p) => set({ page: p > 1 ? String(p) : "" })} label={t("finance.donation-pages")} />
         </>
       ) : null}
     </div>

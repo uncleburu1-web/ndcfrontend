@@ -1,17 +1,16 @@
 import { useEffect } from "react";
 import { EmptyState } from "../../components/ui";
+import { t } from "../../i18n";
 
 /** After self-service deletion (spec 14 §4.4). */
 export default function AccountDeletedPage() {
   useEffect(() => {
-    document.title = "Account deleted | NDCConnect";
+    document.title = t("privacy.account-deleted-ndcconnect");
   }, []);
   return (
     <section className="auth-page">
-      <EmptyState icon="checkCircle" title="Your account has been deleted">
-        You’ve been signed out. Your profile, follows, PVC check and membership register details are gone. Donation and payment records are
-        kept, anonymised, because the law requires them. Thank you for being part of NDCConnect.
-      </EmptyState>
+      <EmptyState icon="checkCircle" title={t("privacy.your-account-has-been-deleted")}>
+        {t("privacy.you-ve-been-signed-out-your")}</EmptyState>
     </section>
   );
 }

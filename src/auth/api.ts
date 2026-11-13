@@ -1,3 +1,4 @@
+import { getLanguage, hasOwn, t } from "../i18n";
 /**
  * API client — feature-specs/02-authentication.md §7.5.
  *
@@ -73,13 +74,9 @@ export function newRequestId(): string {
 
 /** "40 seconds", "3 minutes", "2 hours". */
 export function waitWords(seconds: number): string {
-  if (seconds < 90) return `${seconds} second${seconds === 1 ? "" : "s"}`;
-  if (seconds < 90 * 60) {
-    const m = Math.ceil(seconds / 60);
-    return `${m} minute${m === 1 ? "" : "s"}`;
-  }
-  const h = Math.ceil(seconds / 3600);
-  return `${h} hour${h === 1 ? "" : "s"}`;
+  if (seconds < 90) return t("auth.wait.seconds", { n: seconds });
+  if (seconds < 90 * 60) return t("auth.wait.minutes", { n: Math.ceil(seconds / 60) });
+  return t("auth.wait.hours", { n: Math.ceil(seconds / 3600) });
 }
 
 function withReference(message: string, requestId: string): string {
@@ -135,7 +132,7 @@ function networkError(requestId: string) {
     status: 0,
     code: "network_error",
     request_id: requestId,
-    message: withReference("Couldn't reach NDCConnect. Check your connection and try again.", requestId),
+    message: withReference(t("auth.couldn-t-reach-ndcconnect-check-your"), requestId),
   });
 }
 
@@ -144,7 +141,7 @@ function timeoutError(requestId: string) {
     status: 0,
     code: "timeout",
     request_id: requestId,
-    message: withReference("NDCConnect is taking too long to answer. Try again in a moment.", requestId),
+    message: withReference(t("auth.ndcconnect-is-taking-too-long-to"), requestId),
   });
 }
 
@@ -156,10 +153,13 @@ async function readError(res: Response, requestId: string): Promise<ApiError> {
     err = new ApiError({ request_id: rid, ...(data.error as ApiErrorBody & Record<string, unknown>) });
   } else {
     err = new ApiError({ status: res.status, code: "error", request_id: rid,
-      message: res.status >= 500 ? "Something went wrong on our side." : `Request failed (${res.status}).` });
+      message: res.status >= 500 ? t("auth.something-went-wrong-on-our-side") : t("auth.request-failed", { status: res.status }) });
   }
+  // Spec 21 §5.5: a translation of the error code wins over the server's words; the server's message (already in the
+  // request's language, §6) is the fallback. English keeps the server's specific message.
+  if (getLanguage() !== "en" && hasOwn(`errors.${err.code}`)) err.message = t(`errors.${err.code}`, err.extra as Record<string, unknown>);
   if (err.code === "throttled" && typeof err.extra.retry_after === "number") {
-    err.message = `Too many tries. Try again in ${waitWords(err.extra.retry_after)}.`;
+    err.message = t("auth.too-many-tries-try-again-in", { waitWords: waitWords(err.extra.retry_after) });
   }
   if (showsReference(err)) err.message = withReference(err.message, err.requestId);
   return err;
@@ -258,7 +258,7 @@ export function createApiClient(opts: ApiClientOptions) {
       result = await opts.withReverification!(attempt);
     } catch (e) {
       if (e instanceof ApiError) throw e;
-      throw new ApiError({ status: 403, code: CANCELLED_REVERIFICATION, message: "Cancelled. Nothing was done." });
+      throw new ApiError({ status: 403, code: CANCELLED_REVERIFICATION, message: t("auth.cancelled-nothing-was-done") });
     }
     if (isReverificationHint(result)) throw first;
     return result;
@@ -272,7 +272,7 @@ export function createApiClient(opts: ApiClientOptions) {
       if (err.code === "reverification_required" && opts.withReverification) return reverified<T>(path, options, err);
       if (err.code === "consent_required" && opts.onConsentRequired) {
         if (!(await opts.onConsentRequired(err))) {
-          throw new ApiError({ status: 403, code: CONSENT_DECLINED, message: "Nothing was changed." });
+          throw new ApiError({ status: 403, code: CONSENT_DECLINED, message: t("auth.nothing-was-changed") });
         }
         try {
           return await core<T>(path, options, false);

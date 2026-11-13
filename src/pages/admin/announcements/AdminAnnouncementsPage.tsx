@@ -8,34 +8,34 @@ import { formatDate } from "../../../lib/format";
 import type { AdminArticle } from "../../../news/types";
 import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
+import { t } from "../../../i18n";
 
 export default function AdminAnnouncementsPage() {
   const api = useApi();
   const res = useRequest("admin-announcements", (signal) =>
     api<{ count: number; results: AdminArticle[]; paused_until: string | null; pinned_count: number }>("/admin/announcements/", { signal }));
   useEffect(() => {
-    document.title = "Announcements | NDCConnect admin";
+    document.title = t("admin.announcements-ndcconnect-admin");
   }, []);
   return (
     <div className="adm-page">
       <AdminNav current="announcements" />
       <header className="adm-page__head">
         <div>
-          <h1>Official announcements</h1>
-          <p className="ds-field__hint">Published straight away under the “Official” label.</p>
+          <h1>{t("admin.official-announcements")}</h1>
+          <p className="ds-field__hint">{t("admin.published-straight-away-under-the-official")}</p>
         </div>
-        <Button href="/admin/announcements/new">New announcement</Button>
+        <Button href="/admin/announcements/new">{t("admin.new-announcement")}</Button>
       </header>
       {res.data?.paused_until && (
-        <Banner tone="warning" title="Campaign Announcements are paused">
-          Campaign blackout until {formatDate(res.data.paused_until, { withTime: true })}. Other categories can still be published.
-        </Banner>
+        <Banner tone="warning" title={t("admin.campaign-announcements-are-paused")}>
+          {t("admin.campaign-blackout-until-other-categories-can", { formatDate: formatDate(res.data.paused_until, { withTime: true }) })}</Banner>
       )}
       {res.error ? <Banner tone="error">{res.error.message}</Banner> : !res.data ? <Skeleton width="100%" height={160} /> : res.data.count === 0 ? (
-        <EmptyState title="No announcements yet" action={<Button href="/admin/announcements/new">New announcement</Button>} />
+        <EmptyState title={t("admin.no-announcements-yet")} action={<Button href="/admin/announcements/new">{t("admin.new-announcement")}</Button>} />
       ) : (
         <div className="adm-table-wrap"><table className="adm-table">
-          <thead><tr><th>Published</th><th>Title</th><th>Category</th><th>Status</th></tr></thead>
+          <thead><tr><th>{t("admin.published")}</th><th>{t("admin.title")}</th><th>{t("admin.category")}</th><th>{t("admin.status")}</th></tr></thead>
           <tbody>
             {res.data.results.map((a) => (
               <tr key={a.id}>

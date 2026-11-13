@@ -9,6 +9,7 @@ import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "../donations/admin-donations.css";
 import "./admin-pvc.css";
+import { t } from "../../../i18n";
 
 export default function AdminPvcSettingsPage() {
   const api = useApi();
@@ -21,20 +22,20 @@ export default function AdminPvcSettingsPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    document.title = "PVC guidance | NDCConnect admin";
+    document.title = t("admin.pvc-guidance-ndcconnect-admin");
     api<PvcConfig>("/admin/pvc/settings/").then((c) => {
       setCfg(c);
       setF({ guidance_note: c.guidance_note, collection_note: c.collection_note });
-    }).catch((e) => setError(e instanceof ApiError ? e.message : "Couldn’t load settings."));
+    }).catch((e) => setError(e instanceof ApiError ? e.message : t("admin.couldn-t-load-settings")));
   }, [api]);
 
   const save = async () => {
     setBusy(true);
     try {
       setCfg(await api<PvcConfig>("/admin/pvc/settings/", { method: "PATCH", body: f }));
-      toast.show({ tone: "success", message: "Saved. It shows on /pvc within a few minutes." });
+      toast.show({ tone: "success", message: t("admin.saved-it-shows-on-pvc-within") });
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Couldn’t save." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("admin.couldn-t-save") });
     } finally {
       setBusy(false);
     }
@@ -43,28 +44,28 @@ export default function AdminPvcSettingsPage() {
   return (
     <div className="adm-page">
       <AdminNav current="pvc" />
-      <p className="adm-back"><Link to="/admin/pvc">← PVC checks</Link></p>
+      <p className="adm-back"><Link to="/admin/pvc">{t("admin.pvc-checks-2")}</Link></p>
       <header className="adm-page__head">
         <div>
-          <h1>“Get your PVC” guidance</h1>
-          <p className="ds-field__hint">Shown on the public PVC page. Plain text. Changes are audited.</p>
+          <h1>{t("admin.get-your-pvc-guidance")}</h1>
+          <p className="ds-field__hint">{t("admin.shown-on-the-public-pvc-page")}</p>
         </div>
       </header>
       {error && <Banner tone="error">{error}</Banner>}
       {!cfg && !error ? <Skeleton width="100%" height={200} /> : cfg && (
         <div className="adm-panel adm-pvc-settings">
-          {!canEdit && <Banner tone="info">Only a system admin can change these.</Banner>}
-          <TextArea label="Collection note" rows={3} maxLength={500} value={f.collection_note} disabled={!canEdit}
+          {!canEdit && <Banner tone="info">{t("admin.only-a-system-admin-can-change-2")}</Banner>}
+          <TextArea label={t("admin.collection-note")} rows={3} maxLength={500} value={f.collection_note} disabled={!canEdit}
             onChange={(e) => setF({ ...f, collection_note: e.target.value })} hint={`${f.collection_note.length} / 500`} />
-          <TextArea label="Current guidance (optional)" rows={4} maxLength={1000} value={f.guidance_note} disabled={!canEdit}
+          <TextArea label={t("admin.current-guidance-optional")} rows={4} maxLength={1000} value={f.guidance_note} disabled={!canEdit}
             onChange={(e) => setF({ ...f, guidance_note: e.target.value })}
-            hint={`${f.guidance_note.length} / 1,000 · e.g. “Registration is closed until INEC announces the next phase.”`} />
+            hint={t("admin.1-000-e-g-registration-is", { length: f.guidance_note.length })} />
           <dl className="adm-dl">
-            <div><dt>Voter checker</dt><dd>{cfg.inec_voter_check_url}</dd></div>
-            <div><dt>INEC portal</dt><dd>{cfg.inec_pvc_url ?? "Not set: the “Register, transfer or replace” button is hidden"}</dd></div>
+            <div><dt>{t("admin.voter-checker")}</dt><dd>{cfg.inec_voter_check_url}</dd></div>
+            <div><dt>{t("admin.inec-portal")}</dt><dd>{cfg.inec_pvc_url ?? t("admin.not-set-the-register-transfer-or")}</dd></div>
           </dl>
-          <p className="ds-field__hint">INEC addresses are server settings (they must be verified official URLs), not editable here.</p>
-          {canEdit && <Button onClick={() => void save()} loading={busy} loadingLabel="Saving…">Save guidance</Button>}
+          <p className="ds-field__hint">{t("admin.inec-addresses-are-server-settings-they")}</p>
+          {canEdit && <Button onClick={() => void save()} loading={busy} loadingLabel={t("admin.saving")}>{t("admin.save-guidance")}</Button>}
         </div>
       )}
     </div>

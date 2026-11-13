@@ -18,6 +18,7 @@ import { useToast } from "../components/ui";
 import { clearPendingVote, markPendingVoteFailed, readPendingVote, savePendingVote } from "./pendingVote";
 import type { Follow, FollowStates } from "./types";
 import { VoteSignInPrompt } from "./VoteSignInPrompt";
+import { t } from "../i18n";
 
 /** `{ notify }` = following; `null` = known not following; missing = unknown (treated as not following). */
 type Known = { notify: boolean } | null;
@@ -140,11 +141,11 @@ export function FollowProvider({ children }: { children: ReactNode }) {
         if (options.from === "card") {
           toast.show({
             tone: "success",
-            message: `You're following ${name}.`,
-            action: { label: "Turn on notifications", onClick: () => navigate(`/candidates/${slug}`) },
+            message: t("follows.you-re-following", { name }),
+            action: { label: t("follows.turn-on-notifications"), onClick: () => navigate(`/candidates/${slug}`) },
           });
         } else {
-          toast.show({ tone: "success", message: `You're following ${name}. Turn on notifications to hear when they post.` });
+          toast.show({ tone: "success", message: t("follows.you-re-following-turn-on-notifications", { name }) });
         }
       } catch (err) {
         if (!handleKnownError(err, slug, name, options.onGone)) throw err;
@@ -204,17 +205,17 @@ export function FollowProvider({ children }: { children: ReactNode }) {
         const onProfile = pathRef.current === `/candidates/${slug}`;
         toast.show({
           tone: "success",
-          message: `You're now following ${name}.`,
-          action: onProfile ? undefined : { label: "View profile", onClick: () => navigate(`/candidates/${slug}`) },
+          message: t("follows.you-re-now-following", { name }),
+          action: onProfile ? undefined : { label: t("follows.view-profile"), onClick: () => navigate(`/candidates/${slug}`) },
         });
       })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 404) {
           clearPendingVote();
-          toast.show({ tone: "warning", message: `${name} is no longer listed, so we couldn't complete your vote.` });
+          toast.show({ tone: "warning", message: t("follows.is-no-longer-listed-so-we", { name }) });
         } else if (pending.tries >= 1) {
           clearPendingVote();
-          toast.show({ tone: "error", message: `We couldn't complete your vote for ${name}. Tap Vote on their profile to try again.` });
+          toast.show({ tone: "error", message: t("follows.we-couldn-t-complete-your-vote", { name }) });
         } else {
           markPendingVoteFailed(pending); // one more try on the next page load (§11)
         }

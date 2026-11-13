@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 /** Deadlines in words, never colour alone (spec 13 §4.3, §8). */
 export function dueWords(due: { overdue: boolean; hours: number } | null): string {
   if (!due) return "";
@@ -12,28 +13,28 @@ export function untilWords(iso: string | null, now = new Date()): { text: string
   return { text: dueWords({ overdue: ms < 0, hours }), overdue: ms < 0 };
 }
 
-export const KIND_LABEL: Record<string, string> = { article: "News", post: "Candidate post", candidate: "Candidate profile",
-  community_post: "Community post", community_comment: "Community comment", event: "Event" };
+export const KIND_LABEL: Record<string, string> = { get article() { return t("moderation.news"); }, get post() { return t("moderation.candidate-post"); }, get candidate() { return t("moderation.candidate-profile"); },
+  get community_post() { return t("moderation.community-post"); }, get community_comment() { return t("moderation.community-comment"); }, event: "Event" };
 
 export const EVENT_WORDS: Record<string, string> = {
-  opened: "Opened",
-  report_added: "Report added",
-  claimed: "Taken",
-  released: "Released",
-  escalated: "Escalated",
-  kept: "Kept (no action)",
-  removed: "Removed",
-  restored: "Restored",
-  warned: "Author warned",
-  paused: "Community news paused",
-  pause_lifted: "Pause lifted",
-  appeal_opened: "Appeal received",
-  appeal_upheld: "Appeal upheld",
-  appeal_denied: "Appeal not upheld",
-  notice_linked: "Legal notice linked",
-  hold_on: "Legal hold on",
-  hold_off: "Legal hold off",
-  reporter_viewed: "Reporter revealed",
-  counter_notice: "Counter-notice received",
-  author_removed: "Removed by author",
+  get opened() { return t("moderation.opened"); },
+  get report_added() { return t("moderation.report-added"); },
+  get claimed() { return t("moderation.taken"); },
+  get released() { return t("moderation.released"); },
+  get escalated() { return t("moderation.escalated"); },
+  get kept() { return t("moderation.kept-no-action"); },
+  get removed() { return t("moderation.removed"); },
+  get restored() { return t("moderation.restored"); },
+  get warned() { return t("moderation.author-warned"); },
+  get paused() { return t("moderation.community-news-paused"); },
+  get pause_lifted() { return t("moderation.pause-lifted"); },
+  get appeal_opened() { return t("moderation.appeal-received"); },
+  get appeal_upheld() { return t("moderation.appeal-upheld"); },
+  get appeal_denied() { return t("moderation.appeal-not-upheld"); },
+  get notice_linked() { return t("moderation.legal-notice-linked"); },
+  get hold_on() { return t("moderation.legal-hold-on"); },
+  get hold_off() { return t("moderation.legal-hold-off"); },
+  get reporter_viewed() { return t("moderation.reporter-revealed"); },
+  get counter_notice() { return t("moderation.counter-notice-received"); },
+  get author_removed() { return t("moderation.removed-by-author"); },
 };

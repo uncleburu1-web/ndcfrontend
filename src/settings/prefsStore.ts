@@ -83,7 +83,7 @@ export function applyToDocument(p: DevicePrefs, doc: Document = document) {
   html.dataset.motion = p.motion;
   html.dataset.scheme = r.scheme;
   html.dataset.contrastLevel = r.contrastLevel;
-  html.lang = p.language || "en";
+  // <html lang> follows the language actually shown, set by src/i18n once its catalogue has loaded (spec 21 §5.4).
 }
 
 function persist(p: DevicePrefs) {

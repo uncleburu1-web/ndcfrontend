@@ -11,6 +11,7 @@ import { useState } from "react";
 import { Icon } from "./Icon";
 import { Switch } from "./fields/Switch";
 import { useToast } from "./Toast";
+import { t } from "../../i18n";
 
 interface NotificationToggleProps {
   candidateName: string;
@@ -33,7 +34,7 @@ export function NotificationToggle({ candidateName, following, enabled = false, 
     try {
       await result;
     } catch {
-      toast.show({ tone: "error", message: `We couldn't update notifications for ${candidateName}. Try again.` });
+      toast.show({ tone: "error", message: t("ui.we-couldn-t-update-notifications-for", { candidateName }) });
     } finally {
       setBusy(false);
     }
@@ -42,7 +43,7 @@ export function NotificationToggle({ candidateName, following, enabled = false, 
   return (
     <Switch
       icon={<Icon name="bell" size={18} />}
-      label={`Notify me when ${candidateName} posts`}
+      label={t("ui.notify-me-when-posts", { candidateName })}
       checked={enabled}
       onChange={(next) => void handle(next)}
       disabled={disabled || busy}

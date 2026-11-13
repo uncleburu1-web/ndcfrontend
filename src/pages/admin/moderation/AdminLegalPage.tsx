@@ -12,6 +12,7 @@ import { AdminNav } from "../AdminNav";
 import { ModerationNav } from "./ModerationNav";
 import "../candidates/admin.css";
 import "../../../moderation/moderation.css";
+import { t } from "../../../i18n";
 
 const EMPTY = {
   kind: "agency", sender_name: "", sender_org: "", sender_contact: "", sender_reference: "", legal_basis: "", received_at: "",
@@ -35,7 +36,7 @@ export default function AdminLegalPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   useEffect(() => {
-    document.title = "Legal notices | NDCConnect admin";
+    document.title = t("admin.legal-notices-ndcconnect-admin");
   }, []);
   const set = (k: keyof typeof EMPTY) => (e: { target: { value: string } }) => setF((x) => ({ ...x, [k]: e.target.value }));
 
@@ -49,10 +50,10 @@ export default function AdminLegalPage() {
         body: { ...f, received_at: new Date(f.received_at || nowLocal()).toISOString(), items: f.items.split(/\s+/).filter(Boolean),
           declaration_accepted: declared },
       });
-      toast.show({ tone: "success", message: `Logged as ${n.reference}. A case was opened for each item.` });
+      toast.show({ tone: "success", message: t("admin.logged-as-a-case-was-opened", { reference: n.reference }) });
       navigate(`/admin/moderation/legal/${n.id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Couldn’t log the notice.");
+      setError(err instanceof ApiError ? err.message : t("admin.couldn-t-log-the-notice"));
     } finally {
       setBusy(false);
     }
@@ -65,23 +66,22 @@ export default function AdminLegalPage() {
       <ModerationNav current="legal" />
       <header className="adm-page__head">
         <div>
-          <h1>Legal notices</h1>
+          <h1>{t("admin.legal-notices")}</h1>
           <p className="ds-field__hint">
-            Agency notices must be acknowledged and acted on within 48 hours (NITDA Code). Nothing is removed automatically: decide each item.
-          </p>
+            {t("admin.agency-notices-must-be-acknowledged-and")}</p>
         </div>
-        <Button onClick={() => { setF({ ...EMPTY, received_at: nowLocal() }); setDeclared(false); setLogging(true); }}>Log a notice</Button>
+        <Button onClick={() => { setF({ ...EMPTY, received_at: nowLocal() }); setDeclared(false); setLogging(true); }}>{t("admin.log-a-notice")}</Button>
       </header>
       {res.error ? (
-        <Banner tone="error" title="We couldn’t load notices" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>{res.error.message}</Banner>
+        <Banner tone="error" title={t("admin.we-couldn-t-load-notices")} action={<Button size="sm" variant="secondary" onClick={res.retry}>{t("admin.try-again-2")}</Button>}>{res.error.message}</Banner>
       ) : !res.data ? (
         <Skeleton width="100%" height={160} />
       ) : rows.length === 0 ? (
-        <EmptyState title="No legal notices yet" />
+        <EmptyState title={t("admin.no-legal-notices-yet")} />
       ) : (
         <div className="adm-table-wrap">
           <table className="adm-table">
-            <thead><tr><th>Notice</th><th>From</th><th>Received</th><th>Deadline</th><th>Items</th></tr></thead>
+            <thead><tr><th>{t("admin.notice")}</th><th>{t("admin.from-2")}</th><th>{t("admin.received")}</th><th>{t("admin.deadline")}</th><th>{t("admin.items")}</th></tr></thead>
             <tbody>
               {rows.map((n) => {
                 const due = n.status === "open" ? untilWords(n.due_at) : null;
@@ -89,9 +89,9 @@ export default function AdminLegalPage() {
                   <tr key={n.id}>
                     <td><Link to={`/admin/moderation/legal/${n.id}`}>{n.reference}</Link><br /><span className="mod-meta">{n.kind_label}</span></td>
                     <td>{n.sender_org || n.sender_name}</td>
-                    <td>{formatDate(n.received_at, { withTime: true })}{n.acknowledged_at ? <><br /><span className="mod-meta">Acknowledged</span></> : <><br /><span className="mod-meta">Not acknowledged</span></>}</td>
-                    <td>{n.status === "closed" ? "Done" : due ? <span className={`mod-due${due.overdue ? " mod-due--overdue" : ""}`}>{due.text}</span> : "—"}</td>
-                    <td>{n.pending_items ? `${n.pending_items} of ${n.items} waiting` : `${n.items} decided`}</td>
+                    <td>{formatDate(n.received_at, { withTime: true })}{n.acknowledged_at ? <><br /><span className="mod-meta">{t("admin.acknowledged-2")}</span></> : <><br /><span className="mod-meta">{t("admin.not-acknowledged")}</span></>}</td>
+                    <td>{n.status === "closed" ? t("admin.done") : due ? <span className={`mod-due${due.overdue ? " mod-due--overdue" : ""}`}>{due.text}</span> : "—"}</td>
+                    <td>{n.pending_items ? t("admin.of-waiting", { pending_items: n.pending_items, items: n.items }) : t("admin.decided", { items: n.items })}</td>
                   </tr>
                 );
               })}
@@ -100,31 +100,31 @@ export default function AdminLegalPage() {
         </div>
       )}
 
-      <Modal open={logging} onClose={() => setLogging(false)} title="Log a legal notice"
-        footer={<><Button variant="secondary" onClick={() => setLogging(false)}>Cancel</Button>
-          <Button type="submit" form="legal-form" loading={busy} loadingLabel="Logging…">Log notice</Button></>}>
+      <Modal open={logging} onClose={() => setLogging(false)} title={t("admin.log-a-legal-notice")}
+        footer={<><Button variant="secondary" onClick={() => setLogging(false)}>{t("admin.cancel")}</Button>
+          <Button type="submit" form="legal-form" loading={busy} loadingLabel={t("admin.logging")}>{t("admin.log-notice")}</Button></>}>
         <form id="legal-form" onSubmit={(e) => void submit(e)} noValidate>
           {error && <Banner tone="error">{error}</Banner>}
-          <Select label="Type" required value={f.kind} onChange={set("kind")} options={[
-            { value: "agency", label: "Authorised Government Agency" }, { value: "court_order", label: "Court order" },
-            { value: "copyright", label: "Copyright notice" },
+          <Select label={t("admin.type")} required value={f.kind} onChange={set("kind")} options={[
+            { value: "agency", label: t("admin.authorised-government-agency") }, { value: "court_order", label: t("admin.court-order") },
+            { value: "copyright", label: t("admin.copyright-notice") },
           ]} />
-          <TextField label={f.kind === "court_order" ? "Court" : f.kind === "agency" ? "Agency" : "Organisation (optional)"} value={f.sender_org} onChange={set("sender_org")} />
-          <TextField label="Name of the sender or officer" required value={f.sender_name} onChange={set("sender_name")} />
-          <TextField label="Their contact" required value={f.sender_contact} onChange={set("sender_contact")} hint="Email, phone or postal address." />
-          <TextField label="Their reference (optional)" value={f.sender_reference} onChange={set("sender_reference")} />
-          <TextField label="Received at" required value={f.received_at} onChange={set("received_at")} hint="Date and time, e.g. 2026-11-02T09:30" />
-          <TextField label={f.kind === "agency" ? "Legal basis (law and section)" : "Legal basis (optional)"} required={f.kind === "agency"}
-            value={f.legal_basis} onChange={set("legal_basis")} hint="For example “NITDA Act 2007 s. 6”." />
-          <TextArea label="NDCConnect links or IDs" required rows={3} value={f.items} onChange={set("items")} hint="One per line." />
+          <TextField label={f.kind === "court_order" ? t("admin.court") : f.kind === "agency" ? t("admin.agency") : t("admin.organisation-optional")} value={f.sender_org} onChange={set("sender_org")} />
+          <TextField label={t("admin.name-of-the-sender-or-officer")} required value={f.sender_name} onChange={set("sender_name")} />
+          <TextField label={t("admin.their-contact")} required value={f.sender_contact} onChange={set("sender_contact")} hint={t("admin.email-phone-or-postal-address")} />
+          <TextField label={t("admin.their-reference-optional")} value={f.sender_reference} onChange={set("sender_reference")} />
+          <TextField label={t("admin.received-at")} required value={f.received_at} onChange={set("received_at")} hint={t("admin.date-and-time-e-g-2026")} />
+          <TextField label={f.kind === "agency" ? t("admin.legal-basis-law-and-section") : t("admin.legal-basis-optional")} required={f.kind === "agency"}
+            value={f.legal_basis} onChange={set("legal_basis")} hint={t("admin.for-example-nitda-act-2007-s")} />
+          <TextArea label={t("admin.ndcconnect-links-or-ids")} required rows={3} value={f.items} onChange={set("items")} hint={t("admin.one-per-line")} />
           {f.kind === "copyright" && (
             <>
-              <TextArea label="The work" required rows={2} value={f.work_description} onChange={set("work_description")} />
-              <TextField label="Signature" required value={f.signature} onChange={set("signature")} />
-              <Checkbox label="The notice includes the s. 54(2) declarations" checked={declared} onChange={(e) => setDeclared(e.target.checked)} />
+              <TextArea label={t("admin.the-work")} required rows={2} value={f.work_description} onChange={set("work_description")} />
+              <TextField label={t("admin.signature")} required value={f.signature} onChange={set("signature")} />
+              <Checkbox label={t("admin.the-notice-includes-the-s-54")} checked={declared} onChange={(e) => setDeclared(e.target.checked)} />
             </>
           )}
-          <p className="ds-field__hint">Upload a copy of the notice on the next page.</p>
+          <p className="ds-field__hint">{t("admin.upload-a-copy-of-the-notice")}</p>
         </form>
       </Modal>
     </div>

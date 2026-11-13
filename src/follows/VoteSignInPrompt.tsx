@@ -3,6 +3,7 @@
  * dialog from 640px up. Focus-trapped; Esc and "Not now" close it.
  */
 import { BottomSheet, Button } from "../components/ui";
+import { t } from "../i18n";
 
 interface Props {
   open: boolean;
@@ -17,23 +18,20 @@ export function VoteSignInPrompt({ open, candidateName, onClose, onSignIn, onSig
     <BottomSheet
       open={open}
       onClose={onClose}
-      title={`Sign in to vote for ${candidateName}`}
+      title={t("follows.sign-in-to-vote-for", { candidateName })}
       footer={
         <div className="vote-prompt__actions">
-          <Button onClick={onSignIn}>Sign in</Button>
+          <Button onClick={onSignIn}>{t("follows.sign-in")}</Button>
           <Button variant="secondary" onClick={onSignUp}>
-            Create account
-          </Button>
+            {t("follows.create-account")}</Button>
           <Button variant="ghost" onClick={onClose}>
-            Not now
-          </Button>
+            {t("follows.not-now")}</Button>
         </div>
       }
     >
       <p className="vote-prompt__text">
-        On NDCConnect, voting means following: it’s free, private and you don’t need to donate.
-      </p>
-      <p className="vote-prompt__text vote-prompt__text--muted">It isn’t an official ballot.</p>
+        {t("follows.on-ndcconnect-voting-means-following-it")}</p>
+      <p className="vote-prompt__text vote-prompt__text--muted">{t("follows.it-isn-t-an-official-ballot")}</p>
     </BottomSheet>
   );
 }

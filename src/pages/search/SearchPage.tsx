@@ -18,20 +18,21 @@ import { useHomeState } from "../../search/useHomeState";
 import "../../news/news.css";
 import "../../search/search.css";
 import "../../geo/geo.css";
+import { t as tr } from "../../i18n";
 
 const TABS: [SearchType, string][] = [["all", "All"], ["candidates", "Candidates"], ["news", "News"], ["posts", "Candidate posts"]];
-const SINCE = [{ value: "", label: "Any time" }, { value: "week", label: "Past week" }, { value: "month", label: "Past month" }, { value: "year", label: "Past year" }];
+const SINCE = [{ value: "", get label() { return tr("search.any-time"); } }, { value: "week", get label() { return tr("search.past-week"); } }, { value: "month", get label() { return tr("search.past-month"); } }, { value: "year", get label() { return tr("search.past-year"); } }];
 
 function NoResults({ q, dym, onTry }: { q: string; dym: string | null; onTry: (q: string) => void }) {
   return (
-    <EmptyState icon="search" title={`No results for “${q}”`}
-      action={<span className="article-badges"><Button variant="secondary" href="/candidates">Browse candidates</Button>
-        <Button variant="secondary" href="/news">Browse news</Button><Button variant="secondary" href="/states">Browse by state</Button></span>}>
-      {dym && <p className="search-dym">Did you mean <button type="button" className="home-chip__clear" onClick={() => onTry(dym)}>{dym}</button>?</p>}
+    <EmptyState icon="search" title={tr("search.no-results-for", { q })}
+      action={<span className="article-badges"><Button variant="secondary" href="/candidates">{tr("search.browse-candidates")}</Button>
+        <Button variant="secondary" href="/news">{tr("search.browse-news")}</Button><Button variant="secondary" href="/states">{tr("search.browse-by-state")}</Button></span>}>
+      {dym && <p className="search-dym">{tr.rich("search.did-you-mean", { dym, button: (chunks) => <button type="button" className="home-chip__clear" onClick={() => onTry(dym)}>{chunks}</button> })}</p>}
       <ul className="search-tips">
-        <li>Check the spelling, or try part of the name.</li>
-        <li>Use fewer words.</li>
-        <li>Remove filters.</li>
+        <li>{tr("search.check-the-spelling-or-try-part")}</li>
+        <li>{tr("search.use-fewer-words")}</li>
+        <li>{tr("search.remove-filters")}</li>
       </ul>
     </EmptyState>
   );
@@ -48,7 +49,7 @@ export default function SearchPage() {
   const [text, setText] = useState(q);
   useEffect(() => setText(q), [q]);
   useEffect(() => {
-    document.title = q ? `“${q}” — Search | NDCConnect` : "Search | NDCConnect";
+    document.title = q ? tr("search.search-ndcconnect-2", { q }) : tr("search.search-ndcconnect-3");
   }, [q]);
 
   const qs = new URLSearchParams();
@@ -92,13 +93,13 @@ export default function SearchPage() {
 
   return (
     <div className="search-page">
-      <h1>Search</h1>
+      <h1>{tr("search.search")}</h1>
       <form className="search-form" role="search" onSubmit={onSubmit}>
-        <TextField label="Search candidates, news and posts" enterKeyHint="search" value={text} onChange={(e) => setText(e.target.value)} autoFocus />
-        <Button type="submit">Search</Button>
+        <TextField label={tr("search.search-candidates-news-and-posts")} enterKeyHint="search" value={text} onChange={(e) => setText(e.target.value)} autoFocus />
+        <Button type="submit">{tr("search.search")}</Button>
       </form>
-      {q.length > 0 && q.length < Q_MIN && <Banner tone="info">Type at least 2 characters.</Banner>}
-      <nav className="search-tabs" aria-label="Result types">
+      {q.length > 0 && q.length < Q_MIN && <Banner tone="info">{tr("search.type-at-least-2-characters")}</Banner>}
+      <nav className="search-tabs" aria-label={tr("search.result-types")}>
         {TABS.map(([t, label]) => (
           <Link key={t} to={tabHref(t)} aria-current={t === type ? "page" : undefined}>
             {label}{counts && t !== "all" ? ` (${counts[t]})` : ""}
@@ -106,32 +107,32 @@ export default function SearchPage() {
         ))}
       </nav>
       <div className="search-filters">
-        <Select label="State" value={state} onChange={(e) => set({ state: e.target.value })} options={[{ value: "", label: "All states" }, ...STATES]} />
+        <Select label={tr("search.state")} value={state} onChange={(e) => set({ state: e.target.value })} options={[{ value: "", label: tr("search.all-states") }, ...STATES]} />
         {type === "candidates" && (
           <>
-            <Select label="Office" value={params.get("position") ?? ""} onChange={(e) => set({ position: e.target.value })}
-              options={[{ value: "", label: "All offices" }, ...POSITIONS.map((p) => ({ value: p.value, label: p.label }))]} />
-            <Select label="Election" value={params.get("year") ?? ""} onChange={(e) => set({ year: e.target.value })}
-              options={[{ value: "", label: current ? `Current (${current})` : "Current" },
-                ...past.map((y) => ({ value: String(y), label: `Past: ${y}` }))]} />
+            <Select label={tr("search.office")} value={params.get("position") ?? ""} onChange={(e) => set({ position: e.target.value })}
+              options={[{ value: "", label: tr("search.all-offices") }, ...POSITIONS.map((p) => ({ value: p.value, label: p.label }))]} />
+            <Select label={tr("search.election")} value={params.get("year") ?? ""} onChange={(e) => set({ year: e.target.value })}
+              options={[{ value: "", label: current ? tr("search.current", { current }) : tr("search.current-2") },
+                ...past.map((y) => ({ value: String(y), label: tr("search.past", { y }) }))]} />
           </>
         )}
         {(type === "news" || type === "posts") && (
-          <Select label="Date" value={params.get("since") ?? ""} onChange={(e) => set({ since: e.target.value })} options={SINCE} />
+          <Select label={tr("search.date")} value={params.get("since") ?? ""} onChange={(e) => set({ since: e.target.value })} options={SINCE} />
         )}
         {type === "news" && (
-          <Select label="Source" value={params.get("source") ?? ""} onChange={(e) => set({ source: e.target.value })}
-            options={[{ value: "", label: "All news" }, { value: "official", label: "Official" }, { value: "community", label: "Community" }]} />
+          <Select label={tr("search.source")} value={params.get("source") ?? ""} onChange={(e) => set({ source: e.target.value })}
+            options={[{ value: "", label: tr("search.all-news") }, { value: "official", label: tr("search.official") }, { value: "community", label: tr("search.community") }]} />
         )}
       </div>
       {home.fromHome && <HomeStateChip state={home.home} onClear={home.dismiss} />}
 
-      <div aria-live="polite" className="visually-hidden">{res.data ? `${total} result${total === 1 ? "" : "s"}` : ""}</div>
+      <div aria-live="polite" className="visually-hidden">{res.data ? tr("search.result", { total, v: total === 1 ? "" : "s" }) : ""}</div>
       {!ready ? (
-        <EmptyState icon="search" title="Search NDCConnect">Find candidates, news and candidate posts. Try a name, a place or an office like “governor Kano”.</EmptyState>
+        <EmptyState icon="search" title={tr("search.search-ndcconnect")}>{tr("search.find-candidates-news-and-candidate-posts")}</EmptyState>
       ) : err ? (
-        <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>
-          {err.code === "search_unavailable" ? "Search is busy. Try again in a moment." : err.message}
+        <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={res.retry}>{tr("search.try-again")}</Button>}>
+          {err.code === "search_unavailable" ? tr("search.search-is-busy-try-again-in") : err.message}
         </Banner>
       ) : !res.data ? (
         <Skeleton width="100%" height={200} />
@@ -141,40 +142,40 @@ export default function SearchPage() {
         <>
           {(all.places?.results.length ?? 0) > 0 && (
             <section className="search-section" aria-labelledby="s-pl">
-              <h2 id="s-pl">Places</h2>
+              <h2 id="s-pl">{tr("search.places")}</h2>
               <ul className="geo-list">{all.places!.results.map((p) => <li key={p.url}><Link to={p.url}>{p.title}</Link></li>)}</ul>
             </section>
           )}
           {all.candidates.count > 0 && (
             <section className="search-section" aria-labelledby="s-c">
-              <div className="search-section__head"><h2 id="s-c">Candidates</h2>
-                {all.candidates.count > all.candidates.results.length && <Link to={tabHref("candidates")}>See all {all.candidates.count}</Link>}</div>
+              <div className="search-section__head"><h2 id="s-c">{tr("search.candidates")}</h2>
+                {all.candidates.count > all.candidates.results.length && <Link to={tabHref("candidates")}>{tr("search.see-all", { count: all.candidates.count })}</Link>}</div>
               <CandidateGrid items={all.candidates.results} />
             </section>
           )}
           {all.news.count > 0 && (
             <section className="search-section" aria-labelledby="s-n">
-              <div className="search-section__head"><h2 id="s-n">News</h2>
-                {all.news.count > all.news.results.length && <Link to={tabHref("news")}>See all {all.news.count}</Link>}</div>
+              <div className="search-section__head"><h2 id="s-n">{tr("search.news")}</h2>
+                {all.news.count > all.news.results.length && <Link to={tabHref("news")}>{tr("search.see-all", { count: all.news.count })}</Link>}</div>
               <ul className="news-list">{all.news.results.map((a) => <ArticleResult key={a.id} a={a} />)}</ul>
             </section>
           )}
           {all.posts.count > 0 && (
             <section className="search-section" aria-labelledby="s-p">
-              <div className="search-section__head"><h2 id="s-p">Candidate posts</h2>
-                {all.posts.count > all.posts.results.length && <Link to={tabHref("posts")}>See all {all.posts.count}</Link>}</div>
+              <div className="search-section__head"><h2 id="s-p">{tr("search.candidate-posts")}</h2>
+                {all.posts.count > all.posts.results.length && <Link to={tabHref("posts")}>{tr("search.see-all", { count: all.posts.count })}</Link>}</div>
               <ul className="news-list">{all.posts.results.map((p) => <PostResult key={p.id} p={p} />)}</ul>
             </section>
           )}
         </>
       ) : one ? (
         <>
-          <p className="news-meta">{one.count.toLocaleString()} {one.count === 1 ? "result" : "results"}</p>
+          <p className="news-meta">{one.count.toLocaleString()} {one.count === 1 ? tr("search.result-2") : tr("search.results")}</p>
           {type === "candidates" ? <CandidateGrid items={one.results as CandidateSummary[]} />
             : <ul className="news-list">{type === "news"
               ? (one.results as ArticleHit[]).map((a) => <ArticleResult key={a.id} a={a} />)
               : (one.results as PostHit[]).map((p) => <PostResult key={p.id} p={p} />)}</ul>}
-          <Pagination page={page} pageCount={Math.ceil(one.count / 20)} label="Result pages" onChange={(p) => set({ page: p > 1 ? String(p) : "" })} />
+          <Pagination page={page} pageCount={Math.ceil(one.count / 20)} label={tr("search.result-pages")} onChange={(p) => set({ page: p > 1 ? String(p) : "" })} />
         </>
       ) : null}
     </div>

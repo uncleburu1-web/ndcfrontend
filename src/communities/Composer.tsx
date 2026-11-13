@@ -8,6 +8,8 @@ import { ApiError } from "../auth/api";
 import { useApi } from "../auth/session";
 import { Banner, Button, Select, TextArea } from "../components/ui";
 import { formatDate } from "../lib/format";
+import { getLanguage, t } from "../i18n";
+import { defaultWritingLanguage, WrittenIn } from "../i18n/ContentLanguage";
 
 interface Props<T> {
   path: string;
@@ -31,6 +33,7 @@ export function refusalWords(err: unknown): string {
 export function Composer<T>({ path, kind, campaigns = [], onPosted }: Props<T>) {
   const api = useApi();
   const [body, setBody] = useState("");
+  const [language, setLanguage] = useState<string>(defaultWritingLanguage(getLanguage()));
   const [campaign, setCampaign] = useState(campaigns.length === 1 ? campaigns[0].id : "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -39,7 +42,7 @@ export function Composer<T>({ path, kind, campaigns = [], onPosted }: Props<T>) 
     setBusy(true);
     setError("");
     try {
-      const item = await api<T>(path, { method: "POST", body: { body, ...(campaign ? { campaign_candidate: campaign } : {}) } });
+      const item = await api<T>(path, { method: "POST", body: { body, language, ...(campaign ? { campaign_candidate: campaign } : {}) } });
       setBody("");
       onPosted(item);
     } catch (err) {
@@ -50,19 +53,20 @@ export function Composer<T>({ path, kind, campaigns = [], onPosted }: Props<T>) 
   };
   return (
     <form className="comm-composer" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
-      {kind === "post" && <p className="ds-field__hint">Keep to the <Link to="/rules">rules</Link>. Only INEC announces results.</p>}
-      <TextArea label={kind === "post" ? "Write a post" : "Write a comment"} rows={kind === "post" ? 4 : 2} value={body}
+      {kind === "post" && <p className="ds-field__hint">{t.rich("communities.keep-to-the-rules-only-inec", { link: (chunks) => <Link to="/rules">{chunks}</Link> })}</p>}
+      <TextArea label={kind === "post" ? t("communities.write-a-post") : t("communities.write-a-comment")} rows={kind === "post" ? 4 : 2} value={body}
         onChange={(e) => setBody(e.target.value)} />
+      {kind === "post" && <WrittenIn value={language} onChange={setLanguage} />}
       {campaigns.length > 0 && (
-        <Select label="Posting for" required value={campaign} onChange={(e) => setCampaign(e.target.value)}
-          placeholder="Choose the campaign" options={campaigns.map((c) => ({ value: c.id, label: `Campaign team · ${c.name}` }))}
-          hint="Campaign accounts always post with a label." />
+        <Select label={t("communities.posting-for")} required value={campaign} onChange={(e) => setCampaign(e.target.value)}
+          placeholder={t("communities.choose-the-campaign")} options={campaigns.map((c) => ({ value: c.id, label: t("communities.campaign-team", { name: c.name }) }))}
+          hint={t("communities.campaign-accounts-always-post-with-a")} />
       )}
       {error && <Banner tone="error">{error}</Banner>}
       <div className="comm-composer__row">
         <span className={`comm-count${over ? " comm-count--over" : ""}`} aria-live="polite">{body.length.toLocaleString()} / {LIMIT[kind].toLocaleString()}</span>
         <Button type="submit" loading={busy} disabled={body.trim().length < MIN[kind] || over || (campaigns.length > 1 && !campaign)}>
-          {kind === "post" ? "Post" : "Comment"}
+          {kind === "post" ? t("communities.post") : t("communities.comment")}
         </Button>
       </div>
     </form>

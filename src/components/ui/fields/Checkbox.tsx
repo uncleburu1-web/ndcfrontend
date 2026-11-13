@@ -1,6 +1,7 @@
 import { useId, type InputHTMLAttributes, type ReactNode } from "react";
 import { FieldError } from "./Field";
 import "./fields.css";
+import { t } from "../../../i18n";
 
 interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "id"> {
   label: ReactNode;
@@ -26,7 +27,7 @@ export function Checkbox({ label, hint, error, required, ...rest }: CheckboxProp
       <div>
         <label htmlFor={id} className="ds-check__label">
           {label}
-          {required && <span className="ds-field__required"> (required)</span>}
+          {required && <span className="ds-field__required"> {t("ui.required")}</span>}
         </label>
         {hint && (
           <p id={hintId} className="ds-field__hint">

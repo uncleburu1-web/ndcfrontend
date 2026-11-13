@@ -9,6 +9,7 @@ import { formatDate } from "../../../lib/format";
 import { POSITIONS, STATES } from "../../../lib/nigeria";
 import "./admin.css";
 import { AdminNav } from "../AdminNav";
+import { t } from "../../../i18n";
 
 export default function AdminCandidatesPage() {
   const api = useApi();
@@ -18,7 +19,7 @@ export default function AdminCandidatesPage() {
   const qs = params.toString();
 
   useEffect(() => {
-    document.title = "Candidates admin | NDCConnect";
+    document.title = t("admin.candidates-admin-ndcconnect");
   }, []);
 
   const { data, error, loading, retry } = useRequest(`admin-list?${qs}`, (signal) =>
@@ -38,38 +39,38 @@ export default function AdminCandidatesPage() {
       <AdminNav current="candidates" />
       <header className="adm-page__head">
         <div>
-          <h1>Candidates</h1>
-          <p className="adm-page__lead">Only verified candidates can be published. Published candidates appear on the public Candidates page.</p>
+          <h1>{t("admin.candidates")}</h1>
+          <p className="adm-page__lead">{t("admin.only-verified-candidates-can-be-published")}</p>
         </div>
-        <Button href="/admin/candidates/new">Add candidate</Button>
+        <Button href="/admin/candidates/new">{t("admin.add-candidate")}</Button>
       </header>
 
-      <form className="adm-filters" role="search" aria-label="Filter candidates" onSubmit={(e: FormEvent) => { e.preventDefault(); update("q", search.trim()); }}>
-        <Select label="Status" value={params.get("status") ?? ""} onChange={(e) => update("status", e.target.value)}
-          options={[{ value: "", label: "Any status" }, { value: "draft", label: "Draft" }, { value: "published", label: "Published" },
-            { value: "unpublished", label: "Unpublished" }, { value: "archived", label: "Archived" }]} />
-        <Select label="Office" value={params.get("position") ?? ""} onChange={(e) => update("position", e.target.value)}
-          options={[{ value: "", label: "All offices" }, ...POSITIONS.map((p) => ({ value: p.value, label: p.label }))]} />
-        <Select label="State" value={params.get("state") ?? ""} onChange={(e) => update("state", e.target.value)}
-          options={[{ value: "", label: "All states" }, ...STATES]} />
+      <form className="adm-filters" role="search" aria-label={t("admin.filter-candidates")} onSubmit={(e: FormEvent) => { e.preventDefault(); update("q", search.trim()); }}>
+        <Select label={t("admin.status")} value={params.get("status") ?? ""} onChange={(e) => update("status", e.target.value)}
+          options={[{ value: "", label: t("admin.any-status") }, { value: "draft", label: t("admin.draft") }, { value: "published", label: t("admin.published") },
+            { value: "unpublished", label: t("admin.unpublished") }, { value: "archived", label: t("admin.archived") }]} />
+        <Select label={t("admin.office")} value={params.get("position") ?? ""} onChange={(e) => update("position", e.target.value)}
+          options={[{ value: "", label: t("admin.all-offices") }, ...POSITIONS.map((p) => ({ value: p.value, label: p.label }))]} />
+        <Select label={t("admin.state")} value={params.get("state") ?? ""} onChange={(e) => update("state", e.target.value)}
+          options={[{ value: "", label: t("admin.all-states") }, ...STATES]} />
         <div className="adm-filters__search">
-          <TextField label="Search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Name, area or slug" />
-          <Button type="submit" variant="secondary">Search</Button>
+          <TextField label={t("admin.search")} value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("admin.name-area-or-slug")} />
+          <Button type="submit" variant="secondary">{t("admin.search")}</Button>
         </div>
       </form>
 
       {error ? (
-        <Banner tone="error" title="We couldn’t load candidates" action={<Button variant="secondary" size="sm" onClick={retry}>Try again</Button>}>{error.message}</Banner>
+        <Banner tone="error" title={t("admin.we-couldn-t-load-candidates")} action={<Button variant="secondary" size="sm" onClick={retry}>{t("admin.try-again-2")}</Button>}>{error.message}</Banner>
       ) : loading && !data ? (
-        <div aria-busy="true" className="adm-skeleton"><span className="visually-hidden">Loading</span><Skeleton height={40} /><Skeleton height={40} /><Skeleton height={40} /></div>
+        <div aria-busy="true" className="adm-skeleton"><span className="visually-hidden">{t("admin.loading")}</span><Skeleton height={40} /><Skeleton height={40} /><Skeleton height={40} /></div>
       ) : data && data.results.length === 0 ? (
-        <EmptyState title="No candidates match" action={<Button href="/admin/candidates/new">Add candidate</Button>}>Change the filters, or add the first candidate.</EmptyState>
+        <EmptyState title={t("admin.no-candidates-match")} action={<Button href="/admin/candidates/new">{t("admin.add-candidate")}</Button>}>{t("admin.change-the-filters-or-add-the")}</EmptyState>
       ) : data ? (
         <>
           <div className="adm-table-wrap">
             <table className="adm-table">
               <thead>
-                <tr><th scope="col">Name</th><th scope="col">Office</th><th scope="col">Area</th><th scope="col">Status</th><th scope="col">Verification</th><th scope="col">Updated</th></tr>
+                <tr><th scope="col">{t("admin.name")}</th><th scope="col">{t("admin.office")}</th><th scope="col">{t("admin.area")}</th><th scope="col">{t("admin.status")}</th><th scope="col">{t("admin.verification")}</th><th scope="col">{t("admin.updated-3")}</th></tr>
               </thead>
               <tbody>
                 {data.results.map((c) => (

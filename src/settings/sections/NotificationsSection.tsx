@@ -7,6 +7,7 @@ import { useApi } from "../../auth/session";
 import { Icon, Switch, useToast } from "../../components/ui";
 import { usePreferences } from "../PreferencesProvider";
 import { Loading, SectionShell, useSettingsData } from "../SettingsLayout";
+import { t } from "../../i18n";
 
 type Notifications = Schema<"SettingsNotifications">;
 
@@ -25,31 +26,29 @@ export default function NotificationsSection() {
       patchSettings({ notifications: r });
       toast.show({ tone: "success", message: words });
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "Couldn’t save that. Try again." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("settings.couldn-t-save-that-try-again") });
     } finally {
       setBusy(null);
     }
   };
 
   return (
-    <SectionShell title="Notifications"
-      intro="All notices appear in the app under the bell. Turning a category off stops new notices of that kind; ones you already have stay until you read or delete them.">
+    <SectionShell title={t("settings.notifications")}
+      intro={t("settings.all-notices-appear-in-the-app")}>
       {!n ? (
         <Loading error={settingsError} retry={() => void loadSettings()} />
       ) : (
         <>
           <div className="set-card">
-            <h3>Candidates you follow</h3>
+            <h3>{t("settings.candidates-you-follow")}</h3>
             <p className="set-meta">
-              Following a candidate shows them in your <Link to="/following">Following</Link> list. The bell beside each one decides whether you get
-              their posts. Unfollowing turns the bell off; pausing all bells doesn’t unfollow anyone.
-            </p>
-            <Switch label="Pause all candidate bells" checked={n.candidate_bells_paused} disabled={busy === "candidate_bells_paused"}
-              onChange={(on) => void save("candidate_bells_paused", on, on ? "Candidate bells paused. Your bells stay as they are." : "Candidate bells back on.")}
-              hint="Stops candidate post notices without changing any bell." />
+              {t.rich("settings.following-a-candidate-shows-them-in", { link: (chunks) => <Link to="/following">{chunks}</Link> })}</p>
+            <Switch label={t("settings.pause-all-candidate-bells")} checked={n.candidate_bells_paused} disabled={busy === "candidate_bells_paused"}
+              onChange={(on) => void save("candidate_bells_paused", on, on ? t("settings.candidate-bells-paused-your-bells-stay") : t("settings.candidate-bells-back-on"))}
+              hint={t("settings.stops-candidate-post-notices-without-changing")} />
           </div>
           <div className="set-card">
-            <h3>You choose</h3>
+            <h3>{t("settings.you-choose")}</h3>
             <ul className="set-switches">
               {n.categories.filter((c) => !c.locked).map((c) => (
                 <li key={c.key}>
@@ -60,8 +59,8 @@ export default function NotificationsSection() {
             </ul>
           </div>
           <div className="set-card">
-            <h3>Always on</h3>
-            <p className="set-meta">These are about your own records, payments and safety, so they can’t be turned off.</p>
+            <h3>{t("settings.always-on")}</h3>
+            <p className="set-meta">{t("settings.these-are-about-your-own-records")}</p>
             <ul className="set-locked">
               {n.categories.filter((c) => c.locked).map((c) => (
                 <li key={c.key}>

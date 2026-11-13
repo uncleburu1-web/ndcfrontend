@@ -16,6 +16,7 @@ import { redirectTo } from "../../donations/navigation";
 import { formatNaira } from "../../lib/format";
 import { STATES } from "../../lib/nigeria";
 import "./donate.css";
+import { t as tr } from "../../i18n";
 
 type Fields = Record<string, string>;
 const DECLARATIONS = [
@@ -61,7 +62,7 @@ export default function DonatePage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    document.title = "Donate | NDCConnect";
+    document.title = tr("donate.donate-ndcconnect");
   }, []);
 
   // Prefill from the signed-in profile, without overwriting what the donor typed.
@@ -91,7 +92,7 @@ export default function DonatePage() {
       .then((c) => setCandidate({ slug: c.slug, full_name: c.full_name }))
       .catch(() => {
         setDesignation("party");
-        setCandidateNotice("That candidate isn’t available for donations, so your gift is set to the NDC general fund. You can choose another candidate.");
+        setCandidateNotice(tr("donate.that-candidate-isn-t-available-for"));
       });
   }, [api, presetSlug]);
 
@@ -114,7 +115,7 @@ export default function DonatePage() {
   if (configLoading) {
     return (
       <div className="donate-page" aria-busy="true">
-        <span className="visually-hidden">Loading</span>
+        <span className="visually-hidden">{tr("donate.loading")}</span>
         <Skeleton width="40%" height={36} />
         <Skeleton width="80%" />
       </div>
@@ -123,9 +124,8 @@ export default function DonatePage() {
   if (!config.open) {
     return (
       <div className="page-shell">
-        <EmptyState title="Donations aren’t open yet" action={<Button href="/candidates">See candidates</Button>}>
-          You can still vote (follow) candidates for free.
-        </EmptyState>
+        <EmptyState title={tr("donate.donations-aren-t-open-yet")} action={<Button href="/candidates">{tr("donate.see-candidates")}</Button>}>
+          {tr("donate.you-can-still-vote-follow-candidates")}</EmptyState>
       </div>
     );
   }
@@ -176,53 +176,49 @@ export default function DonatePage() {
   return (
     <div className="donate-page">
       <header className="donate-page__head">
-        <h1>Donate</h1>
+        <h1>{tr("donate.donate")}</h1>
         <p className="donate-page__lead">
-          Support the NDC or a candidate’s campaign. Payment happens on our payment provider’s secure page; NDCConnect never sees your card.
-        </p>
+          {tr("donate.support-the-ndc-or-a-candidate")}</p>
       </header>
 
       <form className="donate-layout" onSubmit={submit} noValidate>
         <div className="donate-form">
-          {formError && <Banner tone="error" title="We couldn’t start your donation">{formError}</Banner>}
+          {formError && <Banner tone="error" title={tr("donate.we-couldn-t-start-your-donation")}>{formError}</Banner>}
 
           <section className="donate-section" aria-labelledby="amount-title">
-            <h2 id="amount-title">1. Amount</h2>
+            <h2 id="amount-title">{tr("donate.1-amount")}</h2>
             <AmountPicker
-              label="How much would you like to give?"
+              label={tr("donate.how-much-would-you-like-to")}
               presets={presets}
               value={amount}
               onChange={setAmount}
               error={errors.amount_kobo}
-              hint={`Between ${formatNaira(min)} and ${formatNaira(max)} per payment.`}
+              hint={tr("donate.between-and-per-payment", { formatNaira: formatNaira(min), formatNaira2: formatNaira(max) })}
             />
           </section>
 
           <section className="donate-section" aria-labelledby="give-title">
-            <h2 id="give-title">2. Give to</h2>
+            <h2 id="give-title">{tr("donate.2-give-to")}</h2>
             {candidateNotice && <Banner tone="info">{candidateNotice}</Banner>}
             <RadioGroup
-              legend="Who should receive it?"
+              legend={tr("donate.who-should-receive-it")}
               name="designation"
               value={designation}
               onChange={(v) => setDesignation(v as "party" | "candidate")}
               options={[
-                { value: "party", label: "NDC (general campaign fund)" },
-                { value: "candidate", label: "A candidate" },
+                { value: "party", label: tr("donate.ndc-general-campaign-fund") },
+                { value: "candidate", label: tr("donate.a-candidate") },
               ]}
             />
             {designation === "candidate" &&
               (candidate ? (
                 <p className="donate-chosen">
-                  Giving to <strong>{candidate.full_name}</strong>{" "}
-                  <Button variant="ghost" size="sm" onClick={() => setCandidate(null)}>
-                    Change
-                  </Button>
+                  {tr.rich("donate.giving-to-change", { full_name: candidate.full_name, strong: (chunks) => <strong>{chunks}</strong>, button: (chunks) => <Button variant="ghost" size="sm" onClick={() => setCandidate(null)}>{chunks}</Button> })}
                 </p>
               ) : (
                 <div className="donate-search">
-                  <TextField label="Find a candidate" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Name or area" error={errors.candidate_slug} />
-                  <ul className="donate-search__results" aria-label="Candidates">
+                  <TextField label={tr("donate.find-a-candidate")} value={search} onChange={(e) => setSearch(e.target.value)} placeholder={tr("donate.name-or-area")} error={errors.candidate_slug} />
+                  <ul className="donate-search__results" aria-label={tr("donate.candidates")}>
                     {results.map((c) => (
                       <li key={c.slug}>
                         <button type="button" onClick={() => setCandidate({ slug: c.slug, full_name: c.full_name })}>
@@ -236,37 +232,37 @@ export default function DonatePage() {
           </section>
 
           <section className="donate-section" aria-labelledby="details-title">
-            <h2 id="details-title">3. Your details</h2>
-            <p className="donate-note">The law requires parties to record who donates (name and address). We never show these publicly.</p>
-            <TextField label="Full name" required value={donor.name} onChange={(e) => setDonor({ ...donor, name: e.target.value })} error={errors.donor_name} autoComplete="name" />
-            <TextField label="Email" type="email" required value={donor.email} onChange={(e) => setDonor({ ...donor, email: e.target.value })} error={errors.donor_email} />
-            <TextField label="Phone" type="tel" required value={donor.phone} onChange={(e) => setDonor({ ...donor, phone: e.target.value })} error={errors.donor_phone} />
-            <Select label="State" required value={donor.state} onChange={(e) => setDonor({ ...donor, state: e.target.value })} error={errors.donor_state}
-              options={[{ value: "", label: "Choose your state" }, ...STATES]} />
-            <TextArea label="Address" required rows={2} value={donor.address} onChange={(e) => setDonor({ ...donor, address: e.target.value })} error={errors.donor_address} autoComplete="street-address" />
+            <h2 id="details-title">{tr("donate.3-your-details")}</h2>
+            <p className="donate-note">{tr("donate.the-law-requires-parties-to-record")}</p>
+            <TextField label={tr("donate.full-name")} required value={donor.name} onChange={(e) => setDonor({ ...donor, name: e.target.value })} error={errors.donor_name} autoComplete="name" />
+            <TextField label={tr("donate.email")} type="email" required value={donor.email} onChange={(e) => setDonor({ ...donor, email: e.target.value })} error={errors.donor_email} />
+            <TextField label={tr("donate.phone")} type="tel" required value={donor.phone} onChange={(e) => setDonor({ ...donor, phone: e.target.value })} error={errors.donor_phone} />
+            <Select label={tr("donate.state")} required value={donor.state} onChange={(e) => setDonor({ ...donor, state: e.target.value })} error={errors.donor_state}
+              options={[{ value: "", label: tr("donate.choose-your-state") }, ...STATES]} />
+            <TextArea label={tr("donate.address")} required rows={2} value={donor.address} onChange={(e) => setDonor({ ...donor, address: e.target.value })} error={errors.donor_address} autoComplete="street-address" />
           </section>
 
           <section className="donate-section" aria-labelledby="public-title">
-            <h2 id="public-title">4. On the public Finance page</h2>
+            <h2 id="public-title">{tr("donate.4-on-the-public-finance-page")}</h2>
             {isSignedIn ? (
               <RadioGroup
-                legend="How should your donation appear?"
+                legend={tr("donate.how-should-your-donation-appear")}
                 name="display"
                 value={display}
                 onChange={(v) => { setDisplay(v as "name" | "anonymous"); setDisplayTouched(true); }}
-                hint="Successful donations are listed publicly on the Finance page with the amount and who it went to."
+                hint={tr("donate.successful-donations-are-listed-publicly-on")}
                 options={[
-                  { value: "name", label: `Show my name${donor.name ? ` (“${donor.name}”)` : ""}` },
-                  { value: "anonymous", label: "Show as “Anonymous Donor”", hint: "We still record your details privately, as the law requires." },
+                  { value: "name", label: tr("donate.show-my-name", { v: donor.name ? ` (“${donor.name}”)` : "" }) },
+                  { value: "anonymous", label: tr("donate.show-as-anonymous-donor"), hint: tr("donate.we-still-record-your-details-privately") },
                 ]}
               />
             ) : (
-              <p className="donate-note">You’ll appear as “Guest”.</p>
+              <p className="donate-note">{tr("donate.you-ll-appear-as-guest")}</p>
             )}
           </section>
 
           <section className="donate-section" aria-labelledby="declare-title">
-            <h2 id="declare-title">Please confirm</h2>
+            <h2 id="declare-title">{tr("donate.please-confirm")}</h2>
             {DECLARATIONS.map(([key, label]) => (
               <Checkbox key={key} label={label} required checked={declared[key]} error={errors[`declarations.${key}`]}
                 onChange={(e) => setDeclared({ ...declared, [key]: e.target.checked })} />
@@ -274,15 +270,14 @@ export default function DonatePage() {
           </section>
         </div>
 
-        <aside className="donate-summary" aria-label="Summary">
+        <aside className="donate-summary" aria-label={tr("donate.summary")}>
           <p className="donate-summary__amount">{amount ? formatNaira(amount) : "₦—"}</p>
-          <p className="donate-summary__to">to {target}</p>
-          <Button type="submit" fullWidth loading={busy} loadingLabel="Starting…">
-            {amount ? `Donate ${formatNaira(amount)}` : "Donate"}
+          <p className="donate-summary__to">{tr("donate.to-2", { target })}</p>
+          <Button type="submit" fullWidth loading={busy} loadingLabel={tr("donate.starting")}>
+            {amount ? tr("donate.donate-2", { formatNaira: formatNaira(amount) }) : tr("donate.donate")}
           </Button>
           <p className="donate-summary__free">
-            You can also <Link to="/candidates">vote (follow) candidates</Link> for free. Donating is optional.
-          </p>
+            {tr.rich("donate.you-can-also-vote-follow-candidates", { link: (chunks) => <Link to="/candidates">{chunks}</Link> })}</p>
         </aside>
       </form>
     </div>

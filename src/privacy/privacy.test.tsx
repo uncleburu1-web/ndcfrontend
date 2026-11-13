@@ -173,7 +173,7 @@ describe("/privacy and /security", () => {
     expect(screen.getByText(/Last updated .* · version 1/)).toBeTruthy();
     expect(screen.getByText("Draft — under review")).toBeTruthy();
     expect(screen.getByText("Sensitive")).toBeTruthy();
-    expect(h.api).toHaveBeenCalledWith("/privacy/", { anonymous: true });
+    expect(h.api).toHaveBeenCalledWith("/privacy/?lang=en", { anonymous: true }) // spec 21: ?lang= is part of the cached URL;
   });
 
   it("explains how to report a vulnerability", () => {

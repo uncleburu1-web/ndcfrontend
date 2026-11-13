@@ -4,6 +4,7 @@
  */
 import { useId, type ReactNode } from "react";
 import "./fields.css";
+import { t } from "../../../i18n";
 
 export interface FieldFrameProps {
   label: ReactNode;
@@ -34,7 +35,7 @@ export function Field({
     <div className={`ds-field${error ? " ds-field--invalid" : ""}`}>
       <label className="ds-field__label" htmlFor={id}>
         {label}
-        {required && <span className="ds-field__required"> (required)</span>}
+        {required && <span className="ds-field__required"> {t("ui.required")}</span>}
       </label>
       {hint && (
         <p id={hintId} className="ds-field__hint">

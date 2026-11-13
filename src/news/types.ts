@@ -38,12 +38,18 @@ export interface ArticleSummary {
   pinned: boolean;
   /** Spec 17 §9: an announcement aimed at a community ("For: Ikeja LGA community"). */
   audience?: { id: string; name: string; path: string } | null;
+  /** Spec 21 §9: the language it's written in ("und" = not sure). */
+  language?: string;
 }
 
 export interface ArticleDetail extends ArticleSummary {
   body: string;
   source_name: string;
   source_url: string;
+  /** Spec 21 §10: an official announcement's published versions in other languages, and which one this is. */
+  translations?: { language: string; title: string; updated_at: string; out_of_date: boolean }[];
+  version_language?: string;
+  version_out_of_date?: boolean;
 }
 
 export interface NewsPage {

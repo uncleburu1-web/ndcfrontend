@@ -6,6 +6,7 @@ import { useApi } from "../../auth/session";
 import { useAuth } from "@clerk/react";
 import { Banner, Button, Checkbox, TextArea, TextField } from "../../components/ui";
 import "../../moderation/moderation.css";
+import { t as tr } from "../../i18n";
 
 const EMPTY = { name: "", contact: "", work: "", url: "", signature: "" };
 
@@ -19,7 +20,7 @@ export default function CopyrightNoticePage() {
   const [busy, setBusy] = useState(false);
   const [reference, setReference] = useState("");
   useEffect(() => {
-    document.title = "Copyright notice | NDCConnect";
+    document.title = tr("reports.copyright-notice-ndcconnect");
   }, []);
   const set = (k: keyof typeof EMPTY) => (e: { target: { value: string } }) => setF((x) => ({ ...x, [k]: e.target.value }));
   const submit = async (e: FormEvent) => {
@@ -34,7 +35,7 @@ export default function CopyrightNoticePage() {
       if (err instanceof ApiError) {
         setErrors(err.fields);
         setError(err.message);
-      } else setError("We couldn’t send your notice.");
+      } else setError(tr("reports.we-couldn-t-send-your-notice"));
     } finally {
       setBusy(false);
     }
@@ -44,36 +45,34 @@ export default function CopyrightNoticePage() {
   if (reference) {
     return (
       <div className="mod-page">
-        <h1>Copyright notice received</h1>
+        <h1>{tr("reports.copyright-notice-received")}</h1>
         <p className="mod-ref"><strong>{reference}</strong></p>
-        <p>We’ll review it and may contact you. Keep the reference to check progress at <Link to="/reports/status">Check a report</Link>.</p>
+        <p>{tr.rich("reports.we-ll-review-it-and-may", { link: (chunks) => <Link to="/reports/status">{chunks}</Link> })}</p>
       </div>
     );
   }
   return (
     <div className="mod-page">
-      <h1>Send a copyright notice</h1>
+      <h1>{tr("reports.send-a-copyright-notice")}</h1>
       <p className="mod-lead">
-        Use this if something on NDCConnect uses your work (a photo, article or video) without permission. The Copyright Act 2022 (s. 54)
-        asks for each item below. We may share your notice with the person who posted the content so they can respond.
-      </p>
+        {tr("reports.use-this-if-something-on-ndcconnect")}</p>
       {error && <Banner tone="error">{error}</Banner>}
       <form onSubmit={(e) => void submit(e)} noValidate>
-        <TextField label="Your name" required value={f.name} onChange={set("name")} error={fe("name")} autoComplete="name" />
-        <TextField label="How we can contact you" required value={f.contact} onChange={set("contact")} error={fe("contact")}
-          hint="An email address or phone number." />
-        <TextArea label="The work that was copied" required rows={3} value={f.work} onChange={set("work")} error={fe("work")}
-          hint="Describe your original work, and where it was first published if you can." />
-        <TextField label="The page on NDCConnect" required value={f.url} onChange={set("url")} error={fe("url")}
-          hint="Paste the link to the news story or candidate post." />
-        <Checkbox label="I own the copyright, or I’m allowed to act for the owner." checked={ticks.authority}
+        <TextField label={tr("reports.your-name")} required value={f.name} onChange={set("name")} error={fe("name")} autoComplete="name" />
+        <TextField label={tr("reports.how-we-can-contact-you")} required value={f.contact} onChange={set("contact")} error={fe("contact")}
+          hint={tr("reports.an-email-address-or-phone-number")} />
+        <TextArea label={tr("reports.the-work-that-was-copied")} required rows={3} value={f.work} onChange={set("work")} error={fe("work")}
+          hint={tr("reports.describe-your-original-work-and-where")} />
+        <TextField label={tr("reports.the-page-on-ndcconnect")} required value={f.url} onChange={set("url")} error={fe("url")}
+          hint={tr("reports.paste-the-link-to-the-news")} />
+        <Checkbox label={tr("reports.i-own-the-copyright-or-i")} checked={ticks.authority}
           onChange={(e) => setTicks((t) => ({ ...t, authority: e.target.checked }))} error={fe("authority")} />
-        <Checkbox label="I believe in good faith that this use isn’t allowed by the owner or the law." checked={ticks.good_faith}
+        <Checkbox label={tr("reports.i-believe-in-good-faith-that")} checked={ticks.good_faith}
           onChange={(e) => setTicks((t) => ({ ...t, good_faith: e.target.checked }))} error={fe("good_faith")} />
-        <Checkbox label="The information in this notice is accurate." checked={ticks.accurate}
+        <Checkbox label={tr("reports.the-information-in-this-notice-is")} checked={ticks.accurate}
           onChange={(e) => setTicks((t) => ({ ...t, accurate: e.target.checked }))} error={fe("accurate")} />
-        <TextField label="Type your full name as your signature" required value={f.signature} onChange={set("signature")} error={fe("signature")} />
-        <Button type="submit" loading={busy} loadingLabel="Sending…">Send notice</Button>
+        <TextField label={tr("reports.type-your-full-name-as-your")} required value={f.signature} onChange={set("signature")} error={fe("signature")} />
+        <Button type="submit" loading={busy} loadingLabel={tr("reports.sending")}>{tr("reports.send-notice")}</Button>
       </form>
     </div>
   );

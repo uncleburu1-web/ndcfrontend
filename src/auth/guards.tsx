@@ -10,6 +10,7 @@ import type { ReactNode } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Banner, Button, EmptyState, Skeleton } from "../components/ui";
 import { useMe } from "./session";
+import { t } from "../i18n";
 
 function Pending({ label }: { label: string }) {
   return (
@@ -26,7 +27,7 @@ function Pending({ label }: { label: string }) {
 export function RequireSignedIn({ children }: { children?: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
   const location = useLocation();
-  if (!isLoaded) return <Pending label="Checking your session" />;
+  if (!isLoaded) return <Pending label={t("auth.checking-your-session")} />;
   if (!isSignedIn) {
     const back = location.pathname + location.search;
     return <Navigate to={`/sign-in?redirect_url=${encodeURIComponent(back)}`} replace />;
@@ -37,7 +38,7 @@ export function RequireSignedIn({ children }: { children?: ReactNode }) {
 /** Sign-in / sign-up pages: signed-in users don't need them. */
 export function SignedOutOnly({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
-  if (!isLoaded) return <Pending label="Checking your session" />;
+  if (!isLoaded) return <Pending label={t("auth.checking-your-session")} />;
   if (isSignedIn) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
@@ -49,12 +50,12 @@ export function RequireProfileComplete({ children }: { children?: ReactNode }) {
 
   if (status === "error") {
     return (
-      <Banner tone="error" title="We couldn't load your profile" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+      <Banner tone="error" title={t("auth.we-couldn-t-load-your-profile")} action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>{t("auth.try-again")}</Button>}>
         {error?.message}
       </Banner>
     );
   }
-  if (!me) return <Pending label="Loading your profile" />;
+  if (!me) return <Pending label={t("auth.loading-your-profile")} />;
   if (!me.profile_complete) {
     return <Navigate to="/setup-profile" replace state={{ from: location.pathname + location.search }} />;
   }
@@ -69,18 +70,17 @@ export function RequireSystemAdmin({ children }: { children?: ReactNode }) {
   const { me, status, error, refresh } = useMe();
   if (status === "error") {
     return (
-      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+      <Banner tone="error" title={t("auth.we-couldn-t-load-your-account")} action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>{t("auth.try-again")}</Button>}>
         {error?.message}
       </Banner>
     );
   }
-  if (!me) return <Pending label="Loading your account" />;
+  if (!me) return <Pending label={t("auth.loading-your-account")} />;
   if (!me.is_system_admin) {
     return (
       <div className="page-shell">
-        <EmptyState icon="shield" title="You don’t have access to this page">
-          This area is for NDCConnect system administrators.
-        </EmptyState>
+        <EmptyState icon="shield" title={t("auth.you-don-t-have-access-to")}>
+          {t("auth.this-area-is-for-ndcconnect-system")}</EmptyState>
       </div>
     );
   }
@@ -96,18 +96,17 @@ export function RequireFinanceViewer({ children }: { children?: ReactNode }) {
   const { me, status, error, refresh } = useMe();
   if (status === "error") {
     return (
-      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+      <Banner tone="error" title={t("auth.we-couldn-t-load-your-account")} action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>{t("auth.try-again")}</Button>}>
         {error?.message}
       </Banner>
     );
   }
-  if (!me) return <Pending label="Loading your account" />;
+  if (!me) return <Pending label={t("auth.loading-your-account")} />;
   if (!isFinanceViewer(me)) {
     return (
       <div className="page-shell">
-        <EmptyState icon="shield" title="You don’t have access to this page">
-          Donation records are for NDCConnect administrators and party finance officers.
-        </EmptyState>
+        <EmptyState icon="shield" title={t("auth.you-don-t-have-access-to")}>
+          {t("auth.donation-records-are-for-ndcconnect-administrators")}</EmptyState>
       </div>
     );
   }
@@ -123,18 +122,17 @@ export function RequireMembershipOfficer({ children }: { children?: ReactNode })
   const { me, status, error, refresh } = useMe();
   if (status === "error") {
     return (
-      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+      <Banner tone="error" title={t("auth.we-couldn-t-load-your-account")} action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>{t("auth.try-again")}</Button>}>
         {error?.message}
       </Banner>
     );
   }
-  if (!me) return <Pending label="Loading your account" />;
+  if (!me) return <Pending label={t("auth.loading-your-account")} />;
   if (!isMembershipOfficer(me)) {
     return (
       <div className="page-shell">
-        <EmptyState icon="shield" title="You don’t have access to this page">
-          Membership records are for NDCConnect administrators and membership officers.
-        </EmptyState>
+        <EmptyState icon="shield" title={t("auth.you-don-t-have-access-to")}>
+          {t("auth.membership-records-are-for-ndcconnect-administrators")}</EmptyState>
       </div>
     );
   }
@@ -150,18 +148,17 @@ export function RequireNewsReviewer({ children }: { children?: ReactNode }) {
   const { me, status, error, refresh } = useMe();
   if (status === "error") {
     return (
-      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+      <Banner tone="error" title={t("auth.we-couldn-t-load-your-account")} action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>{t("auth.try-again")}</Button>}>
         {error?.message}
       </Banner>
     );
   }
-  if (!me) return <Pending label="Loading your account" />;
+  if (!me) return <Pending label={t("auth.loading-your-account")} />;
   if (!isNewsReviewer(me)) {
     return (
       <div className="page-shell">
-        <EmptyState icon="shield" title="You don’t have access to this page">
-          News review is for NDCConnect administrators and news reviewers.
-        </EmptyState>
+        <EmptyState icon="shield" title={t("auth.you-don-t-have-access-to")}>
+          {t("auth.news-review-is-for-ndcconnect-administrators")}</EmptyState>
       </div>
     );
   }
@@ -177,18 +174,17 @@ export function RequirePvcOfficer({ children }: { children?: ReactNode }) {
   const { me, status, error, refresh } = useMe();
   if (status === "error") {
     return (
-      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+      <Banner tone="error" title={t("auth.we-couldn-t-load-your-account")} action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>{t("auth.try-again")}</Button>}>
         {error?.message}
       </Banner>
     );
   }
-  if (!me) return <Pending label="Loading your account" />;
+  if (!me) return <Pending label={t("auth.loading-your-account")} />;
   if (!isPvcOfficer(me)) {
     return (
       <div className="page-shell">
-        <EmptyState icon="shield" title="You don’t have access to this page">
-          PVC checks are for PVC officers, membership officers and NDCConnect administrators.
-        </EmptyState>
+        <EmptyState icon="shield" title={t("auth.you-don-t-have-access-to")}>
+          {t("auth.pvc-checks-are-for-pvc-officers")}</EmptyState>
       </div>
     );
   }
@@ -228,18 +224,17 @@ export function RequireAnyAdmin({ children }: { children?: ReactNode }) {
   const { me, status, error, refresh } = useMe();
   if (status === "error") {
     return (
-      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+      <Banner tone="error" title={t("auth.we-couldn-t-load-your-account")} action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>{t("auth.try-again")}</Button>}>
         {error?.message}
       </Banner>
     );
   }
-  if (!me) return <Pending label="Loading your account" />;
+  if (!me) return <Pending label={t("auth.loading-your-account")} />;
   if (!isAnyAdmin(me)) {
     return (
       <div className="page-shell">
-        <EmptyState icon="shield" title="You don’t have access to this page">
-          The admin is for NDCConnect administrators and officers.
-        </EmptyState>
+        <EmptyState icon="shield" title={t("auth.you-don-t-have-access-to")}>
+          {t("auth.the-admin-is-for-ndcconnect-administrators")}</EmptyState>
       </div>
     );
   }
@@ -255,18 +250,17 @@ export function RequireModerationStaff({ children }: { children?: ReactNode }) {
   const { me, status, error, refresh } = useMe();
   if (status === "error") {
     return (
-      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+      <Banner tone="error" title={t("auth.we-couldn-t-load-your-account")} action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>{t("auth.try-again")}</Button>}>
         {error?.message}
       </Banner>
     );
   }
-  if (!me) return <Pending label="Loading your account" />;
+  if (!me) return <Pending label={t("auth.loading-your-account")} />;
   if (!isModerationStaff(me)) {
     return (
       <div className="page-shell">
-        <EmptyState icon="shield" title="You don’t have access to this page">
-          Moderation is for moderators, news reviewers and NDCConnect administrators.
-        </EmptyState>
+        <EmptyState icon="shield" title={t("auth.you-don-t-have-access-to")}>
+          {t("auth.moderation-is-for-moderators-news-reviewers")}</EmptyState>
       </div>
     );
   }
@@ -282,18 +276,17 @@ export function RequirePrivacyOfficer({ children }: { children?: ReactNode }) {
   const { me, status, error, refresh } = useMe();
   if (status === "error") {
     return (
-      <Banner tone="error" title="We couldn't load your account" action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>Try again</Button>}>
+      <Banner tone="error" title={t("auth.we-couldn-t-load-your-account")} action={<Button variant="secondary" size="sm" onClick={() => void refresh()}>{t("auth.try-again")}</Button>}>
         {error?.message}
       </Banner>
     );
   }
-  if (!me) return <Pending label="Loading your account" />;
+  if (!me) return <Pending label={t("auth.loading-your-account")} />;
   if (!isPrivacyOfficer(me)) {
     return (
       <div className="page-shell">
-        <EmptyState icon="shield" title="You don’t have access to this page">
-          Privacy requests and incidents are for the Data Protection Officer and system administrators.
-        </EmptyState>
+        <EmptyState icon="shield" title={t("auth.you-don-t-have-access-to")}>
+          {t("auth.privacy-requests-and-incidents-are-for")}</EmptyState>
       </div>
     );
   }

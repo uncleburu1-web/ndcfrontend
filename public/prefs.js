@@ -25,5 +25,5 @@
   }
   html.setAttribute("data-scheme", theme === "system" ? (media("(prefers-color-scheme: dark)") ? "dark" : "light") : theme);
   html.setAttribute("data-contrast-level", contrast === "system" ? (media("(prefers-contrast: more)") ? "more" : "standard") : contrast);
-  if (typeof p.language === "string" && /^[a-z]{2,3}$/.test(p.language)) html.setAttribute("lang", p.language);
+  // <html lang> is set by the app once the chosen language's text has loaded (spec 21 §5.4): English until then.
 })();

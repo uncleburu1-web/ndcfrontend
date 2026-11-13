@@ -6,6 +6,7 @@
 import { Select } from "../components/ui";
 import { geoApi, useGeoList } from "./useGeo";
 import { CONSTITUENCY_LABEL, type GeoConstituency } from "./types";
+import { t } from "../i18n";
 
 export const POSITION_KIND: Record<string, string> = {
   senator: "senatorial_district", house_of_reps: "federal_constituency", state_assembly: "state_constituency",
@@ -24,12 +25,12 @@ export function ConstituencyPicker({ state, position, value, onChange, error, li
   if (!kind) return null;
   return (
     <Select label={CONSTITUENCY_LABEL[kind]} value={value ? String(value) : ""} error={error}
-      options={[{ value: "", label: list.loading ? "Loading…" : "Not chosen (type the area below)" },
+      options={[{ value: "", label: list.loading ? t("geo.loading") : t("geo.not-chosen-type-the-area-below") },
         ...list.data.map((c) => ({ value: String(c.id), label: c.name }))]}
       onChange={(e) => {
         const id = Number(e.target.value) || null;
         onChange(id, list.data.find((c) => c.id === id)?.name ?? "");
       }}
-      hint={state ? undefined : "Choose the state first."} />
+      hint={state ? undefined : t("geo.choose-the-state-first")} />
   );
 }

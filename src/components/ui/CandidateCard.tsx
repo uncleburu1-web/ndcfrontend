@@ -8,6 +8,7 @@ import { Avatar } from "./Avatar";
 import { Icon } from "./Icon";
 import { Skeleton } from "./Skeleton";
 import "./CandidateCard.css";
+import { t } from "../../i18n";
 
 export interface CandidateCardProps {
   name: string;
@@ -30,16 +31,16 @@ export function CandidateCard({ name, position, area, party, photoSrc, photoSrcS
         <div className="ds-candidate__text">
           <h3 className="ds-candidate__name">
             {title}
-            {verified && <Icon name="verified" size={18} label="Verified candidate" className="ds-candidate__verified" />}
+            {verified && <Icon name="verified" size={18} label={t("ui.verified-candidate")} className="ds-candidate__verified" />}
           </h3>
           <p className="ds-candidate__position">{position}</p>
           <dl className="ds-candidate__meta">
             <div>
-              <dt>Area</dt>
+              <dt>{t("ui.area")}</dt>
               <dd>{area}</dd>
             </div>
             <div>
-              <dt>Party</dt>
+              <dt>{t("ui.party")}</dt>
               <dd>{party}</dd>
             </div>
           </dl>

@@ -16,25 +16,27 @@ import type { CommentPage, CommunityComment, CommunityDetail, CommunityPost, Fee
 import { LEVEL_WORDS, communityHref } from "../../communities/types";
 import "../../communities/communities.css";
 import "../../news/news.css";
+import { t } from "../../i18n";
+import { LanguageFilter } from "../../i18n/ContentLanguage";
 
 function Header({ c }: { c: CommunityDetail }) {
   return (
     <header className="comm-head">
-      <nav aria-label="Community levels">
+      <nav aria-label={t("communities.community-levels")}>
         <ol className="comm-crumbs">
-          <li><Link to="/communities">Communities</Link></li>
+          <li><Link to="/communities">{t("communities.communities")}</Link></li>
           {c.breadcrumb.map((b) => <li key={b.id}><Link to={communityHref(b.path)}>{b.name}</Link></li>)}
         </ol>
       </nav>
       <h1>{c.name}</h1>
       <div className="comm-head__meta">
         <span className="comm-level">{LEVEL_WORDS[c.level]}</span>
-        <span>{c.members} members</span>
-        <Link to="/rules">Community rules</Link>
-        {c.membership && <span>You’re a member · {c.membership.how_label}</span>}
+        <span>{t("communities.members-2", { members: c.members })}</span>
+        <Link to="/rules">{t("communities.community-rules")}</Link>
+        {c.membership && <span>{t("communities.you-re-a-member", { how_label: c.membership.how_label })}</span>}
       </div>
-      {!c.active && <Banner tone="warning">This community has closed. Its posts are read-only.</Banner>}
-      {!c.posting_open && <Banner tone="info">Posting is paused in this community.</Banner>}
+      {!c.active && <Banner tone="warning">{t("communities.this-community-has-closed-its-posts")}</Banner>}
+      {!c.posting_open && <Banner tone="info">{t("communities.posting-is-paused-in-this-community")}</Banner>}
     </header>
   );
 }
@@ -43,16 +45,14 @@ function Locked({ c, signedIn }: { c: CommunityDetail; signedIn: boolean }) {
   const here = encodeURIComponent(communityHref(c.path));
   if (!signedIn) {
     return (
-      <EmptyState icon="lock" title="Sign in to read this community" action={<Button href={`/sign-in?redirect_url=${here}`}>Sign in</Button>}>
-        Community posts are for signed-in members.
-      </EmptyState>
+      <EmptyState icon="lock" title={t("communities.sign-in-to-read-this-community")} action={<Button href={`/sign-in?redirect_url=${here}`}>{t("communities.sign-in")}</Button>}>
+        {t("communities.community-posts-are-for-signed-in")}</EmptyState>
     );
   }
   return (
-    <EmptyState icon="lock" title="Only members can read this community"
-      action={c.post_block?.code === "verification_required" ? <Button href="/pvc">Verify your PVC</Button> : <Button href="/communities">Your communities</Button>}>
-      {c.level === "national" || c.level === "state" ? "Join from Communities." :
-        "LGA, ward and polling unit communities are for verified voters registered there. We place you automatically once your PVC is verified."}
+    <EmptyState icon="lock" title={t("communities.only-members-can-read-this-community")}
+      action={c.post_block?.code === "verification_required" ? <Button href="/pvc">{t("communities.verify-your-pvc")}</Button> : <Button href="/communities">{t("communities.your-communities")}</Button>}>
+      {c.level === "national" || c.level === "state" ? t("communities.join-from-communities") : t("communities.lga-ward-and-polling-unit-communities-2")}
     </EmptyState>
   );
 }
@@ -61,7 +61,9 @@ function FeedView({ c }: { c: CommunityDetail }) {
   const api = useApi();
   const [pages, setPages] = useState<Feed[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
-  const first = useRequest(`community-feed:${c.id}`, (signal) => api<Feed>(`/communities/${c.id}/posts/`, { signal }));
+  const [language, setLanguage] = useState(""); // spec 21 §9
+  const q = language ? `?language=${language}` : "";
+  const first = useRequest(`community-feed:${c.id}:${language}`, (signal) => api<Feed>(`/communities/${c.id}/posts/${q}`, { signal }));
   useEffect(() => { if (first.data) setPages([first.data]); }, [first.data]);
   const posts = pages.flatMap((p) => p.results);
   const pinned = pages[0]?.pinned ?? [];
@@ -87,23 +89,24 @@ function FeedView({ c }: { c: CommunityDetail }) {
         <Composer<CommunityPost> path={`/communities/${c.id}/posts/`} kind="post" campaigns={c.campaigns as { id: string; name: string }[]}
           onPosted={(p) => setPages((ps) => (ps.length ? [{ ...ps[0], results: [p, ...ps[0].results] }, ...ps.slice(1)] : ps))} />
       ) : c.post_block && c.post_block.code !== "not_authenticated" ? (
-        <Banner tone="info">{c.post_block.message}{c.post_block.until ? ` (until ${formatDate(c.post_block.until, { withTime: true })})` : ""}</Banner>
+        <Banner tone="info">{c.post_block.message}{c.post_block.until ? t("communities.until", { formatDate: formatDate(c.post_block.until, { withTime: true }) }) : ""}</Banner>
       ) : null}
       {pinned.map((a) => (
         <div className="comm-pinned" key={a.id}>
-          <span className="comm-pinned__chip">Pinned · {a.category_label}</span>
+          <span className="comm-pinned__chip">{t("communities.pinned", { category_label: a.category_label })}</span>
           <h2><Link to={`/news/official/${a.id}`}>{a.title}</Link></h2>
-          <p className="news-meta">For: {a.audience.name} · {formatDate(a.published_at)}</p>
+          <p className="news-meta">{t("communities.for", { name: a.audience.name, formatDate: formatDate(a.published_at) })}</p>
         </div>
       ))}
-      {c.level !== "national" && <UpcomingStrip query={`community=${c.id}`} title="Upcoming events here" more={`/events?state=${c.state}`} />}
-      {posts.length === 0 ? <EmptyState title="No posts yet">Start the conversation.</EmptyState> : (
+      <LanguageFilter value={language} onChange={setLanguage} />
+      {c.level !== "national" && <UpcomingStrip query={`community=${c.id}`} title={t("communities.upcoming-events-here")} more={`/events?state=${c.state}`} />}
+      {posts.length === 0 ? <EmptyState title={t("communities.no-posts-yet")}>{t("communities.start-the-conversation")}</EmptyState> : (
         <ul className="comm-feed">
           {posts.map((p) => <li key={p.id}><PostCard item={p} kind="post" communityPath={c.path} showCommentsLink
             onChange={(x) => setPost(p.id, x as CommunityPost | null)} /></li>)}
         </ul>
       )}
-      {next && <Button variant="secondary" onClick={() => void more()} loading={loadingMore}>Load more</Button>}
+      {next && <Button variant="secondary" onClick={() => void more()} loading={loadingMore}>{t("communities.load-more")}</Button>}
     </>
   );
 }
@@ -121,7 +124,7 @@ function PostView({ c, postId }: { c: CommunityDetail; postId: string }) {
     if (hash && list.length) document.getElementById(hash.slice(1))?.scrollIntoView?.();
   }, [list.length]);
   if (post.error) {
-    return <EmptyState title="Post not found" action={<Button href={communityHref(c.path)}>Back to {c.name}</Button>}>It may have been deleted.</EmptyState>;
+    return <EmptyState title={t("communities.post-not-found")} action={<Button href={communityHref(c.path)}>{t("communities.back-to", { name: c.name })}</Button>}>{t("communities.it-may-have-been-deleted")}</EmptyState>;
   }
   if (!p) return <Skeleton width="100%" height={200} />;
   return (
@@ -129,7 +132,7 @@ function PostView({ c, postId }: { c: CommunityDetail; postId: string }) {
       <p className="article-back"><Link to={communityHref(c.path)}>← {c.name}</Link></p>
       <PostCard item={p} kind="post" communityPath={c.path} onChange={(x) => setP(x as CommunityPost)} />
       <section aria-labelledby="comments-h">
-        <h2 id="comments-h">{p.comment_count} comment{p.comment_count === 1 ? "" : "s"}</h2>
+        <h2 id="comments-h">{t("communities.comment-2", { comment_count: p.comment_count, v: p.comment_count === 1 ? "" : "s" })}</h2>
         {list.length > 0 && (
           <ul className="comm-comments">
             {list.map((x) => <li key={x.id}><PostCard item={x} kind="comment" communityPath={c.path}
@@ -157,11 +160,11 @@ export default function CommunityPage() {
   const res = useRequest(`community:${path}:${isSignedIn ? 1 : 0}`, (signal) =>
     api<CommunityDetail>(`/communities/lookup/?path=${encodeURIComponent(path)}`, { signal, anonymous: !isSignedIn }));
   const c = res.data;
-  useEffect(() => { document.title = c ? `${c.name} | NDCConnect` : "Community | NDCConnect"; }, [c]);
+  useEffect(() => { document.title = c ? t("communities.ndcconnect", { name: c.name }) : t("communities.community-ndcconnect"); }, [c]);
 
   if (res.error) {
-    return <div className="comm-page"><EmptyState title="Community not found" action={<Button href="/communities">All communities</Button>}>
-      The link may be wrong, or the community has closed.</EmptyState></div>;
+    return <div className="comm-page"><EmptyState title={t("communities.community-not-found")} action={<Button href="/communities">{t("communities.all-communities")}</Button>}>
+      {t("communities.the-link-may-be-wrong-or")}</EmptyState></div>;
   }
   if (!c) return <div className="comm-page" aria-busy="true"><Skeleton width="60%" height={36} /><Skeleton width="100%" height={240} /></div>;
   return (

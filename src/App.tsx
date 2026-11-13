@@ -106,6 +106,7 @@ import { AdminMfaGate } from "./privacy/AdminMfaGate";
 import HomePage from "./pages/HomePage";
 import PublicProfilePage from "./pages/people/PublicProfilePage";
 import AdminSettingsDefaultsPage from "./pages/admin/settings/AdminSettingsDefaultsPage";
+import AdminLanguagesPage from "./pages/admin/languages/AdminLanguagesPage";
 import SettingsLayout from "./settings/SettingsLayout";
 import AccountSection from "./settings/sections/AccountSection";
 import ProfileSection from "./settings/sections/ProfileSection";
@@ -115,11 +116,12 @@ import PrivacySection from "./settings/sections/PrivacySection";
 import { ConnectedSection, SecuritySection } from "./settings/sections/SecuritySection";
 import ManageSection from "./settings/sections/ManageSection";
 import AboutSection from "./settings/sections/AboutSection";
+import { t } from "./i18n";
 
 function NotFound() {
   return (
     <div className="page-shell">
-      <EmptyState title="Page not found">That address doesn’t lead anywhere on NDCConnect yet.</EmptyState>
+      <EmptyState title={t("app.page-not-found")}>{t("app.that-address-doesn-t-lead-anywhere")}</EmptyState>
     </div>
   );
 }
@@ -247,6 +249,7 @@ export default function App() {
             <Route path="admin/communities" element={<AdminCommunitiesPage />} />
             <Route path="admin/events" element={<AdminEventsPage />} />
             <Route path="admin/settings/defaults" element={<AdminSettingsDefaultsPage />} />
+            <Route path="admin/languages" element={<AdminLanguagesPage />} />
           </Route>
           {/* System admin or finance officer (spec 05 §7.2) */}
           <Route element={<RequireFinanceViewer />}>

@@ -11,3 +11,19 @@
   margin: var(--space-4) auto 0;
   padding: 0 var(--space-4);
 }
+
+/* Spec 21 §9: the language of someone's words, and the feed language filter */
+.content-lang {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.lang-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.lang-filter select {
+  max-width: 14rem;
+}

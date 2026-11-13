@@ -2,6 +2,7 @@
 import { NavLink } from "react-router-dom";
 import { useMe } from "../../../auth/session";
 import "../membership/admin-membership.css";
+import { t } from "../../../i18n";
 
 export function ModerationNav({ current, counts }: { current: string; counts?: Record<string, number> }) {
   const { me } = useMe();
@@ -15,7 +16,7 @@ export function ModerationNav({ current, counts }: { current: string; counts?: R
     ...(sys ? [["legal", "Legal notices", "/admin/moderation/legal"], ["compliance", "Compliance report", "/admin/moderation/compliance"]] as [string, string, string][] : []),
   ];
   return (
-    <nav className="adm-subnav" aria-label="Moderation">
+    <nav className="adm-subnav" aria-label={t("admin.moderation")}>
       {tabs.map(([id, label, href]) => (
         <NavLink key={id} to={href} end className={() => (current === id ? "active" : "")} aria-current={current === id ? "page" : undefined}>
           {label}{counts && counts[id] ? ` (${counts[id]})` : ""}

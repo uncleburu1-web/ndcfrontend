@@ -13,6 +13,7 @@ import { STATES } from "../../lib/nigeria";
 import type { Community, MyCommunities } from "../../communities/types";
 import { LEVEL_WORDS, communityHref } from "../../communities/types";
 import "../../communities/communities.css";
+import { t } from "../../i18n";
 
 export function CommunityCards({ items }: { items: Community[] }) {
   return (
@@ -21,7 +22,7 @@ export function CommunityCards({ items }: { items: Community[] }) {
         <li key={c.id}>
           <Link className="comm-card" to={communityHref(c.path)}>
             <span className="comm-card__name">{c.name}</span>
-            <span className="comm-card__meta">{LEVEL_WORDS[c.level]} · {c.members} members</span>
+            <span className="comm-card__meta">{t("communities.members", { LEVEL_WORDS: LEVEL_WORDS[c.level], members: c.members })}</span>
           </Link>
         </li>
       ))}
@@ -41,7 +42,7 @@ function YourCommunities({ me, onChange }: { me: MyCommunities; onChange: (m: My
       onChange(await fn());
       toast.show({ tone: "success", message: done });
     } catch (err) {
-      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : "That didn’t work. Try again." });
+      toast.show({ tone: "error", message: err instanceof ApiError ? err.message : t("communities.that-didn-t-work-try-again") });
     } finally {
       setBusy("");
     }
@@ -49,37 +50,35 @@ function YourCommunities({ me, onChange }: { me: MyCommunities; onChange: (m: My
   if (!me.consented) {
     return (
       <section className="adm-panel" aria-labelledby="join-h">
-        <h2 id="join-h">Join your communities</h2>
-        <p>Discuss politics with people in your state, LGA, ward and polling unit. Nobody can see who is in a community; your posts show your
-          first name and last initial.</p>
+        <h2 id="join-h">{t("communities.join-your-communities")}</h2>
+        <p>{t("communities.discuss-politics-with-people-in-your")}</p>
         <Button loading={busy === "join"} onClick={() => void run("join", () => api<MyCommunities>("/me/communities/join/", { method: "POST" }),
-          "You’ve joined.")}>Join communities</Button>
+          t("communities.you-ve-joined"))}>{t("communities.join-communities")}</Button>
       </section>
     );
   }
   return (
     <section aria-labelledby="yours-h">
-      <h2 id="yours-h">Your communities</h2>
+      <h2 id="yours-h">{t("communities.your-communities")}</h2>
       {!me.verified && (
-        <Banner tone="info" title="Verify your PVC to join your local communities"
-          action={<Button href="/pvc" variant="secondary" size="sm">Verify your PVC</Button>}>
-          Verify your PVC to join your LGA, ward (registration area) and polling unit communities.
-        </Banner>
+        <Banner tone="info" title={t("communities.verify-your-pvc-to-join-your-2")}
+          action={<Button href="/pvc" variant="secondary" size="sm">{t("communities.verify-your-pvc")}</Button>}>
+          {t("communities.verify-your-pvc-to-join-your")}</Banner>
       )}
-      {me.verified && me.unmatched && <Banner tone="info">We couldn’t match your polling unit to INEC’s list yet. You’re in your state (and LGA, if it matched).</Banner>}
-      {!me.geography_loaded && <Banner tone="info">LGA, ward and polling unit communities open when INEC’s polling-unit list is loaded.</Banner>}
-      {me.memberships.length ? <CommunityCards items={me.memberships.map((m) => m.community)} /> : <p>You’re not in a state community yet.</p>}
+      {me.verified && me.unmatched && <Banner tone="info">{t("communities.we-couldn-t-match-your-polling")}</Banner>}
+      {!me.geography_loaded && <Banner tone="info">{t("communities.lga-ward-and-polling-unit-communities")}</Banner>}
+      {me.memberships.length ? <CommunityCards items={me.memberships.map((m) => m.community)} /> : <p>{t("communities.you-re-not-in-a-state")}</p>}
       {!hasState && !me.verified && (
         <form className="comm-composer" onSubmit={(e) => {
           e.preventDefault();
-          void run("state", () => api<MyCommunities>("/me/communities/state/", { method: "POST", body: { state } }), "You’ve joined your state community.");
+          void run("state", () => api<MyCommunities>("/me/communities/state/", { method: "POST", body: { state } }), t("communities.you-ve-joined-your-state-community"));
         }}>
-          <Select label="Choose your state community" required value={state} onChange={(e) => setState(e.target.value)} placeholder="Choose a state"
-            options={STATES} hint="You can change it once every 30 days. Verifying your PVC places you in your registered state." />
-          <div><Button type="submit" disabled={!state} loading={busy === "state"}>Join</Button></div>
+          <Select label={t("communities.choose-your-state-community")} required value={state} onChange={(e) => setState(e.target.value)} placeholder={t("communities.choose-a-state")}
+            options={STATES} hint={t("communities.you-can-change-it-once-every")} />
+          <div><Button type="submit" disabled={!state} loading={busy === "state"}>{t("communities.join")}</Button></div>
         </form>
       )}
-      <p><Link to="/account/communities">Manage your communities</Link></p>
+      <p><Link to="/account/communities">{t("communities.manage-your-communities")}</Link></p>
     </section>
   );
 }
@@ -92,28 +91,27 @@ export default function CommunitiesPage() {
     isSignedIn ? api<MyCommunities>("/me/communities/", { signal }) : Promise.resolve(null));
   const [me, setMe] = useState<MyCommunities | null>(null);
   useEffect(() => { setMe(mine.data); }, [mine.data]);
-  useEffect(() => { document.title = "Communities | NDCConnect"; }, []);
+  useEffect(() => { document.title = t("communities.communities-ndcconnect"); }, []);
 
   const national = list.data?.filter((c) => c.level === "national") ?? [];
   const states = list.data?.filter((c) => c.level === "state") ?? [];
   return (
     <div className="comm-page">
       <header className="comm-head">
-        <h1>Communities</h1>
-        <p>Talk about politics and public life with people where you vote, beyond election time.</p>
+        <h1>{t("communities.communities")}</h1>
+        <p>{t("communities.talk-about-politics-and-public-life")}</p>
       </header>
       {!isSignedIn && (
-        <Banner tone="info" title="Sign in to take part" action={<Button href="/sign-in?redirect_url=%2Fcommunities" size="sm">Sign in</Button>}>
-          Community posts are for signed-in members.
-        </Banner>
+        <Banner tone="info" title={t("communities.sign-in-to-take-part")} action={<Button href="/sign-in?redirect_url=%2Fcommunities" size="sm">{t("communities.sign-in")}</Button>}>
+          {t("communities.community-posts-are-for-signed-in")}</Banner>
       )}
       {isSignedIn && (me ? <YourCommunities me={me} onChange={setMe} /> : mine.error ? <Banner tone="error">{mine.error.message}</Banner>
         : <Skeleton width="100%" height={120} />)}
       <section aria-labelledby="browse-h">
-        <h2 id="browse-h">Browse</h2>
-        {list.error && <EmptyState title="Communities couldn’t load" action={<Button onClick={list.retry}>Try again</Button>} />}
+        <h2 id="browse-h">{t("communities.browse")}</h2>
+        {list.error && <EmptyState title={t("communities.communities-couldn-t-load")} action={<Button onClick={list.retry}>{t("communities.try-again")}</Button>} />}
         {!list.data && !list.error && <Skeleton width="100%" height={200} />}
-        {list.data && <><CommunityCards items={national} /><h3>States</h3><CommunityCards items={states} /></>}
+        {list.data && <><CommunityCards items={national} /><h3>{t("communities.states")}</h3><CommunityCards items={states} /></>}
       </section>
     </div>
   );

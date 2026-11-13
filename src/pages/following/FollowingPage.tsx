@@ -12,6 +12,7 @@ import { CandidateVote } from "../../follows/CandidateVote";
 import { useFollows } from "../../follows/FollowProvider";
 import type { FollowPage } from "../../follows/types";
 import "./following.css";
+import { t } from "../../i18n";
 
 const PAGE_SIZE = 20;
 
@@ -23,7 +24,7 @@ export default function FollowingPage() {
   const res = useRequest(`following:${page}`, (signal) => api<FollowPage>(`/me/follows/${page > 1 ? `?page=${page}` : ""}`, { signal }));
 
   useEffect(() => {
-    document.title = "Following | NDCConnect";
+    document.title = t("following.following-ndcconnect");
   }, []);
   const { seed } = f;
   useEffect(() => {
@@ -37,19 +38,18 @@ export default function FollowingPage() {
   return (
     <div className="following-page">
       <header className="following-page__head">
-        <h1>Following</h1>
+        <h1>{t("following.following")}</h1>
         <p className="following-page__lead">
-          Candidates you’ve voted for (followed). Only you can see this list. Turn on the bell to be notified when a candidate posts.
-        </p>
+          {t("following.candidates-you-ve-voted-for-followed")}</p>
       </header>
 
       {res.error ? (
-        <Banner tone="error" title="We couldn’t load who you follow" action={<Button variant="secondary" size="sm" onClick={res.retry}>Try again</Button>}>
+        <Banner tone="error" title={t("following.we-couldn-t-load-who-you")} action={<Button variant="secondary" size="sm" onClick={res.retry}>{t("following.try-again")}</Button>}>
           {res.error.message}
         </Banner>
       ) : res.loading && !res.data ? (
         <div aria-busy="true">
-          <span className="visually-hidden">Loading who you follow</span>
+          <span className="visually-hidden">{t("following.loading-who-you-follow")}</span>
           <ul className="following-list">
           {Array.from({ length: 3 }, (_, i) => (
             <li key={i} className="following-row">
@@ -63,15 +63,13 @@ export default function FollowingPage() {
           </ul>
         </div>
       ) : res.data && rows.length === 0 && res.data.count === 0 ? (
-        <EmptyState title="You’re not following anyone yet." action={<Button href="/candidates">Browse candidates</Button>}>
-          Tap Vote on a candidate’s profile to follow them. It’s free.
-        </EmptyState>
+        <EmptyState title={t("following.you-re-not-following-anyone-yet")} action={<Button href="/candidates">{t("following.browse-candidates")}</Button>}>
+          {t("following.tap-vote-on-a-candidate-s")}</EmptyState>
       ) : res.data ? (
         <>
           {rows.length === 0 ? (
-            <EmptyState title="You’re not following anyone on this page any more." action={<Button href="/candidates">Browse candidates</Button>}>
-              Candidates you unfollow disappear from this list.
-            </EmptyState>
+            <EmptyState title={t("following.you-re-not-following-anyone-on")} action={<Button href="/candidates">{t("following.browse-candidates")}</Button>}>
+              {t("following.candidates-you-unfollow-disappear-from-this")}</EmptyState>
           ) : (
             <ul className="following-list">
               {rows.map((r) => (
@@ -96,9 +94,9 @@ export default function FollowingPage() {
             page={page}
             pageCount={Math.ceil(res.data.count / PAGE_SIZE)}
             onChange={(p) => setParams(p > 1 ? { page: String(p) } : {})}
-            label="Following pages"
+            label={t("following.following-pages")}
           />
-          {hidden > 0 && <p className="following-page__hidden">Some candidates you followed are no longer listed.</p>}
+          {hidden > 0 && <p className="following-page__hidden">{t("following.some-candidates-you-followed-are-no")}</p>}
         </>
       ) : null}
     </div>

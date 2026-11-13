@@ -14,7 +14,12 @@
     "api:sync": "node scripts/api-sync.mjs",
     "api:types": "openapi-typescript api/openapi.json -o src/api/schema.d.ts && node scripts/api-header.mjs",
     "check:secrets": "node scripts/check-secrets.mjs",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "check:fonts": "node scripts/check-fonts.mjs",
+    "i18n:export": "node scripts/i18n-csv.mjs export",
+    "i18n:import": "node scripts/i18n-csv.mjs import",
+    "i18n:extract": "node scripts/i18n-extract.mjs"
   },
   "dependencies": {
     "@clerk/react": "^6.18.4",

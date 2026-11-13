@@ -1,5 +1,6 @@
 /** Geography types (spec 19 §13), from the generated OpenAPI schema. */
 import type { Schema } from "../api/typed";
+import { t } from "../i18n";
 
 export type GeoState = Schema<"StateSchema">;
 export type GeoLga = Schema<"LgaSchema">;
@@ -55,7 +56,7 @@ export function geoFrom(place: GeoPlace | null | undefined, typed?: { lga?: stri
 export const lgaWord = (state: string) => (state === "fct" ? "Area council" : "LGA");
 
 export const CONSTITUENCY_LABEL: Record<string, string> = {
-  senatorial_district: "Senatorial district",
-  federal_constituency: "Federal constituency",
-  state_constituency: "State constituency",
+  get senatorial_district() { return t("geo.senatorial-district"); },
+  get federal_constituency() { return t("geo.federal-constituency"); },
+  get state_constituency() { return t("geo.state-constituency"); },
 };

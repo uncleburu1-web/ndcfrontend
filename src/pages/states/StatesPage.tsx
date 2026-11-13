@@ -6,6 +6,7 @@ import { useRequest } from "../../candidates/useRequest";
 import { Banner, Button, Skeleton } from "../../components/ui";
 import type { StateSummary } from "../../search/types";
 import "../../search/search.css";
+import { t } from "../../i18n";
 
 const plural = (n: number, one: string, many: string) => `${n.toLocaleString()} ${n === 1 ? one : many}`;
 
@@ -13,14 +14,14 @@ export default function StatesPage() {
   const api = useApi();
   const res = useRequest("states", (signal) => api<{ results: StateSummary[] }>("/states/", { anonymous: true, signal }));
   useEffect(() => {
-    document.title = "States | NDCConnect";
+    document.title = t("states.states-ndcconnect");
   }, []);
   return (
     <div className="states-page">
-      <h1>States</h1>
-      <p className="news-meta">Candidates, news and candidate posts for each state and the FCT.</p>
+      <h1>{t("states.states")}</h1>
+      <p className="news-meta">{t("states.candidates-news-and-candidate-posts-for")}</p>
       {res.error ? (
-        <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>{res.error.message}</Banner>
+        <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={res.retry}>{t("states.try-again")}</Button>}>{res.error.message}</Banner>
       ) : !res.data ? (
         <Skeleton width="100%" height={300} />
       ) : (

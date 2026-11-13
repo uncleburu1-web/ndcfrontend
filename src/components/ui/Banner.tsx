@@ -10,6 +10,7 @@ import { useState, type ReactNode } from "react";
 import { ErrorReference, splitReference } from "./ErrorReference";
 import { Icon, type IconName } from "./Icon";
 import "./Banner.css";
+import { t } from "../../i18n";
 
 export type BannerTone = "info" | "success" | "warning" | "error";
 
@@ -82,7 +83,7 @@ export function Banner({ tone = "info", title, children, dismissible, dismissKey
         {action && <div className="ds-banner__action">{action}</div>}
       </div>
       {canDismiss && (
-        <button type="button" className="ds-banner__close" onClick={dismiss} aria-label="Dismiss">
+        <button type="button" className="ds-banner__close" onClick={dismiss} aria-label={t("ui.dismiss")}>
           <Icon name="close" size={18} />
         </button>
       )}

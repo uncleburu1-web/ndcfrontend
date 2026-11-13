@@ -7,6 +7,7 @@ import { Banner, EmptyState, Skeleton, Tabs } from "../../components/ui";
 import type { MyEvent } from "../../events/types";
 import { whenWords } from "../../events/types";
 import "../../events/events.css";
+import { t } from "../../i18n";
 
 function Rows({ when }: { when: "upcoming" | "past" }) {
   const api = useApi();
@@ -14,19 +15,19 @@ function Rows({ when }: { when: "upcoming" | "past" }) {
   if (res.error) return <Banner tone="error">{res.error.message}</Banner>;
   if (!res.data) return <Skeleton width="100%" height={160} />;
   if (!res.data.results.length) {
-    return <EmptyState title={when === "past" ? "No past events" : "No upcoming events"}>
-      <Link to="/events">Find an event</Link></EmptyState>;
+    return <EmptyState title={when === "past" ? t("events.no-past-events") : t("events.no-upcoming-events")}>
+      <Link to="/events">{t("events.find-an-event")}</Link></EmptyState>;
   }
   return (
     <ul className="ev-cards">
       {res.data.results.map(({ event: e, registration: r, online_url }) => (
         <li key={e.id} className="ev-box">
           <h2 className="ev-card__title"><Link to={`/events/${e.id}`}>{e.title}</Link></h2>
-          <p className="ev-meta">{whenWords(e.starts_at)} · {e.place} · Organised by {e.organiser.label}</p>
-          {e.status === "cancelled" && <Banner tone="warning">Cancelled.</Banner>}
-          {r.status === "registered" && <p>Ticket code <span className="ev-ticket">{r.ticket_code}</span>{r.checked_in ? " · Checked in" : ""}</p>}
-          {r.status === "waitlisted" && <p>Waitlist number {r.waitlist_position}</p>}
-          {online_url && when === "upcoming" && <p><a href={online_url} target="_blank" rel="noopener noreferrer nofollow">Join online</a></p>}
+          <p className="ev-meta">{t("events.organised-by-3", { whenWords: whenWords(e.starts_at), place: e.place, label: e.organiser.label })}</p>
+          {e.status === "cancelled" && <Banner tone="warning">{t("events.cancelled-2")}</Banner>}
+          {r.status === "registered" && <p>{t.rich("events.ticket-code-3", { ticket_code: r.ticket_code, span: (chunks) => <span className="ev-ticket">{chunks}</span>, v: r.checked_in ? t("events.checked-in-5") : "" })}</p>}
+          {r.status === "waitlisted" && <p>{t("events.waitlist-number", { waitlist_position: r.waitlist_position })}</p>}
+          {online_url && when === "upcoming" && <p><a href={online_url} target="_blank" rel="noopener noreferrer nofollow">{t("events.join-online")}</a></p>}
         </li>
       ))}
     </ul>
@@ -35,16 +36,16 @@ function Rows({ when }: { when: "upcoming" | "past" }) {
 
 export default function MyEventsPage() {
   const [tab, setTab] = useState("upcoming");
-  useEffect(() => { document.title = "My events | NDCConnect"; }, []);
+  useEffect(() => { document.title = t("events.my-events-ndcconnect"); }, []);
   return (
     <div className="ev-page ev-narrow">
       <header>
-        <p className="article-back"><Link to="/settings/account">← My account</Link></p>
-        <h1>My events</h1>
-        <p>Only you can see which events you registered for. To stop registering for events, withdraw that consent in <Link to="/settings/privacy/data">Your data</Link>.</p>
+        <p className="article-back"><Link to="/settings/account">{t("events.my-account")}</Link></p>
+        <h1>{t("events.my-events")}</h1>
+        <p>{t.rich("events.only-you-can-see-which-events", { link: (chunks) => <Link to="/settings/privacy/data">{chunks}</Link> })}</p>
       </header>
-      <Tabs label="When" value={tab} onChange={setTab}
-        tabs={[{ id: "upcoming", label: "Upcoming", content: <Rows when="upcoming" /> }, { id: "past", label: "Past", content: <Rows when="past" /> }]} />
+      <Tabs label={t("events.when")} value={tab} onChange={setTab}
+        tabs={[{ id: "upcoming", label: t("events.upcoming"), content: <Rows when="upcoming" /> }, { id: "past", label: t("events.past"), content: <Rows when="past" /> }]} />
     </div>
   );
 }

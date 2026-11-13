@@ -9,6 +9,7 @@ import { EventCardItem } from "../../events/EventCardItem";
 import type { EventCard, EventList } from "../../events/types";
 import { TYPE_OPTIONS } from "../../events/types";
 import "../../events/events.css";
+import { t } from "../../i18n";
 
 export default function EventsPage() {
   const api = useApi();
@@ -23,7 +24,7 @@ export default function EventsPage() {
   const [next, setNext] = useState<string | null>(null);
   const [more, setMore] = useState(false);
   useEffect(() => { if (res.data) { setItems(res.data.results); setNext(res.data.next); } }, [res.data]);
-  useEffect(() => { document.title = "Events | NDCConnect"; }, []);
+  useEffect(() => { document.title = t("events.events-ndcconnect"); }, []);
   const set = (k: string, v: string) => {
     const p = new URLSearchParams(params);
     if (v) p.set(k, v); else p.delete(k);
@@ -46,27 +47,27 @@ export default function EventsPage() {
       {!res.data && !res.error && <Skeleton width="100%" height={240} />}
       {res.data && (items.length ? (
         <ul className="ev-cards">{items.map((e) => <EventCardItem key={e.id} e={e} />)}</ul>
-      ) : <EmptyState title={when === "past" ? "No past events" : "No upcoming events"}>Try another state or type.</EmptyState>)}
-      {next && <Button variant="secondary" onClick={() => void loadMore()} loading={more}>Load more</Button>}
+      ) : <EmptyState title={when === "past" ? t("events.no-past-events") : t("events.no-upcoming-events")}>{t("events.try-another-state-or-type")}</EmptyState>)}
+      {next && <Button variant="secondary" onClick={() => void loadMore()} loading={more}>{t("events.load-more")}</Button>}
     </>
   );
   return (
     <div className="ev-page">
       <header>
-        <h1>Events</h1>
-        <p>Rallies, town halls, meetings and trainings from candidates’ campaigns and the party.</p>
+        <h1>{t("events.events")}</h1>
+        <p>{t("events.rallies-town-halls-meetings-and-trainings")}</p>
       </header>
-      <div className="ev-filters" role="group" aria-label="Filter events">
-        <Select label="State" value={params.get("state") ?? ""} onChange={(e) => set("state", e.target.value)}
-          options={[{ value: "", label: "All states" }, ...STATES]} />
-        <Select label="Type" value={params.get("type") ?? ""} onChange={(e) => set("type", e.target.value)}
-          options={[{ value: "", label: "All types" }, ...TYPE_OPTIONS]} />
-        <Switch label="Online" checked={params.get("mode") === "online"} onChange={(v: boolean) => set("mode", v ? "online" : "")} />
-        <Switch label="This week" checked={params.get("this_week") === "1"} onChange={(v: boolean) => set("this_week", v ? "1" : "")} />
+      <div className="ev-filters" role="group" aria-label={t("events.filter-events")}>
+        <Select label={t("events.state")} value={params.get("state") ?? ""} onChange={(e) => set("state", e.target.value)}
+          options={[{ value: "", label: t("events.all-states") }, ...STATES]} />
+        <Select label={t("events.type")} value={params.get("type") ?? ""} onChange={(e) => set("type", e.target.value)}
+          options={[{ value: "", label: t("events.all-types") }, ...TYPE_OPTIONS]} />
+        <Switch label={t("events.online")} checked={params.get("mode") === "online"} onChange={(v: boolean) => set("mode", v ? "online" : "")} />
+        <Switch label={t("events.this-week")} checked={params.get("this_week") === "1"} onChange={(v: boolean) => set("this_week", v ? "1" : "")} />
       </div>
-      <Tabs label="When" value={when} onChange={(v) => set("when", v === "past" ? "past" : "")}
-        tabs={[{ id: "upcoming", label: "Upcoming", content: when === "upcoming" ? list : null },
-          { id: "past", label: "Past", content: when === "past" ? list : null }]} />
+      <Tabs label={t("events.when")} value={when} onChange={(v) => set("when", v === "past" ? "past" : "")}
+        tabs={[{ id: "upcoming", label: t("events.upcoming"), content: when === "upcoming" ? list : null },
+          { id: "past", label: t("events.past"), content: when === "past" ? list : null }]} />
     </div>
   );
 }

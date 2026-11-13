@@ -9,6 +9,7 @@ import type { AdminNewsPage as Page } from "../../../news/types";
 import { AdminNav } from "../AdminNav";
 import "../candidates/admin.css";
 import "../membership/admin-membership.css";
+import { t as tr } from "../../../i18n";
 
 const TABS = [["pending", "Pending"], ["reported", "Reported"], ["successful", "Published"], ["rejected", "Rejected"], ["removed", "Removed"]] as const;
 
@@ -26,7 +27,7 @@ function AdminNewsQueue() {
   const res = useRequest(`admin-news:${qs}`, (signal) => api<Page>(`/admin/news/?${qs}`, { signal }));
 
   useEffect(() => {
-    document.title = "News review | NDCConnect admin";
+    document.title = tr("admin.news-review-ndcconnect-admin");
   }, []);
   const counts = res.data?.counts;
   const tabHref = (t: string) => `/admin/news${t === "pending" ? "" : `?tab=${t}`}`;
@@ -44,11 +45,11 @@ function AdminNewsQueue() {
       <AdminNav current="news" />
       <header className="adm-page__head">
         <div>
-          <h1>News review</h1>
-          <p className="ds-field__hint">Approve or reject; never rewrite. Check the source, results only from INEC, no abuse or incitement, no private information.</p>
+          <h1>{tr("admin.news-review")}</h1>
+          <p className="ds-field__hint">{tr("admin.approve-or-reject-never-rewrite-check")}</p>
         </div>
       </header>
-      <nav className="adm-subnav" aria-label="Review queues">
+      <nav className="adm-subnav" aria-label={tr("admin.review-queues")}>
         {TABS.map(([id, label]) => (
           <NavLink key={id} to={tabHref(id)} className={() => (tab === id ? "active" : "")} aria-current={tab === id ? "page" : undefined}>
             {label}
@@ -58,40 +59,39 @@ function AdminNewsQueue() {
         ))}
       </nav>
       {counts?.paused_until && (
-        <Banner tone="warning" title="Approvals are paused">
-          Campaign blackout until {formatDate(counts.paused_until, { withTime: true })}. You can still reject, remove and dismiss reports.
-        </Banner>
+        <Banner tone="warning" title={tr("admin.approvals-are-paused")}>
+          {tr("admin.campaign-blackout-until-you-can-still", { formatDate: formatDate(counts.paused_until, { withTime: true }) })}</Banner>
       )}
       {tab === "reported" && counts?.oldest_open_report && (
-        <Banner tone="warning">Oldest open report: {formatDate(counts.oldest_open_report, { withTime: true })}. Aim to act within 24 hours.</Banner>
+        <Banner tone="warning">{tr("admin.oldest-open-report-aim-to-act", { formatDate: formatDate(counts.oldest_open_report, { withTime: true }) })}</Banner>
       )}
       <form className="adm-filters__search" onSubmit={onSearch}>
-        <TextField label="Search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Title or author email" />
-        <Button type="submit" variant="secondary">Search</Button>
+        <TextField label={tr("admin.search")} value={search} onChange={(e) => setSearch(e.target.value)} placeholder={tr("admin.title-or-author-email")} />
+        <Button type="submit" variant="secondary">{tr("admin.search")}</Button>
       </form>
       {res.error ? (
-        <Banner tone="error" title="We couldn’t load the queue" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>{res.error.message}</Banner>
+        <Banner tone="error" title={tr("admin.we-couldn-t-load-the-queue")} action={<Button size="sm" variant="secondary" onClick={res.retry}>{tr("admin.try-again-2")}</Button>}>{res.error.message}</Banner>
       ) : res.loading && !res.data ? (
         <Skeleton width="100%" height={160} />
       ) : res.data && res.data.count === 0 ? (
-        <EmptyState title={tab === "pending" ? "Nothing waiting for review" : "Nothing here"} />
+        <EmptyState title={tab === "pending" ? tr("admin.nothing-waiting-for-review") : tr("admin.nothing-here")} />
       ) : res.data ? (
         <>
           <div className="adm-table-wrap"><table className="adm-table">
-            <thead><tr><th>{tab === "pending" ? "Submitted" : "Date"}</th><th>Title</th><th>Source</th><th>Status</th><th>Reports</th></tr></thead>
+            <thead><tr><th>{tab === "pending" ? tr("admin.submitted") : tr("admin.date")}</th><th>{tr("admin.title")}</th><th>{tr("admin.source")}</th><th>{tr("admin.status")}</th><th>{tr("admin.reports-2")}</th></tr></thead>
             <tbody>
               {res.data.results.map((a) => (
                 <tr key={a.id}>
                   <td>{formatDate(a.submitted_at ?? a.published_at ?? a.created_at)}</td>
-                  <td><Link to={`/admin/news/${a.id}`}>{a.title}</Link><br /><span className="ds-field__hint">{a.source === "official" ? "Official" : a.author_email}{a.is_own ? " · your submission" : ""}</span></td>
-                  <td>{a.source === "official" ? "Official" : "Community"}</td>
+                  <td><Link to={`/admin/news/${a.id}`}>{a.title}</Link><br /><span className="ds-field__hint">{a.source === "official" ? tr("admin.official") : a.author_email}{a.is_own ? tr("admin.your-submission") : ""}</span></td>
+                  <td>{a.source === "official" ? tr("admin.official") : tr("admin.community")}</td>
                   <td><StatusBadge set="news" status={a.status} /></td>
                   <td>{a.open_reports || "—"}</td>
                 </tr>
               ))}
             </tbody>
           </table></div>
-          <Pagination page={page} pageCount={Math.ceil(res.data.count / 20)} label="Queue pages"
+          <Pagination page={page} pageCount={Math.ceil(res.data.count / 20)} label={tr("admin.queue-pages")}
             onChange={(p) => { const n = new URLSearchParams(params); if (p > 1) n.set("page", String(p)); else n.delete("page"); setParams(n); }} />
         </>
       ) : null}

@@ -9,6 +9,7 @@ import { Banner, Button, Icon, useToast } from "../../components/ui";
 import { formatDate } from "../../lib/format";
 import type { MyPrivacy } from "../../privacy/types";
 import { SectionShell, useSettingsData } from "../SettingsLayout";
+import { t } from "../../i18n";
 
 function SignOutButtons() {
   const api = useApi();
@@ -21,23 +22,23 @@ function SignOutButtons() {
     setError("");
     try {
       const r = await api<Schema<"SignedOut">>("/me/settings/security/sign-out-others/", { method: "POST" });
-      toast.show({ tone: "success", message: r.signed_out ? `Signed out of ${r.signed_out} other ${r.signed_out === 1 ? "device" : "devices"}.` : "No other devices were signed in." });
+      toast.show({ tone: "success", message: r.signed_out ? `Signed out of ${r.signed_out} other ${r.signed_out === 1 ? "device" : "devices"}.` : t("settings.no-other-devices-were-signed-in") });
     } catch (err) {
       if (err instanceof ApiError && err.code === CANCELLED_REVERIFICATION) return;
-      setError(err instanceof ApiError ? err.message : "Couldn’t sign out your other devices. Nothing changed. Try again.");
+      setError(err instanceof ApiError ? err.message : t("settings.couldn-t-sign-out-your-other"));
     } finally {
       setBusy(false);
     }
   };
   return (
     <div className="set-card">
-      <h3>Sign out</h3>
+      <h3>{t("settings.sign-out")}</h3>
       {error && <Banner tone="error">{error}</Banner>}
       <div className="set-actions">
-        <Button variant="secondary" onClick={() => void signOut({ redirectUrl: "/" })}>Sign out of this device</Button>
-        <Button variant="secondary" onClick={() => void others()} loading={busy} loadingLabel="Signing out…">Sign out of all other devices</Button>
+        <Button variant="secondary" onClick={() => void signOut({ redirectUrl: "/" })}>{t("settings.sign-out-of-this-device")}</Button>
+        <Button variant="secondary" onClick={() => void others()} loading={busy} loadingLabel={t("settings.signing-out")}>{t("settings.sign-out-of-all-other-devices")}</Button>
       </div>
-      <p className="set-meta">Signing out other devices asks you to confirm it’s you first.</p>
+      <p className="set-meta">{t("settings.signing-out-other-devices-asks-you")}</p>
     </div>
   );
 }
@@ -50,8 +51,8 @@ function SecurityNotices() {
   }, [api]);
   return (
     <div className="set-card">
-      <h3><Icon name="shield" size={18} /> Recent security notices</h3>
-      {notices === null ? <p className="set-meta">Loading…</p> : notices.length === 0 ? <p className="set-meta">None. We tell you here if something affects your account.</p> : (
+      <h3>{t.rich("settings.recent-security-notices", { icon: <Icon name="shield" size={18} /> })}</h3>
+      {notices === null ? <p className="set-meta">{t("settings.loading")}</p> : notices.length === 0 ? <p className="set-meta">{t("settings.none-we-tell-you-here-if")}</p> : (
         <ul className="set-notices">
           {notices.map((n) => (
             <li key={n.id}>
@@ -69,10 +70,10 @@ export function SecuritySection() {
   const { settings } = useSettingsData();
   const a = settings?.account;
   return (
-    <SectionShell title="Security" intro="Email addresses, password, sign-in connections, two-step verification and your devices are managed by Clerk, our sign-in provider.">
+    <SectionShell title={t("settings.security")} intro={t("settings.email-addresses-password-sign-in-connections")}>
       {a?.staff && (
         <Banner tone={a.mfa_enabled ? "success" : "warning"}>
-          Your admin role needs two-step verification. It’s {a.mfa_enabled ? "on" : "off"}{a.mfa_enabled ? "." : ": turn it on below to open admin pages."}
+          {t("settings.your-admin-role-needs-two-step", { v: a.mfa_enabled ? t("settings.on") : t("settings.off"), v2: a.mfa_enabled ? "." : t("settings.turn-it-on-below-to-open") })}
         </Banner>
       )}
       <SignOutButtons />
@@ -90,11 +91,11 @@ export function ConnectedSection() {
   const accounts = user?.externalAccounts ?? [];
   const campaigns = settings?.connected.campaigns ?? [];
   return (
-    <SectionShell title="Connected accounts" intro="NDCConnect has no other third-party connections per person, and never shows keys or tokens.">
+    <SectionShell title={t("settings.connected-accounts")} intro={t("settings.ndcconnect-has-no-other-third-party")}>
       <div className="set-card">
-        <h3>Sign-in connections</h3>
-        <p className="set-meta">Only used to sign in. Add or remove them in <Link to="/settings/security">Security</Link>.</p>
-        {accounts.length === 0 ? <p>None. You sign in with your email.</p> : (
+        <h3>{t("settings.sign-in-connections")}</h3>
+        <p className="set-meta">{t.rich("settings.only-used-to-sign-in-add", { link: (chunks) => <Link to="/settings/security">{chunks}</Link> })}</p>
+        {accounts.length === 0 ? <p>{t("settings.none-you-sign-in-with-your")}</p> : (
           <ul className="set-links">
             {accounts.map((x) => (
               <li key={x.id}>{x.providerTitle?.() ?? x.provider}{x.emailAddress ? ` · ${x.emailAddress}` : ""}</li>
@@ -103,13 +104,13 @@ export function ConnectedSection() {
         )}
       </div>
       <div className="set-card">
-        <h3>Campaign accounts</h3>
-        {campaigns.length === 0 ? <p className="set-meta">You aren’t linked to a candidate’s campaign.</p> : (
+        <h3>{t("settings.campaign-accounts")}</h3>
+        {campaigns.length === 0 ? <p className="set-meta">{t("settings.you-aren-t-linked-to-a")}</p> : (
           <>
             <ul className="set-links">
               {campaigns.map((c) => <li key={c.slug}><Link to={`/candidates/${c.slug}`}>{c.name}</Link></li>)}
             </ul>
-            <p className="set-meta">You post and organise for these campaigns. Ask a system admin to remove this link.</p>
+            <p className="set-meta">{t("settings.you-post-and-organise-for-these")}</p>
           </>
         )}
       </div>

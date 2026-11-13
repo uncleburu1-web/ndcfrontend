@@ -13,6 +13,7 @@ import { Button } from "./Button";
 import { DonateButton } from "./DonateButton";
 import { Icon } from "./Icon";
 import "./SiteHeader.css";
+import { t } from "../../i18n";
 
 interface NavLink {
   label: string;
@@ -39,14 +40,14 @@ export function SiteHeader({ links, donateHref, joinHref, account, search }: Sit
     <>
       <header className="ds-header">
         <div className="ds-header__inner">
-          <a href="/" className="ds-header__brand" aria-label="NDCConnect home">
+          <a href="/" className="ds-header__brand" aria-label={t("ui.ndcconnect-home")}>
             <img src={ndcLogo} alt="" width={225} height={121} className="ds-header__logo" />
             <span className="ds-header__wordmark" aria-hidden="true">
-              NDC<span>Connect</span>
+              {t.rich("ui.ndc-connect", { span: (chunks) => <span>{chunks}</span> })}
             </span>
           </a>
 
-          <nav className="ds-header__nav" aria-label="Main">
+          <nav className="ds-header__nav" aria-label={t("ui.main")}>
             <ul>
               {links.map((l) => (
                 <li key={l.href}>
@@ -63,8 +64,7 @@ export function SiteHeader({ links, donateHref, joinHref, account, search }: Sit
           <div className="ds-header__actions">
             {account}
             <Button variant="secondary" href={joinHref}>
-              Join NDC
-            </Button>
+              {t("ui.join-ndc")}</Button>
             {donateHref && <DonateButton href={donateHref} />}
           </div>
 
@@ -76,11 +76,11 @@ export function SiteHeader({ links, donateHref, joinHref, account, search }: Sit
             onClick={() => setMenuOpen((o) => !o)}
           >
             <Icon name={menuOpen ? "close" : "menu"} />
-            <span>Menu</span>
+            <span>{t("ui.menu")}</span>
           </button>
         </div>
 
-        <nav id={menuId} className="ds-header__drawer" aria-label="Main" hidden={!menuOpen}>
+        <nav id={menuId} className="ds-header__drawer" aria-label={t("ui.main")} hidden={!menuOpen}>
           <ul>
             {links.map((l) => (
               <li key={l.href}>
@@ -94,10 +94,9 @@ export function SiteHeader({ links, donateHref, joinHref, account, search }: Sit
         </nav>
       </header>
 
-      <div className="ds-bottombar" role="region" aria-label="Quick actions">
+      <div className="ds-bottombar" role="region" aria-label={t("ui.quick-actions")}>
         <Button variant="secondary" href={joinHref} fullWidth>
-          Join NDC
-        </Button>
+          {t("ui.join-ndc")}</Button>
         {donateHref && <DonateButton href={donateHref} fullWidth />}
       </div>
     </>

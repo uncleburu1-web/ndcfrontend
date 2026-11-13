@@ -1,5 +1,6 @@
 /** Spec 17: community shapes, from the generated OpenAPI types. */
 import type { Schema } from "../api/typed";
+import { t } from "../i18n";
 
 export type CommunityBrief = Schema<"CommunityBriefSchema">;
 export type Community = Schema<"CommunitySchema">;
@@ -13,7 +14,7 @@ export type AdminCommunity = Schema<"AdminCommunitySchema">;
 
 /** "Ward (registration area)" wherever people see the level (spec 16 §19.6). */
 export const LEVEL_WORDS: Record<string, string> = {
-  national: "National", state: "State", lga: "LGA", ward: "Ward (registration area)", polling_unit: "Polling unit",
+  get national() { return t("communities.national"); }, state: "State", lga: "LGA", get ward() { return t("communities.ward-registration-area"); }, get polling_unit() { return t("communities.polling-unit"); },
 };
 
 export const communityHref = (path: string) => `/communities/${path}`;

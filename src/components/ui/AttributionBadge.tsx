@@ -8,6 +8,7 @@
 import { Avatar } from "./Avatar";
 import { Icon } from "./Icon";
 import "./Badge.css";
+import { t } from "../../i18n";
 
 type AttributionBadgeProps =
   | { source: "official" }
@@ -18,9 +19,7 @@ export function AttributionBadge(props: AttributionBadgeProps) {
   if (props.source === "official") {
     return (
       <span className="ds-attribution ds-attribution--official">
-        <Icon name="shield" size={16} />
-        Official
-      </span>
+        {t.rich("ui.official", { icon: <Icon name="shield" size={16} /> })}</span>
     );
   }
 
@@ -28,16 +27,14 @@ export function AttributionBadge(props: AttributionBadgeProps) {
     return (
       <span className="ds-attribution ds-attribution--candidate">
         <Avatar name={props.candidateName} src={props.avatarSrc} size="xs" />
-        <span>Posted by {props.candidateName}</span>
-        {props.verified && <Icon name="verified" size={16} label="Verified candidate" className="ds-attribution__verified" />}
+        <span>{t("ui.posted-by", { candidateName: props.candidateName })}</span>
+        {props.verified && <Icon name="verified" size={16} label={t("ui.verified-candidate")} className="ds-attribution__verified" />}
       </span>
     );
   }
 
   return (
     <span className="ds-attribution ds-attribution--user">
-      <Icon name="user" size={16} />
-      Submitted by a member · Reviewed
-    </span>
+      {t.rich("ui.submitted-by-a-member-reviewed", { icon: <Icon name="user" size={16} /> })}</span>
   );
 }

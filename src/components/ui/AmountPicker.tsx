@@ -9,6 +9,7 @@ import { formatNaira, groupDigits, parseNaira } from "../../lib/format";
 import { FieldError } from "./fields/Field";
 import "./AmountPicker.css";
 import "./fields/fields.css";
+import { t } from "../../i18n";
 
 interface AmountPickerProps {
   label?: string;
@@ -48,7 +49,7 @@ export function AmountPicker({ label = "Amount", presets, value, onChange, error
         </p>
       )}
 
-      <div className="ds-amount__chips" role="group" aria-label="Suggested amounts">
+      <div className="ds-amount__chips" role="group" aria-label={t("ui.suggested-amounts")}>
         {presets.map((amount) => (
           <button
             key={amount}
@@ -63,8 +64,7 @@ export function AmountPicker({ label = "Amount", presets, value, onChange, error
       </div>
 
       <label className="ds-field__label ds-amount__custom-label" htmlFor={customId}>
-        Or enter another amount
-      </label>
+        {t("ui.or-enter-another-amount")}</label>
       <div className="ds-input-group">
         <span className="ds-input-group__prefix" aria-hidden="true">
           ₦

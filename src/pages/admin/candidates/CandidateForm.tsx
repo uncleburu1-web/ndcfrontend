@@ -10,6 +10,8 @@ import { ConstituencyPicker, POSITION_KIND, useConstituencies } from "../../../g
 import { GeoPicker } from "../../../geo/GeoPicker";
 import { EMPTY_GEO, type GeoValue } from "../../../geo/types";
 import { NOT_IN_FCT, POSITIONS, STATES, positionInfo, type PositionValue } from "../../../lib/nigeria";
+import { t } from "../../../i18n";
+import { WrittenIn } from "../../../i18n/ContentLanguage";
 
 export interface CandidateFormValues {
   full_name: string;
@@ -23,6 +25,8 @@ export interface CandidateFormValues {
   geo: GeoValue;
   campaign_summary: string;
   biography: string;
+  /** Spec 21 §9 */
+  biography_language: string;
   priorities: string[];
   links: CandidateLink[];
 }
@@ -43,6 +47,7 @@ export function toFormValues(c?: AdminCandidate | null): CandidateFormValues {
       not_listed: !!c && !c.lga_id && !!c.area_name },
     campaign_summary: c?.campaign_summary ?? "",
     biography: c?.biography ?? "",
+    biography_language: (c as { biography_language?: string } | undefined)?.biography_language ?? "en",
     priorities: c?.priorities ?? [],
     links: c?.links ?? [],
   };
@@ -66,6 +71,7 @@ export function toPayload(v: CandidateFormValues) {
     ...(local ? { lga_id: picked ? v.geo.lga_id : null, ward_id: picked && v.position === "councillor" ? v.geo.ward_id : null } : {}),
     campaign_summary: v.campaign_summary,
     biography: v.biography,
+    biography_language: v.biography_language,
     priorities: v.priorities.map((p) => p.trim()).filter(Boolean),
     links: v.links.filter((l) => l.label.trim() || l.url.trim()),
   };
@@ -97,24 +103,24 @@ export function CandidateForm({ initial, submitLabel, busy, error, onSubmit }: P
   return (
     <form onSubmit={submit} noValidate className="adm-form" aria-busy={busy || undefined}>
       {error && error.code !== "validation_error" && <Banner tone="error">{error.message}</Banner>}
-      {error?.code === "validation_error" && <Banner tone="error">Please correct the highlighted fields.</Banner>}
+      {error?.code === "validation_error" && <Banner tone="error">{t("admin.please-correct-the-highlighted-fields")}</Banner>}
 
       <fieldset className="adm-form__group">
-        <legend>Identity</legend>
-        <TextField label="Full name" name="full_name" required value={v.full_name} onChange={(e) => set("full_name", e.target.value)} error={fe("full_name")} />
+        <legend>{t("admin.identity")}</legend>
+        <TextField label={t("admin.full-name")} name="full_name" required value={v.full_name} onChange={(e) => set("full_name", e.target.value)} error={fe("full_name")} />
         <div className="adm-form__row">
           <Select
-            label="Office sought"
+            label={t("admin.office-sought")}
             name="position"
             required
             value={v.position}
-            placeholder="Choose an office"
+            placeholder={t("admin.choose-an-office")}
             onChange={(e) => set("position", e.target.value)}
             options={POSITIONS.map((p) => ({ value: p.value, label: p.label }))}
             error={fe("position")}
           />
           <TextField
-            label="Election year"
+            label={t("admin.election-year")}
             name="election_year"
             required
             inputMode="numeric"
@@ -126,15 +132,15 @@ export function CandidateForm({ initial, submitLabel, busy, error, onSubmit }: P
         </div>
         {info?.state && (
           <Select
-            label="State"
+            label={t("admin.state")}
             name="state"
             required
             value={v.state}
-            placeholder="Choose a state"
+            placeholder={t("admin.choose-a-state")}
             onChange={(e) => setV((x) => ({ ...x, state: e.target.value, constituency_id: null, geo: EMPTY_GEO }))}
             options={stateOptions}
             error={fe("state")}
-            hint={NOT_IN_FCT.includes(v.position as PositionValue) ? "The FCT has no office of this kind." : undefined}
+            hint={NOT_IN_FCT.includes(v.position as PositionValue) ? t("admin.the-fct-has-no-office-of") : undefined}
           />
         )}
         {POSITION_KIND[v.position] && cons.data.length > 0 && (
@@ -148,93 +154,92 @@ export function CandidateForm({ initial, submitLabel, busy, error, onSubmit }: P
         )}
         {info?.area && !local && !conChosen && (
           <TextField
-            label={info.areaLabel ?? "Area"}
+            label={info.areaLabel ?? t("admin.area")}
             name="area_name"
             required
             value={v.area_name}
             onChange={(e) => set("area_name", e.target.value)}
             error={fe("area_name")}
-            hint={info.value === "senator" ? "For example: Kano Central Senatorial District" : undefined}
+            hint={info.value === "senator" ? t("admin.for-example-kano-central-senatorial-district") : undefined}
           />
         )}
         {info?.ward && !local && (
-          <TextField label="Ward" name="ward_name" required value={v.ward_name} onChange={(e) => set("ward_name", e.target.value)} error={fe("ward_name")} />
+          <TextField label={t("admin.ward")} name="ward_name" required value={v.ward_name} onChange={(e) => set("ward_name", e.target.value)} error={fe("ward_name")} />
         )}
-        {info && !info.state && <p className="adm-form__note">A {info.label} candidate represents the whole country, so no area is needed.</p>}
+        {info && !info.state && <p className="adm-form__note">{t("admin.a-candidate-represents-the-whole-country", { label: info.label })}</p>}
       </fieldset>
 
       <fieldset className="adm-form__group">
-        <legend>Campaign</legend>
+        <legend>{t("admin.campaign")}</legend>
         <TextArea
-          label="Campaign summary"
+          label={t("admin.campaign-summary")}
           name="campaign_summary"
           rows={3}
           maxLength={1000}
           value={v.campaign_summary}
           onChange={(e) => set("campaign_summary", e.target.value)}
           error={fe("campaign_summary")}
-          hint="One short paragraph, up to 1,000 characters."
+          hint={t("admin.one-short-paragraph-up-to-1")}
         />
 
         <div className="adm-rows">
-          <p className="ds-field__label" id="priorities-label">Priorities</p>
-          <p className="ds-field__hint">Up to 8, each under 120 characters.</p>
+          <p className="ds-field__label" id="priorities-label">{t("admin.priorities")}</p>
+          <p className="ds-field__hint">{t("admin.up-to-8-each-under-120")}</p>
           {v.priorities.map((p, i) => (
             <div key={i} className="adm-rows__row">
               <TextField
-                label={`Priority ${i + 1}`}
+                label={t("admin.priority", { v: i + 1 })}
                 value={p}
                 maxLength={120}
                 onChange={(e) => set("priorities", v.priorities.map((x, j) => (j === i ? e.target.value : x)))}
               />
               <Button variant="ghost" size="sm" onClick={() => set("priorities", v.priorities.filter((_, j) => j !== i))}>
-                Remove<span className="visually-hidden"> priority {i + 1}</span>
+                {t.rich("admin.remove-priority", { v: i + 1, span: (chunks) => <span className="visually-hidden">{chunks}</span> })}
               </Button>
             </div>
           ))}
           {fe("priorities") && <p className="ds-field__error">{fe("priorities")}</p>}
           {v.priorities.length < 8 && (
             <Button variant="secondary" size="sm" onClick={() => set("priorities", [...v.priorities, ""])}>
-              Add a priority
-            </Button>
+              {t("admin.add-a-priority")}</Button>
           )}
         </div>
 
         <TextArea
-          label="Biography"
+          label={t("admin.biography")}
           name="biography"
           rows={8}
           maxLength={5000}
           value={v.biography}
           onChange={(e) => set("biography", e.target.value)}
           error={fe("biography")}
-          hint="Plain text. Leave a blank line between paragraphs. Up to 5,000 characters."
+          hint={t("admin.plain-text-leave-a-blank-line-2")}
         />
+        <WrittenIn value={v.biography_language} onChange={(lang) => set("biography_language", lang)} />
 
         <div className="adm-rows">
-          <p className="ds-field__label">Links</p>
-          <p className="ds-field__hint">Website or social profiles. Up to 5, https:// only.</p>
+          <p className="ds-field__label">{t("admin.links")}</p>
+          <p className="ds-field__hint">{t("admin.website-or-social-profiles-up-to")}</p>
           {v.links.map((l, i) => (
             <div key={i} className="adm-rows__row adm-rows__row--link">
-              <TextField label={`Link ${i + 1} label`} value={l.label} maxLength={40}
+              <TextField label={t("admin.link-label", { v: i + 1 })} value={l.label} maxLength={40}
                 onChange={(e) => set("links", v.links.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} />
-              <TextField label={`Link ${i + 1} URL`} value={l.url} type="text" inputMode="url" placeholder="https://"
+              <TextField label={t("admin.link-url", { v: i + 1 })} value={l.url} type="text" inputMode="url" placeholder="https://"
                 onChange={(e) => set("links", v.links.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} />
               <Button variant="ghost" size="sm" onClick={() => set("links", v.links.filter((_, j) => j !== i))}>
-                Remove<span className="visually-hidden"> link {i + 1}</span>
+                {t.rich("admin.remove-link", { v: i + 1, span: (chunks) => <span className="visually-hidden">{chunks}</span> })}
               </Button>
             </div>
           ))}
           {fe("links") && <p className="ds-field__error">{fe("links")}</p>}
           {v.links.length < 5 && (
             <Button variant="secondary" size="sm" onClick={() => set("links", [...v.links, { label: "", url: "" }])}>
-              Add a link
-            </Button>
+              {t("admin.add-a-link")}</Button>
           )}
         </div>
       </fieldset>
 
-      <Button type="submit" loading={busy} loadingLabel="Saving…">
+      <Button type="submit" loading={busy} loadingLabel={t("admin.saving")}>
         {submitLabel}
       </Button>
     </form>

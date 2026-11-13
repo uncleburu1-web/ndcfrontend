@@ -8,6 +8,7 @@ import { Banner, Button, Checkbox, TextField } from "../components/ui";
 import { ApiError } from "./api";
 import { emitProfileCompleted } from "./events";
 import { useApi, useMe, type Me } from "./session";
+import { t } from "../i18n";
 
 interface ProfileFormProps {
   submitLabel: string;
@@ -32,7 +33,7 @@ export function ProfileForm({ submitLabel, busyLabel, onSaved, successMessage }:
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     if (askAge && !adult) {
-      setAgeError("Tick this to confirm you’re 18 or older.");
+      setAgeError(t("auth.tick-this-to-confirm-you-re"));
       return;
     }
     setAgeError("");
@@ -68,16 +69,16 @@ export function ProfileForm({ submitLabel, busyLabel, onSaved, successMessage }:
       {saved && successMessage && <Banner tone="success">{successMessage}</Banner>}
       <div className="profile-form__fields">
         <TextField
-          label="Full name"
+          label={t("auth.full-name")}
           name="full_name"
           required
           autoComplete="name"
           defaultValue={me?.full_name ?? ""}
-          hint="First and last name, as people know you."
+          hint={t("auth.first-and-last-name-as-people")}
           error={fieldError("full_name")}
         />
         <TextField
-          label="Phone number"
+          label={t("auth.phone-number")}
           name="phone_number"
           type="tel"
           required
@@ -86,7 +87,7 @@ export function ProfileForm({ submitLabel, busyLabel, onSaved, successMessage }:
         />
         {askAge && (
           <Checkbox
-            label="I’m 18 or older"
+            label={t("auth.i-m-18-or-older")}
             name="adult_confirmed"
             required
             checked={adult}
@@ -94,17 +95,14 @@ export function ProfileForm({ submitLabel, busyLabel, onSaved, successMessage }:
             error={ageError || fieldError("adult_confirmed")}
             hint={
               <button type="button" className="profile-form__under18" onClick={() => setUnder18(true)}>
-                I’m under 18
-              </button>
+                {t("auth.i-m-under-18")}</button>
             }
           />
         )}
       </div>
       {under18 && (
-        <Banner tone="info" title="NDCConnect is for voters">
-          You need to be 18 or older to use NDCConnect, because it’s for people who can register to vote. You can{" "}
-          <Link to="/settings/manage#delete">delete your account</Link> now; nothing else is kept about you.
-        </Banner>
+        <Banner tone="info" title={t("auth.ndcconnect-is-for-voters")}>
+          {t.rich("auth.you-need-to-be-18-or", { link: (chunks) => <Link to="/settings/manage#delete">{chunks}</Link> })}</Banner>
       )}
       <Button type="submit" loading={busy} loadingLabel={busyLabel} fullWidth>
         {submitLabel}

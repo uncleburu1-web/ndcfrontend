@@ -5,6 +5,7 @@ import { useRequest } from "../candidates/useRequest";
 import { EventCardItem } from "./EventCardItem";
 import type { EventList } from "./types";
 import "./events.css";
+import { t } from "../i18n";
 
 export function UpcomingStrip({ query, title = "Upcoming events", limit = 3, more }: { query: string; title?: string; limit?: number; more?: string }) {
   const api = useApi();
@@ -15,7 +16,7 @@ export function UpcomingStrip({ query, title = "Upcoming events", limit = 3, mor
     <section className="ev-strip" aria-label={title}>
       <h2>{title}</h2>
       <ul className="ev-cards">{items.map((e) => <EventCardItem key={e.id} e={e} />)}</ul>
-      {more && <p><Link to={more}>See all</Link></p>}
+      {more && <p><Link to={more}>{t("events.see-all")}</Link></p>}
     </section>
   );
 }

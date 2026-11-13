@@ -17,6 +17,7 @@ import { moderationError } from "../../../posts/moderation";
 import { REMOVE_REASONS, type AdminPost } from "../../../posts/types";
 import { CandidateForm, IDENTITY_FIELDS, toFormValues, toPayload, type CandidateFormValues } from "./CandidateForm";
 import "./admin.css";
+import { t } from "../../../i18n";
 
 type ActionName = "verify" | "unverify" | "publish" | "unpublish" | "archive" | "restore";
 
@@ -33,28 +34,28 @@ interface ActionSpec {
 
 const ACTIONS: Record<ActionName, ActionSpec> = {
   verify: {
-    label: "Verify",
+    get label() { return t("admin.verify"); },
     title: (n) => `Verify ${n}?`,
     body: () => "Confirm you have checked this candidate's details against supporting information. Verification is required before publishing.",
-    input: { field: "notes", label: "What did you check?", hint: "Internal note, never shown publicly. For example: matched the INEC nomination list." },
+    input: { field: "notes", get label() { return t("admin.what-did-you-check"); }, get hint() { return t("admin.internal-note-never-shown-publicly-for"); } },
   },
-  unverify: { label: "Remove verification", variant: "secondary", title: (n) => `Remove verification from ${n}?`, body: () => "They can't be published again until someone verifies them." },
-  publish: { label: "Publish", title: (n) => `Publish ${n}?`, body: (n) => `${n} will appear on the public Candidates page straight away.` },
+  unverify: { get label() { return t("admin.remove-verification"); }, variant: "secondary", title: (n) => `Remove verification from ${n}?`, body: () => "They can't be published again until someone verifies them." },
+  publish: { get label() { return t("admin.publish"); }, title: (n) => `Publish ${n}?`, body: (n) => `${n} will appear on the public Candidates page straight away.` },
   unpublish: {
-    label: "Unpublish",
+    get label() { return t("admin.unpublish"); },
     variant: "secondary",
     title: (n) => `Unpublish ${n}?`,
     body: (n) => `${n} will disappear from the public Candidates page. Their profile link will show “not found”.`,
-    input: { field: "reason", label: "Reason", hint: "Recorded in the audit log." },
+    input: { field: "reason", get label() { return t("admin.reason"); }, get hint() { return t("admin.recorded-in-the-audit-log"); } },
   },
   archive: {
-    label: "Archive",
+    get label() { return t("admin.archive"); },
     variant: "danger",
     title: (n) => `Archive ${n}?`,
     body: (n) => `${n} will be hidden everywhere public, and every linked account will lose access to this candidate. History is kept, and you can restore later.`,
-    input: { field: "reason", label: "Reason", hint: "Recorded in the audit log." },
+    input: { field: "reason", get label() { return t("admin.reason"); }, get hint() { return t("admin.recorded-in-the-audit-log"); } },
   },
-  restore: { label: "Restore", variant: "secondary", title: (n) => `Restore ${n}?`, body: () => "They go back to draft, unverified. Linked accounts are not restored; link them again if needed." },
+  restore: { get label() { return t("admin.restore"); }, variant: "secondary", title: (n) => `Restore ${n}?`, body: () => "They go back to draft, unverified. Linked accounts are not restored; link them again if needed." },
 };
 
 function availableActions(c: AdminCandidate): ActionName[] {
@@ -85,7 +86,7 @@ function ActionBar({ candidate, onDone }: { candidate: AdminCandidate; onDone: (
     try {
       const body = spec.input ? { [spec.input.field]: text } : {};
       const updated = await api<AdminCandidate>(`/admin/candidates/${candidate.id}/${open}/`, { method: "POST", body });
-      toast.show({ tone: "success", message: `${spec.label}: done for ${updated.full_name}.` });
+      toast.show({ tone: "success", message: t("admin.done-for", { label: spec.label, full_name: updated.full_name }) });
       setOpen(null);
       setText("");
       onDone(updated);
@@ -111,8 +112,8 @@ function ActionBar({ candidate, onDone }: { candidate: AdminCandidate; onDone: (
         title={spec?.title(candidate.full_name) ?? ""}
         footer={
           <>
-            <Button variant="secondary" onClick={() => setOpen(null)}>Cancel</Button>
-            <Button variant={spec?.variant === "danger" ? "danger" : "primary"} loading={busy} loadingLabel="Working…" onClick={run}>
+            <Button variant="secondary" onClick={() => setOpen(null)}>{t("admin.cancel")}</Button>
+            <Button variant={spec?.variant === "danger" ? "danger" : "primary"} loading={busy} loadingLabel={t("admin.working")} onClick={run}>
               {spec?.label}
             </Button>
           </>
@@ -145,7 +146,7 @@ function PostsPanel({ candidate }: { candidate: AdminCandidate }) {
     setBusy(true);
     try {
       await api(`/admin/posts/${post.id}/${action}/`, { method: "POST", body: action === "remove" ? { reason } : undefined });
-      toast.show({ tone: "success", message: action === "remove" ? "Post removed." : "Post restored." });
+      toast.show({ tone: "success", message: action === "remove" ? t("admin.post-removed") : t("admin.post-restored") });
       setRemoving(null);
       retry();
     } catch (err) {
@@ -156,9 +157,9 @@ function PostsPanel({ candidate }: { candidate: AdminCandidate }) {
   };
   return (
     <section className="adm-panel" aria-labelledby="posts-title">
-      <h2 id="posts-title">Posts</h2>
+      <h2 id="posts-title">{t("admin.posts")}</h2>
       {error ? (
-        <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={retry}>Try again</Button>}>{error.message}</Banner>
+        <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={retry}>{t("admin.try-again-2")}</Button>}>{error.message}</Banner>
       ) : loading && !data ? (
         <Skeleton height={60} />
       ) : list.length ? (
@@ -166,21 +167,21 @@ function PostsPanel({ candidate }: { candidate: AdminCandidate }) {
           {list.slice(0, 10).map((p) => (
             <li key={p.id}>
               <a href={`/admin/posts/${p.id}`}>{p.title}</a> · <StatusBadge set="post" status={p.status} /> · {formatDate(p.published_at)}
-              {p.open_reports ? ` · ${p.open_reports} open reports` : ""}
-              {p.status === "published" && <> <Button size="sm" variant="ghost" onClick={() => { setReason(REMOVE_REASONS[0]); setRemoving(p); }}>Remove</Button></>}
-              {p.status === "removed" && <> <Button size="sm" variant="ghost" loading={busy} onClick={() => void act(p, "restore")}>Restore</Button></>}
+              {p.open_reports ? t("admin.open-reports", { open_reports: p.open_reports }) : ""}
+              {p.status === "published" && <> <Button size="sm" variant="ghost" onClick={() => { setReason(REMOVE_REASONS[0]); setRemoving(p); }}>{t("admin.remove-2")}</Button></>}
+              {p.status === "removed" && <> <Button size="sm" variant="ghost" loading={busy} onClick={() => void act(p, "restore")}>{t("admin.restore")}</Button></>}
             </li>
           ))}
         </ul>
       ) : (
-        <p className="ds-field__hint">No posts yet. Linked accounts publish from My campaign.</p>
+        <p className="ds-field__hint">{t("admin.no-posts-yet-linked-accounts-publish")}</p>
       )}
-      {list.length > 10 && <p><a href={`/admin/posts?candidate=${candidate.id}`}>See all {list.length} posts</a></p>}
-      <Modal open={Boolean(removing)} onClose={() => setRemoving(null)} title="Remove this post?"
-        footer={<><Button variant="secondary" onClick={() => setRemoving(null)}>Go back</Button>
-          <Button variant="danger" loading={busy} onClick={() => removing && void act(removing, "remove")}>Remove post</Button></>}>
-        <p>The campaign sees this reason. For a custom reason, open the post.</p>
-        <Select label="Reason" value={reason} onChange={(e) => setReason(e.target.value)}
+      {list.length > 10 && <p><a href={`/admin/posts?candidate=${candidate.id}`}>{t("admin.see-all-posts", { length: list.length })}</a></p>}
+      <Modal open={Boolean(removing)} onClose={() => setRemoving(null)} title={t("admin.remove-this-post")}
+        footer={<><Button variant="secondary" onClick={() => setRemoving(null)}>{t("admin.go-back")}</Button>
+          <Button variant="danger" loading={busy} onClick={() => removing && void act(removing, "remove")}>{t("admin.remove-post")}</Button></>}>
+        <p>{t("admin.the-campaign-sees-this-reason-for")}</p>
+        <Select label={t("admin.reason")} value={reason} onChange={(e) => setReason(e.target.value)}
           options={REMOVE_REASONS.filter((r) => r !== "Other").map((r) => ({ value: r, label: r }))} />
       </Modal>
     </section>
@@ -193,12 +194,10 @@ function FollowersPanel({ followers }: { followers: { total: number; notify_on: 
   const n = new Intl.NumberFormat("en-NG");
   return (
     <section className="adm-panel adm-followers" aria-labelledby="followers-title">
-      <h2 id="followers-title">Followers</h2>
+      <h2 id="followers-title">{t("admin.followers")}</h2>
       <p className="adm-followers__line">
-        <strong>{n.format(followers.total)}</strong> {followers.total === 1 ? "follower" : "followers"} ·{" "}
-        {n.format(followers.notify_on)} with notifications on
-      </p>
-      <p className="ds-field__hint">Counts only. Who follows a candidate is private and isn’t shown to anyone.</p>
+        {t.rich("admin.other-with-notifications-on", { format: n.format(followers.total), strong: (chunks) => <strong>{chunks}</strong>, total: followers.total, format2: n.format(followers.notify_on) })}</p>
+      <p className="ds-field__hint">{t("admin.counts-only-who-follows-a-candidate")}</p>
     </section>
   );
 }
@@ -257,25 +256,25 @@ function PhotoPanel({ candidate, onDone }: { candidate: AdminCandidate; onDone: 
 
   return (
     <section className="adm-panel" aria-labelledby="photo-title">
-      <h2 id="photo-title">Photo</h2>
+      <h2 id="photo-title">{t("admin.photo")}</h2>
       <div className="adm-photo">
         <Avatar name={candidate.full_name} src={preview ?? candidate.photo?.url_200} size="lg" />
-        <p className="ds-field__hint">JPEG, PNG or WebP, up to 5 MB, at least 400 × 400 pixels. We crop it square, remove hidden location data and resize it for mobile.</p>
+        <p className="ds-field__hint">{t("admin.jpeg-png-or-webp-up-to")}</p>
       </div>
       <form onSubmit={upload} noValidate>
         <div className="ds-field">
-          <label className="ds-field__label" htmlFor="photo-input">Choose a photo</label>
+          <label className="ds-field__label" htmlFor="photo-input">{t("admin.choose-a-photo")}</label>
           <input id="photo-input" ref={input} className="adm-file" type="file" accept="image/jpeg,image/png,image/webp"
             onChange={(e) => choose(e.target.files?.[0] ?? null)} aria-describedby={error ? "photo-error" : undefined} />
           {(error?.fields?.photo?.[0] || (error && error.code !== "validation_error")) && (
             <p id="photo-error" className="ds-field__error">{error.fields?.photo?.[0] ?? error.message}</p>
           )}
         </div>
-        <Checkbox label="NDCConnect may publish this photo" hint="Confirm the campaign agreed to its use." checked={rights}
+        <Checkbox label={t("admin.ndcconnect-may-publish-this-photo")} hint={t("admin.confirm-the-campaign-agreed-to-its")} checked={rights}
           onChange={(e) => setRights(e.target.checked)} error={error?.fields?.rights_confirmed?.[0]} />
         <div className="adm-actions">
-          <Button type="submit" disabled={!file} loading={busy} loadingLabel="Uploading…">Upload photo</Button>
-          {candidate.photo && <Button variant="ghost" onClick={remove} disabled={busy}>Remove photo</Button>}
+          <Button type="submit" disabled={!file} loading={busy} loadingLabel={t("admin.uploading")}>{t("admin.upload-photo")}</Button>
+          {candidate.photo && <Button variant="ghost" onClick={remove} disabled={busy}>{t("admin.remove-photo")}</Button>}
         </div>
         <UploadProgress progress={progress} />
       </form>
@@ -301,7 +300,7 @@ function AccountsPanel({ candidate }: { candidate: AdminCandidate }) {
     setLinkError(null);
     try {
       await api(`/admin/candidates/${candidate.id}/accounts/`, { method: "POST", body: { email } });
-      toast.show({ tone: "success", message: `Linked ${email} to ${candidate.full_name}.` });
+      toast.show({ tone: "success", message: t("admin.linked-to", { email, full_name: candidate.full_name }) });
       setEmail("");
       retry();
     } catch (err) {
@@ -316,7 +315,7 @@ function AccountsPanel({ candidate }: { candidate: AdminCandidate }) {
     setBusy(true);
     try {
       await api(`/admin/candidates/${candidate.id}/accounts/${unlinking.user_id}/`, { method: "DELETE" });
-      toast.show({ tone: "success", message: `Unlinked ${unlinking.email}.` });
+      toast.show({ tone: "success", message: t("admin.unlinked", { email: unlinking.email }) });
       setUnlinking(null);
       retry();
     } catch (err) {
@@ -328,34 +327,34 @@ function AccountsPanel({ candidate }: { candidate: AdminCandidate }) {
 
   return (
     <section className="adm-panel" aria-labelledby="accounts-title">
-      <h2 id="accounts-title">Linked accounts</h2>
-      <p className="ds-field__hint">People who will be able to post for this candidate once candidate posts are available. Only admins see this list.</p>
+      <h2 id="accounts-title">{t("admin.linked-accounts")}</h2>
+      <p className="ds-field__hint">{t("admin.people-who-will-be-able-to")}</p>
       {error ? (
-        <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={retry}>Try again</Button>}>{error.message}</Banner>
+        <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={retry}>{t("admin.try-again-2")}</Button>}>{error.message}</Banner>
       ) : loading && !data ? (
         <Skeleton height={36} />
       ) : data && data.length ? (
         <ul className="adm-accounts">
           {data.map((a) => (
             <li key={a.user_id}>
-              <span><strong>{a.full_name || a.email}</strong><br /><span className="ds-field__hint">{a.email} · linked {formatDate(a.linked_at)}</span></span>
-              <Button size="sm" variant="ghost" onClick={() => setUnlinking(a)}>Unlink<span className="visually-hidden"> {a.email}</span></Button>
+              <span><strong>{a.full_name || a.email}</strong><br /><span className="ds-field__hint">{t("admin.linked", { email: a.email, formatDate: formatDate(a.linked_at) })}</span></span>
+              <Button size="sm" variant="ghost" onClick={() => setUnlinking(a)}>{t.rich("admin.unlink", { email: a.email, span: (chunks) => <span className="visually-hidden">{chunks}</span> })}</Button>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="ds-field__hint">No accounts linked yet.</p>
+        <p className="ds-field__hint">{t("admin.no-accounts-linked-yet")}</p>
       )}
       {candidate.status !== "archived" && (
         <form onSubmit={link} noValidate className="adm-link-form">
-          <TextField label="Link an account by email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-            hint="They must have signed up to NDCConnect first." error={linkError?.fields?.email?.[0] ?? (linkError && linkError.code !== "validation_error" ? linkError.message : undefined)} />
-          <Button type="submit" variant="secondary" loading={busy} loadingLabel="Linking…" disabled={!email.trim()}>Link account</Button>
+          <TextField label={t("admin.link-an-account-by-email")} type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+            hint={t("admin.they-must-have-signed-up-to")} error={linkError?.fields?.email?.[0] ?? (linkError && linkError.code !== "validation_error" ? linkError.message : undefined)} />
+          <Button type="submit" variant="secondary" loading={busy} loadingLabel={t("admin.linking")} disabled={!email.trim()}>{t("admin.link-account")}</Button>
         </form>
       )}
-      <Modal open={Boolean(unlinking)} onClose={() => setUnlinking(null)} title={`Unlink ${unlinking?.email ?? ""}?`}
-        footer={<><Button variant="secondary" onClick={() => setUnlinking(null)}>Cancel</Button><Button variant="danger" loading={busy} onClick={unlink}>Unlink account</Button></>}>
-        <p>They will no longer be able to act for {candidate.full_name}.</p>
+      <Modal open={Boolean(unlinking)} onClose={() => setUnlinking(null)} title={t("admin.unlink-2", { v: unlinking?.email ?? "" })}
+        footer={<><Button variant="secondary" onClick={() => setUnlinking(null)}>{t("admin.cancel")}</Button><Button variant="danger" loading={busy} onClick={unlink}>{t("admin.unlink-account")}</Button></>}>
+        <p>{t("admin.they-will-no-longer-be-able", { full_name: candidate.full_name })}</p>
       </Modal>
     </section>
   );
@@ -378,7 +377,7 @@ export default function AdminCandidateEditPage() {
   const [pending, setPending] = useState<CandidateFormValues | null>(null);
 
   useEffect(() => { if (loaded.data) setCandidate(loaded.data); }, [loaded.data]);
-  useEffect(() => { document.title = `${isNew ? "Add candidate" : candidate?.full_name ?? "Candidate"} | NDCConnect admin`; }, [isNew, candidate]);
+  useEffect(() => { document.title = t("admin.ndcconnect-admin", { v: isNew ? t("admin.add-candidate") : candidate?.full_name ?? t("admin.candidate") }); }, [isNew, candidate]);
 
   const save = async (values: CandidateFormValues) => {
     setBusy(true);
@@ -386,7 +385,7 @@ export default function AdminCandidateEditPage() {
     try {
       if (isNew) {
         const created = await api<AdminCandidate>("/admin/candidates/", { method: "POST", body: toPayload(values) });
-        toast.show({ tone: "success", message: `${created.full_name} saved as a draft.` });
+        toast.show({ tone: "success", message: t("admin.saved-as-a-draft", { full_name: created.full_name }) });
         navigate(`/admin/candidates/${created.id}`, { replace: true });
       } else {
         const updated = await api<AdminCandidate>(`/admin/candidates/${id}/`, { method: "PATCH", body: toPayload(values) });
@@ -394,8 +393,8 @@ export default function AdminCandidateEditPage() {
         setFormKey((k) => k + 1);
         toast.show(
           updated.unpublished_by_edit
-            ? { tone: "warning", message: `${updated.full_name} was taken off the public page. Verify and publish again.` }
-            : { tone: "success", message: "Changes saved." }
+            ? { tone: "warning", message: t("admin.was-taken-off-the-public-page", { full_name: updated.full_name }) }
+            : { tone: "success", message: t("admin.changes-saved") }
         );
       }
     } catch (err) {
@@ -422,28 +421,28 @@ export default function AdminCandidateEditPage() {
     return (
       <div className="adm-page">
         {loaded.error.status === 404 ? (
-          <EmptyState title="Candidate not found" action={<Button href="/admin/candidates">Back to candidates</Button>}>It may have been removed.</EmptyState>
+          <EmptyState title={t("admin.candidate-not-found")} action={<Button href="/admin/candidates">{t("admin.back-to-candidates")}</Button>}>{t("admin.it-may-have-been-removed")}</EmptyState>
         ) : (
-          <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={loaded.retry}>Try again</Button>}>{loaded.error.message}</Banner>
+          <Banner tone="error" action={<Button size="sm" variant="secondary" onClick={loaded.retry}>{t("admin.try-again-2")}</Button>}>{loaded.error.message}</Banner>
         )}
       </div>
     );
   }
   if (!isNew && !candidate) {
-    return <div className="adm-page" aria-busy="true"><span className="visually-hidden">Loading</span><Skeleton width="50%" height={36} /><Skeleton height={200} /></div>;
+    return <div className="adm-page" aria-busy="true"><span className="visually-hidden">{t("admin.loading")}</span><Skeleton width="50%" height={36} /><Skeleton height={200} /></div>;
   }
 
   return (
     <div className="adm-page">
-      <p className="adm-back"><a href="/admin/candidates">All candidates</a></p>
+      <p className="adm-back"><a href="/admin/candidates">{t("admin.all-candidates")}</a></p>
       <header className="adm-page__head">
         <div>
-          <h1>{isNew ? "Add candidate" : candidate!.full_name}</h1>
+          <h1>{isNew ? t("admin.add-candidate") : candidate!.full_name}</h1>
           {candidate && (
             <div className="adm-status">
               <StatusBadge set="candidate" status={candidate.status} />
               <StatusBadge set="verification" status={candidate.is_verified ? "verified" : "not_verified"} />
-              {candidate.status === "published" && <a href={`/candidates/${candidate.slug}`} target="_blank" rel="noopener noreferrer">View public profile</a>}
+              {candidate.status === "published" && <a href={`/candidates/${candidate.slug}`} target="_blank" rel="noopener noreferrer">{t("admin.view-public-profile")}</a>}
             </div>
           )}
         </div>
@@ -451,15 +450,15 @@ export default function AdminCandidateEditPage() {
 
       {candidate && (
         <section className="adm-panel" aria-labelledby="workflow-title">
-          <h2 id="workflow-title">Publishing</h2>
+          <h2 id="workflow-title">{t("admin.publishing")}</h2>
           {candidate.is_verified && (
-            <p className="ds-field__hint">Verified {candidate.verified_at ? formatDate(candidate.verified_at) : ""}{candidate.verified_by_email ? ` by ${candidate.verified_by_email}` : ""}. Note: {candidate.verification_notes}</p>
+            <p className="ds-field__hint">{t("admin.verified-note", { v: candidate.verified_at ? formatDate(candidate.verified_at) : "", v2: candidate.verified_by_email ? t("admin.by-2", { verified_by_email: candidate.verified_by_email }) : "", verification_notes: candidate.verification_notes })}</p>
           )}
           {!candidate.is_verified && candidate.verification_notes && (
             <details className="adm-notes" open>
-              <summary>Research notes to check before verifying</summary>
+              <summary>{t("admin.research-notes-to-check-before-verifying")}</summary>
               <p className="adm-notes__body">{candidate.verification_notes}</p>
-              <p className="ds-field__hint">Only admins see these. Verifying replaces them with your own note.</p>
+              <p className="ds-field__hint">{t("admin.only-admins-see-these-verifying-replaces")}</p>
             </details>
           )}
           <ActionBar candidate={candidate} onDone={(c) => { setCandidate(c); setFormKey((k) => k + 1); }} />
@@ -468,11 +467,11 @@ export default function AdminCandidateEditPage() {
 
       <div className="adm-layout">
         <section className="adm-panel" aria-labelledby="details-title">
-          <h2 id="details-title">Details</h2>
+          <h2 id="details-title">{t("admin.details")}</h2>
           {candidate?.status === "archived" ? (
-            <Banner tone="info">Archived candidates can’t be edited. Restore it first.</Banner>
+            <Banner tone="info">{t("admin.archived-candidates-can-t-be-edited")}</Banner>
           ) : (
-            <CandidateForm key={formKey} initial={toFormValues(candidate)} submitLabel={isNew ? "Save as draft" : "Save changes"} busy={busy} error={error} onSubmit={onSubmit} />
+            <CandidateForm key={formKey} initial={toFormValues(candidate)} submitLabel={isNew ? t("admin.save-as-draft") : t("admin.save-changes")} busy={busy} error={error} onSubmit={onSubmit} />
           )}
         </section>
         {candidate && (
@@ -485,9 +484,9 @@ export default function AdminCandidateEditPage() {
         )}
       </div>
 
-      <Modal open={Boolean(pending)} onClose={() => setPending(null)} title="This takes the candidate off the public page"
-        footer={<><Button variant="secondary" onClick={() => setPending(null)}>Cancel</Button><Button loading={busy} onClick={() => pending && void save(pending)}>Save and unpublish</Button></>}>
-        <p>You changed the name, office, election year or area of a published candidate. Saving removes verification and unpublishes {candidate?.full_name} until someone verifies and publishes again.</p>
+      <Modal open={Boolean(pending)} onClose={() => setPending(null)} title={t("admin.this-takes-the-candidate-off-the")}
+        footer={<><Button variant="secondary" onClick={() => setPending(null)}>{t("admin.cancel")}</Button><Button loading={busy} onClick={() => pending && void save(pending)}>{t("admin.save-and-unpublish")}</Button></>}>
+        <p>{t("admin.you-changed-the-name-office-election", { full_name: candidate?.full_name })}</p>
       </Modal>
     </div>
   );

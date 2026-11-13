@@ -3,6 +3,7 @@
  * find the request's log line. `splitReference` lets the Banner turn any error message ending in a reference into this.
  */
 import { useState } from "react";
+import { t } from "../../i18n";
 
 const REF = /\s*Reference: ([0-9A-Za-z_-]{6,64})\.?\s*$/;
 
@@ -24,10 +25,7 @@ export function ErrorReference({ reference }: { reference: string }) {
   };
   return (
     <span className="ds-ref">
-      Reference: <code className="ds-ref__code">{reference}</code>{" "}
-      <button type="button" className="ds-ref__copy" onClick={() => void copy()} aria-label={`Copy reference ${reference}`}>
-        {copied ? "Copied" : "Copy"}
-      </button>
+      {t.rich("ui.reference", { reference, code: (chunks) => <code className="ds-ref__code">{chunks}</code>, v: copied ? t("ui.copied") : t("ui.copy"), button: (chunks) => <button type="button" className="ds-ref__copy" onClick={() => void copy()} aria-label={t("ui.copy-reference", { reference })}>{chunks}</button> })}
     </span>
   );
 }

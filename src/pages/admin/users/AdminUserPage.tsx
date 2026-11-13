@@ -17,6 +17,7 @@ import { accountStatus } from "./AdminUsersPage";
 import "../candidates/admin.css";
 import "../donations/admin-donations.css";
 import "../../../admin/admin-home.css";
+import { t } from "../../../i18n";
 
 export default function AdminUserPage() {
   const { id = "" } = useParams();
@@ -33,7 +34,7 @@ export default function AdminUserPage() {
   const [clerkFailed, setClerkFailed] = useState(false);
   useEffect(() => setU(res.data), [res.data]);
   useEffect(() => {
-    document.title = "Account | NDCConnect admin";
+    document.title = t("admin.account-ndcconnect-admin");
   }, []);
 
   const reveal = async () => {
@@ -52,8 +53,8 @@ export default function AdminUserPage() {
       const failed = (r.clerk_ban ?? r.clerk_unban) === "failed";
       setClerkFailed(which === "deactivate" && failed);
       toast.show(failed
-        ? { tone: "warning", message: which === "deactivate" ? "Blocked on NDCConnect. The sign-in block in Clerk failed; try again." : "Reactivated here, but Clerk didn’t confirm. Try again." }
-        : { tone: "success", message: which === "deactivate" ? "Account deactivated. They can’t sign in." : "Account reactivated." });
+        ? { tone: "warning", message: which === "deactivate" ? t("admin.blocked-on-ndcconnect-the-sign-in") : t("admin.reactivated-here-but-clerk-didn-t") }
+        : { tone: "success", message: which === "deactivate" ? t("admin.account-deactivated-they-can-t-sign") : t("admin.account-reactivated") });
       setModal(null);
       setReason("");
     } catch (err) {
@@ -67,7 +68,7 @@ export default function AdminUserPage() {
     setBusy(true);
     try {
       await api<Assignment>("/admin/team/", { method: "POST", body: { email: u.email, role } });
-      toast.show({ tone: "success", message: "Role granted." });
+      toast.show({ tone: "success", message: t("admin.role-granted") });
       setModal(null);
       setRole("");
       res.retry();
@@ -78,7 +79,7 @@ export default function AdminUserPage() {
     }
   };
 
-  if (res.error) return <div className="adm-page"><AdminNav current="team" /><EmptyState title="Account not found" action={<Button href="/admin/users">Back to users</Button>} /></div>;
+  if (res.error) return <div className="adm-page"><AdminNav current="team" /><EmptyState title={t("admin.account-not-found")} action={<Button href="/admin/users">{t("admin.back-to-users")}</Button>} /></div>;
   if (!u) return <div className="adm-page"><AdminNav current="team" /><Skeleton width="100%" height={240} /></div>;
 
   const banFailed = clerkFailed || (!u.is_active && u.deactivation?.clerk_ban === "failed");
@@ -86,68 +87,67 @@ export default function AdminUserPage() {
     <div className="adm-page">
       <AdminNav current="team" />
       <TeamSubnav />
-      <p className="adm-back"><Link to="/admin/users">← Users</Link></p>
+      <p className="adm-back"><Link to="/admin/users">{t("admin.users-2")}</Link></p>
       <header className="adm-page__head">
         <div>
-          <h1>{u.deleted ? "Deleted account" : u.full_name || u.email}</h1>
-          <div className="adm-status"><StatusBadge set="account" status={accountStatus(u)} />{u.is_self && <span>This is you</span>}</div>
+          <h1>{u.deleted ? t("admin.deleted-account") : u.full_name || u.email}</h1>
+          <div className="adm-status"><StatusBadge set="account" status={accountStatus(u)} />{u.is_self && <span>{t("admin.this-is-you")}</span>}</div>
         </div>
         <div className="adm-actions">
-          {!u.deleted && !u.is_self && u.is_active && <Button variant="secondary" onClick={() => setModal("deactivate")}>Deactivate</Button>}
-          {!u.deleted && !u.is_self && !u.is_active && <Button variant="secondary" onClick={() => setModal("reactivate")}>Reactivate</Button>}
+          {!u.deleted && !u.is_self && u.is_active && <Button variant="secondary" onClick={() => setModal("deactivate")}>{t("admin.deactivate")}</Button>}
+          {!u.deleted && !u.is_self && !u.is_active && <Button variant="secondary" onClick={() => setModal("reactivate")}>{t("admin.reactivate")}</Button>}
         </div>
       </header>
       {banFailed && (
-        <Banner tone="warning" title="Sign-in block failed"
-          action={<Button size="sm" variant="secondary" loading={busy} onClick={() => void act("deactivate", u.deactivation?.reason || "Retry sign-in block")}>Retry sign-in block</Button>}>
-          Blocked on NDCConnect. The sign-in block in Clerk failed; try again.
-        </Banner>
+        <Banner tone="warning" title={t("admin.sign-in-block-failed")}
+          action={<Button size="sm" variant="secondary" loading={busy} onClick={() => void act("deactivate", u.deactivation?.reason || t("admin.retry-sign-in-block"))}>{t("admin.retry-sign-in-block")}</Button>}>
+          {t("admin.blocked-on-ndcconnect-the-sign-in")}</Banner>
       )}
       <div className="adm-donation-grid">
         <section className="adm-panel" aria-labelledby="facts-title">
-          <h2 id="facts-title">Account</h2>
+          <h2 id="facts-title">{t("admin.account")}</h2>
           <dl className="adm-facts">
-            <dt>Email</dt><dd>{u.email || "—"}</dd>
-            <dt>Phone</dt>
-            <dd>{phone || u.phone_masked || "—"} {!phone && u.phone_masked && <Button size="sm" variant="ghost" onClick={() => void reveal()}>Show</Button>}</dd>
-            <dt>Joined</dt><dd>{formatDate(u.joined_at)}</dd>
-            <dt>Profile</dt><dd>{u.profile_complete ? "Complete" : "Incomplete"} · last updated {formatDate(u.updated_at)}</dd>
+            <dt>{t("admin.email")}</dt><dd>{u.email || "—"}</dd>
+            <dt>{t("admin.phone")}</dt>
+            <dd>{phone || u.phone_masked || "—"} {!phone && u.phone_masked && <Button size="sm" variant="ghost" onClick={() => void reveal()}>{t("admin.show")}</Button>}</dd>
+            <dt>{t("admin.joined")}</dt><dd>{formatDate(u.joined_at)}</dd>
+            <dt>{t("admin.profile")}</dt><dd>{t("admin.last-updated", { v: u.profile_complete ? t("admin.complete") : t("admin.incomplete"), formatDate: formatDate(u.updated_at) })}</dd>
             {u.deactivation && (
-              <><dt>Deactivated</dt><dd>{formatDate(u.deactivation.at, { withTime: true })} by {u.deactivation.by}{u.deactivation.reason ? ` — ${u.deactivation.reason}` : ""}</dd></>
+              <><dt>{t("admin.deactivated")}</dt><dd>{t("admin.by-8", { formatDate: formatDate(u.deactivation.at, { withTime: true }), by: u.deactivation.by, v: u.deactivation.reason ? ` — ${u.deactivation.reason}` : "" })}</dd></>
             )}
-            {u.clerk_deleted_at && <><dt>Deleted in Clerk</dt><dd>{formatDate(u.clerk_deleted_at)}</dd></>}
+            {u.clerk_deleted_at && <><dt>{t("admin.deleted-in-clerk")}</dt><dd>{formatDate(u.clerk_deleted_at)}</dd></>}
           </dl>
         </section>
         <section className="adm-panel" aria-labelledby="actions-title">
-          <h2 id="actions-title">Recent actions by this account</h2>
+          <h2 id="actions-title">{t("admin.recent-actions-by-this-account")}</h2>
           {u.recent_actions.length ? <ul className="adm-activity">{u.recent_actions.map((e) => <ActivityRow key={e.id} e={e} />)}</ul>
-            : <p className="adm-muted">None recorded.</p>}
-          {u.email && <p><Link to={`/admin/audit?actor=${encodeURIComponent(u.email)}`}>See all in the audit log</Link></p>}
+            : <p className="adm-muted">{t("admin.none-recorded")}</p>}
+          {u.email && <p><Link to={`/admin/audit?actor=${encodeURIComponent(u.email)}`}>{t("admin.see-all-in-the-audit-log")}</Link></p>}
         </section>
       </div>
       <section className="adm-panel" aria-labelledby="roles-title">
         <div className="adm-page__head">
-          <h2 id="roles-title">Roles</h2>
-          {!u.is_self && u.is_active && !u.deleted && <Button size="sm" variant="secondary" onClick={() => setModal("grant")}>Grant a role</Button>}
+          <h2 id="roles-title">{t("admin.roles")}</h2>
+          {!u.is_self && u.is_active && !u.deleted && <Button size="sm" variant="secondary" onClick={() => setModal("grant")}>{t("admin.grant-a-role")}</Button>}
         </div>
-        {u.assignments.length ? <RoleRows rows={u.assignments} showUser={false} onChanged={res.retry} /> : <p className="adm-muted">No roles.</p>}
+        {u.assignments.length ? <RoleRows rows={u.assignments} showUser={false} onChanged={res.retry} /> : <p className="adm-muted">{t("admin.no-roles")}</p>}
       </section>
 
       <Modal open={modal === "deactivate" || modal === "reactivate"} onClose={() => setModal(null)}
-        title={modal === "deactivate" ? "Deactivate this account?" : "Reactivate this account?"}
-        footer={<><Button variant="secondary" onClick={() => setModal(null)}>Go back</Button>
+        title={modal === "deactivate" ? t("admin.deactivate-this-account") : t("admin.reactivate-this-account")}
+        footer={<><Button variant="secondary" onClick={() => setModal(null)}>{t("admin.go-back")}</Button>
           <Button variant={modal === "deactivate" ? "danger" : "primary"} loading={busy} disabled={modal === "deactivate" && !reason.trim()}
-            onClick={() => modal && modal !== "grant" && void act(modal)}>{modal === "deactivate" ? "Deactivate" : "Reactivate"}</Button></>}>
-        <p>{modal === "deactivate" ? "They’re signed out and can’t sign in or use NDCConnect until reactivated." : "They can sign in again."}</p>
-        <TextArea label={modal === "deactivate" ? "Reason" : "Reason (optional)"} required={modal === "deactivate"} rows={2} value={reason}
+            onClick={() => modal && modal !== "grant" && void act(modal)}>{modal === "deactivate" ? t("admin.deactivate") : t("admin.reactivate")}</Button></>}>
+        <p>{modal === "deactivate" ? t("admin.they-re-signed-out-and-can") : t("admin.they-can-sign-in-again")}</p>
+        <TextArea label={modal === "deactivate" ? t("admin.reason") : t("admin.reason-optional")} required={modal === "deactivate"} rows={2} value={reason}
           onChange={(e) => setReason(e.target.value)} />
       </Modal>
-      <Modal open={modal === "grant"} onClose={() => setModal(null)} title="Grant a role"
-        footer={<><Button variant="secondary" onClick={() => setModal(null)}>Go back</Button><Button loading={busy} disabled={!role} onClick={() => void grant()}>Grant role</Button></>}>
-        <Select label="Role" value={role} onChange={(e) => setRole(e.target.value)}
-          options={[{ value: "", label: "Choose a role" }, ...(grantable.data?.grantable ?? []).map((g) => ({ value: g.role, label: g.label }))]} />
-        {role === "system_admin" && <Banner tone="warning">This gives full access to every admin area, including donations, membership and the audit log.</Banner>}
-        <TextField label="Email" value={u.email} readOnly />
+      <Modal open={modal === "grant"} onClose={() => setModal(null)} title={t("admin.grant-a-role")}
+        footer={<><Button variant="secondary" onClick={() => setModal(null)}>{t("admin.go-back")}</Button><Button loading={busy} disabled={!role} onClick={() => void grant()}>{t("admin.grant-role")}</Button></>}>
+        <Select label={t("admin.role")} value={role} onChange={(e) => setRole(e.target.value)}
+          options={[{ value: "", label: t("admin.choose-a-role") }, ...(grantable.data?.grantable ?? []).map((g) => ({ value: g.role, label: g.label }))]} />
+        {role === "system_admin" && <Banner tone="warning">{t("admin.this-gives-full-access-to-every")}</Banner>}
+        <TextField label={t("admin.email")} value={u.email} readOnly />
       </Modal>
     </div>
   );

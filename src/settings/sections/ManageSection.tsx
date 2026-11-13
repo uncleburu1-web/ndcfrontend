@@ -7,6 +7,7 @@ import { Banner, Button, Modal, TextField } from "../../components/ui";
 import { DeleteSection, DownloadSection } from "../../pages/privacy/YourDataPage";
 import type { MyPrivacy } from "../../privacy/types";
 import { SectionShell, useSettingsData } from "../SettingsLayout";
+import { t } from "../../i18n";
 
 const PAUSE_ROWS: [string, string][] = [
   ["Signing in", "Still works, but shows only “Your account is paused” with Reactivate, Download your data and Delete."],
@@ -36,30 +37,29 @@ export function PauseDialog({ open, onClose, manage }: { open: boolean; onClose:
       await refresh(); // /me now says "paused": the app shows only the paused screen
     } catch (err) {
       if (err instanceof ApiError && err.code === CANCELLED_REVERIFICATION) return;
-      setError(err instanceof ApiError ? err.message : "Couldn’t pause your account. Nothing changed. Try again.");
+      setError(err instanceof ApiError ? err.message : t("settings.couldn-t-pause-your-account-nothing"));
     } finally {
       setBusy(false);
     }
   };
   return (
-    <Modal open={open} onClose={onClose} title="Pause your account?"
+    <Modal open={open} onClose={onClose} title={t("settings.pause-your-account")}
       footer={
         <div className="set-actions">
-          <Button variant="danger" onClick={() => void pause()} loading={busy} loadingLabel="Pausing…" disabled={typed.trim().toLowerCase() !== "pause"}>
-            Pause my account
-          </Button>
-          <Button variant="ghost" onClick={onClose} disabled={busy}>Cancel</Button>
+          <Button variant="danger" onClick={() => void pause()} loading={busy} loadingLabel={t("settings.pausing")} disabled={typed.trim().toLowerCase() !== "pause"}>
+            {t("settings.pause-my-account")}</Button>
+          <Button variant="ghost" onClick={onClose} disabled={busy}>{t("settings.cancel")}</Button>
         </div>
       }>
       {manage && (manage.upcoming_registrations > 0 || manage.pending_volunteer_applications > 0) && (
         <Banner tone="warning">
-          {manage.upcoming_registrations > 0 && <>{manage.upcoming_registrations} upcoming event {manage.upcoming_registrations === 1 ? "registration" : "registrations"} will be cancelled. </>}
-          {manage.pending_volunteer_applications > 0 && <>{manage.pending_volunteer_applications} volunteer {manage.pending_volunteer_applications === 1 ? "application" : "applications"} will be withdrawn.</>}
+          {manage.upcoming_registrations > 0 && <>{t("settings.upcoming-event-other-will-be-cancelled", { upcoming_registrations: manage.upcoming_registrations })}</>}
+          {manage.pending_volunteer_applications > 0 && <>{t("settings.volunteer-other-will-be-withdrawn", { pending_volunteer_applications: manage.pending_volunteer_applications })}</>}
         </Banner>
       )}
-      <p>You can reactivate at any time by signing in. You’ll be asked to confirm it’s you first.</p>
+      <p>{t("settings.you-can-reactivate-at-any-time")}</p>
       {error && <Banner tone="error">{error}</Banner>}
-      <TextField label='Type "pause" to confirm' value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" />
+      <TextField label={t("settings.type-pause-to-confirm")} value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" />
     </Modal>
   );
 }
@@ -73,22 +73,22 @@ export default function ManageSection() {
     api<MyPrivacy>("/me/privacy/").then(setMine).catch(() => setMine(null));
   }, [api]);
   return (
-    <SectionShell title="Account management" intro="Pausing can be undone; deleting can’t.">
+    <SectionShell title={t("settings.account-management")} intro={t("settings.pausing-can-be-undone-deleting-can")}>
       <div className="set-card">
-        <h3>Pause your account</h3>
+        <h3>{t("settings.pause-your-account-2")}</h3>
         <table className="set-table">
-          <caption className="visually-hidden">What pausing does</caption>
+          <caption className="visually-hidden">{t("settings.what-pausing-does")}</caption>
           <tbody>
             {PAUSE_ROWS.map(([what, effect]) => (
               <tr key={what}><th scope="row">{what}</th><td>{effect}</td></tr>
             ))}
           </tbody>
         </table>
-        <Button variant="secondary" onClick={() => setOpen(true)}>Pause my account</Button>
+        <Button variant="secondary" onClick={() => setOpen(true)}>{t("settings.pause-my-account")}</Button>
       </div>
       <PauseDialog open={open} onClose={() => setOpen(false)} manage={settings?.manage ?? null} />
       <div className="set-embed">
-        <p className="set-first">Download your data first</p>
+        <p className="set-first">{t("settings.download-your-data-first")}</p>
         <DownloadSection onDone={() => undefined} />
         <DeleteSection data={mine} />
       </div>

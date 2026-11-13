@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 /**
  * Reference data mirrored from ndcbackend/apps/candidates/reference.py (spec 03 §4).
  * Positions are in display order; each declares the area fields it needs.
@@ -21,13 +22,13 @@ export interface PositionInfo {
 }
 
 export const POSITIONS: PositionInfo[] = [
-  { value: "president", label: "President", state: false, area: false, ward: false },
-  { value: "governor", label: "Governor", state: true, area: false, ward: false },
-  { value: "senator", label: "Senator", state: true, area: true, ward: false, areaLabel: "Senatorial district" },
-  { value: "house_of_reps", label: "Member, House of Representatives", state: true, area: true, ward: false, areaLabel: "Federal constituency" },
-  { value: "state_assembly", label: "Member, State House of Assembly", state: true, area: true, ward: false, areaLabel: "State constituency" },
-  { value: "lga_chairman", label: "LGA Chairman", state: true, area: true, ward: false, areaLabel: "Local government area" },
-  { value: "councillor", label: "Councillor", state: true, area: true, ward: true, areaLabel: "Local government area" },
+  { value: "president", get label() { return t("lib.president"); }, state: false, area: false, ward: false },
+  { value: "governor", get label() { return t("lib.governor"); }, state: true, area: false, ward: false },
+  { value: "senator", get label() { return t("lib.senator"); }, state: true, area: true, ward: false, get areaLabel() { return t("lib.senatorial-district"); } },
+  { value: "house_of_reps", get label() { return t("lib.member-house-of-representatives"); }, state: true, area: true, ward: false, get areaLabel() { return t("lib.federal-constituency"); } },
+  { value: "state_assembly", get label() { return t("lib.member-state-house-of-assembly"); }, state: true, area: true, ward: false, get areaLabel() { return t("lib.state-constituency"); } },
+  { value: "lga_chairman", get label() { return t("lib.lga-chairman"); }, state: true, area: true, ward: false, get areaLabel() { return t("lib.local-government-area"); } },
+  { value: "councillor", get label() { return t("lib.councillor"); }, state: true, area: true, ward: true, get areaLabel() { return t("lib.local-government-area"); } },
 ];
 
 export const positionInfo = (value: string) => POSITIONS.find((p) => p.value === value);

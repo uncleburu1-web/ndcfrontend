@@ -16,6 +16,8 @@ import type { FeedPost } from "../../posts/types";
 import { SourceBadges } from "../../news/SourceBadges";
 import { articlePath, type ArticleSummary, type NewsPage as Page } from "../../news/types";
 import "../../news/news.css";
+import { t } from "../../i18n";
+import { LanguageFilter } from "../../i18n/ContentLanguage";
 
 const TABS = [["", "All"], ["official", "Official"], ["community", "Community"], ["candidate", "Candidates"]] as const;
 
@@ -28,7 +30,7 @@ function Item({ a }: { a: ArticleSummary }) {
         <p className="news-meta">
           {a.published_at ? formatDate(a.published_at) : ""}
           {a.state_label ? ` · ${a.state_label}` : ""}
-          {a.source === "community" ? ` · by ${a.byline ?? "a member"}` : ""}
+          {a.source === "community" ? t("news.by-2", { v: a.byline ?? t("news.a-member") }) : ""}
           {a.byline_verified && <> <VerifiedVoterBadge size="sm" /></>}
         </p>
         <p>{a.excerpt}</p>
@@ -47,14 +49,16 @@ export default function NewsPage() {
   const home = useHomeState(paramState); // spec 12 §4.5: home state only pre-fills, with a chip
   const state = home.state;
   const page = Math.max(1, Number(params.get("page") ?? 1) || 1);
+  const language = params.get("language") ?? ""; // spec 21 §9: written in one language
   const qs = new URLSearchParams();
   if (source) qs.set("source", source);
   if (state) qs.set("state", state);
+  if (language) qs.set("language", language);
   if (page > 1) qs.set("page", String(page));
   const res = useRequest(`news:${qs}`, (signal) => api<Page>(`/news/${qs.toString() ? `?${qs}` : ""}`, { anonymous: true, signal }));
 
   useEffect(() => {
-    document.title = "News | NDCConnect";
+    document.title = t("news.news-ndcconnect");
   }, []);
   const set = (changes: Record<string, string>) => {
     if ("state" in changes && !changes.state && home.fromHome) home.dismiss();
@@ -71,40 +75,41 @@ export default function NewsPage() {
   };
   const submitHref = isSignedIn ? "/news/submit" : "/sign-in?redirect_url=%2Fnews%2Fsubmit";
   const stateLabel = STATES.find((s) => s.value === state)?.label;
-  const empty = source === "candidate" ? `No candidate posts${stateLabel ? ` for ${stateLabel}` : ""} yet` : source === "community" ? `No community news${stateLabel ? ` for ${stateLabel}` : ""} yet`
-    : source === "official" ? "No official announcements yet" : `No news${stateLabel ? ` for ${stateLabel}` : ""} yet`;
+  const where = stateLabel ?? "none";
+  const empty = source === "candidate" ? t("news.empty.candidate", { where }) : source === "community" ? t("news.empty.community", { where })
+    : source === "official" ? t("news.empty.official") : t("news.empty.all", { where });
 
   return (
     <div className="news-page">
       <header className="news-page__head">
-        <h1>News</h1>
-        <Button href={submitHref} variant="secondary">Submit news</Button>
+        <h1>{t("news.news-2")}</h1>
+        <Button href={submitHref} variant="secondary">{t("news.submit-news")}</Button>
       </header>
       <div className="news-filters">
-        <nav aria-label="News source">
+        <nav aria-label={t("news.news-source")}>
           <ul className="news-tabs">
             {TABS.map(([id, label]) => (
-              <li key={id}><Link to={tabHref(id)} aria-current={source === id ? "page" : undefined}>{label}</Link></li>
+              <li key={id}><Link to={tabHref(id)} aria-current={source === id ? "page" : undefined}>{t(`news.tab.${id || "all"}`) || label}</Link></li>
             ))}
           </ul>
         </nav>
         <div className="news-state">
-          <Select label="State" value={state} onChange={(e) => set({ state: e.target.value })}
-            options={[{ value: "", label: "All of Nigeria" }, ...STATES]} />
+          <Select label={t("news.state")} value={state} onChange={(e) => set({ state: e.target.value })}
+            options={[{ value: "", label: t("news.all-of-nigeria") }, ...STATES]} />
         </div>
+        <LanguageFilter value={language} onChange={(v) => set({ language: v })} />
       </div>
       {home.fromHome && <HomeStateChip state={home.home} onClear={home.dismiss} />}
 
       {res.error ? (
-        <Banner tone="error" title="We couldn’t load the news" action={<Button size="sm" variant="secondary" onClick={res.retry}>Try again</Button>}>
+        <Banner tone="error" title={t("news.we-couldn-t-load-the-news")} action={<Button size="sm" variant="secondary" onClick={res.retry}>{t("news.try-again")}</Button>}>
           {res.error.message}
         </Banner>
       ) : res.loading && !res.data ? (
         <Skeleton width="100%" height={180} />
       ) : res.data && res.data.count === 0 && res.data.pinned.length === 0 ? (
-        <EmptyState title={empty} action={<Button href={submitHref}>Submit news</Button>}>
-          Members can submit local news. Our reviewers check it before it appears.
-        </EmptyState>
+        <EmptyState title={empty} action={<Button href={submitHref}>{t("news.submit-news")}</Button>}>
+          {t("news.members-can-submit-local-news-our")}</EmptyState>
       ) : res.data ? (
         <>
           <ul className="news-list">
@@ -113,7 +118,7 @@ export default function NewsPage() {
               ? <CandidatePostItem key={a.id} post={a as FeedPost} candidate={(a as FeedPost).candidate} />
               : <Item key={a.id} a={a as ArticleSummary} />))}
           </ul>
-          <Pagination page={page} pageCount={Math.ceil(res.data.count / 20)} onChange={(p) => set({ page: p > 1 ? String(p) : "" })} label="News pages" />
+          <Pagination page={page} pageCount={Math.ceil(res.data.count / 20)} onChange={(p) => set({ page: p > 1 ? String(p) : "" })} label={t("news.news-pages")} />
         </>
       ) : null}
     </div>
